@@ -448,6 +448,25 @@
     padding-top:4px;
   }
 
+  .mini-toggle{
+    font-family: var(--font);
+    font-size:11px;
+    font-weight:bold;
+    padding: 3px 10px;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    background: var(--panel-alt);
+    color: var(--ink-soft);
+    cursor:pointer;
+    margin-left:8px;
+  }
+  .mini-toggle:hover{ border-color: var(--accent); }
+  .mini-toggle.active{
+    background: var(--accent-strong);
+    border-color: var(--accent);
+    color:#fff;
+  }
+
   /* ---------- LOGIN SCREEN ---------- */
   .login-overlay{
     position:fixed;
@@ -564,7 +583,6 @@
       <div class="breadcrumb" id="breadcrumb"></div>
       <span class="user-badge" id="user-badge"></span>
       <button class="btn-settings" id="btn-logout">Esci</button>
-      <button class="btn-settings" id="btn-lang-toggle">EN</button>
       <button class="btn-settings" id="btn-open-settings">⚙ <span id="i18n-settings-btn">Personalizza</span></button>
     </div>
   </div>
@@ -598,6 +616,7 @@
         <span class="block-num">03</span>
         <span class="block-title" id="i18n-block-indicazione">Indicazione</span>
         <span class="block-hint" id="indicazione-hint">filtrata per esame</span>
+        <button class="mini-toggle" id="btn-urgenza-toggle" title="Attiva/disattiva intestazione urgenza">Urgenza</button>
       </div>
       <div class="block-body" id="indicazione-body"></div>
     </div>
@@ -684,6 +703,17 @@
         </div>
         <div class="field-row">
           <button class="btn-sm" id="add-esame-btn">+ Aggiungi esame</button>
+        </div>
+      </div>
+
+      <div class="settings-section">
+        <h3>Elimina esame</h3>
+        <div class="field-row">
+          <div class="field">
+            <label>Esame da eliminare</label>
+            <select id="delete-esame-select"></select>
+          </div>
+          <button class="btn-sm danger" id="delete-esame-btn">Elimina esame</button>
         </div>
       </div>
 
@@ -1168,6 +1198,7 @@ const state = {
 let indicazioneLines = [];
 let confrontoLine = null;
 let refertoLines = [];
+let urgenzaMode = false;
 
 const el = {
   metodicaRow: document.getElementById('metodica-row'),
@@ -1322,7 +1353,10 @@ function composeText(){
   const lines = [];
 
   if (indicazioneLines.length){
-    lines.push('Indicazione : ' + indicazioneLines.join('; '));
+    const label = urgenzaMode
+      ? "Esame eseguito in regime d'urgenza con indicazione clinica: "
+      : 'Indicazione : ';
+    lines.push(label + indicazioneLines.join('; '));
   }
   if (state.esame){
     lines.push(state.esame);
@@ -1354,6 +1388,12 @@ function insertReferto(txt){
   composeText();
 }
 
+document.getElementById('btn-urgenza-toggle').onclick = () => {
+  urgenzaMode = !urgenzaMode;
+  document.getElementById('btn-urgenza-toggle').classList.toggle('active', urgenzaMode);
+  composeText();
+};
+
 // ============================================================
 // TOOLBAR PRINCIPALE
 // ============================================================
@@ -1361,6 +1401,8 @@ document.getElementById('btn-reset').onclick = () => {
   indicazioneLines = [];
   confrontoLine = null;
   refertoLines = [];
+  urgenzaMode = false;
+  document.getElementById('btn-urgenza-toggle').classList.remove('active');
   composeText();
 };
 
@@ -1414,6 +1456,7 @@ function refreshAllSettingsSelects(){
   fillSelect(document.getElementById('new-referto-esame'), esamiOptions, esamiOptions.length ? null : 'Nessun esame disponibile');
   fillSelect(document.getElementById('edit-referto-esame'), esamiOptions, esamiOptions.length ? null : 'Nessun esame disponibile');
   fillSelect(document.getElementById('edit-indicazione-esame'), esamiOptions, esamiOptions.length ? null : 'Nessun esame disponibile');
+  fillSelect(document.getElementById('delete-esame-select'), esamiOptions, esamiOptions.length ? null : 'Nessun esame disponibile');
 
   refreshEditRefertoGroups();
   refreshEditIndicazioneItems();
@@ -1509,6 +1552,29 @@ document.getElementById('add-esame-btn').onclick = () => {
   persist();
   refreshAllSettingsSelects();
   renderAll();
+};
+
+document.getElementById('delete-esame-btn').onclick = () => {
+  const esame = document.getElementById('delete-esame-select').value;
+  if (!esame) return;
+  if (!confirm('Eliminare l\'esame "' + esame + '"? Verranno eliminate anche tutte le indicazioni e i pulsanti di referto associati a questo esame.')) return;
+
+  DATA.metodiche.forEach(m => {
+    if (DATA.esamiByMetodica[m]){
+      DATA.esamiByMetodica[m] = DATA.esamiByMetodica[m].filter(e => e !== esame);
+    }
+  });
+  delete DATA.indicazioniByEsame[esame];
+  delete DATA.refertoByEsame[esame];
+
+  if (state.esame === esame){
+    state.esame = null;
+  }
+
+  persist();
+  refreshAllSettingsSelects();
+  renderAll();
+  composeText();
 };
 
 document.getElementById('add-indicazione-btn').onclick = () => {
@@ -1613,6 +1679,8 @@ document.getElementById('btn-reset-data').onclick = () => {
   indicazioneLines = [];
   confrontoLine = null;
   refertoLines = [];
+  urgenzaMode = false;
+  document.getElementById('btn-urgenza-toggle').classList.remove('active');
   refreshAllSettingsSelects();
   renderAll();
   composeText();
@@ -1630,9 +1698,7 @@ function createMicHandler(getTargetEl, btnEl){
     const target = getTargetEl();
     if (!target) return;
     if (!SpeechRecognitionCtor){
-      alert(currentLang === 'en'
-        ? 'Voice dictation is not supported by this browser. Try Chrome or Edge.'
-        : 'La dettatura vocale non è supportata da questo browser. Prova con Chrome o Edge.');
+      alert('La dettatura vocale non è supportata da questo browser. Usa Chrome o Edge (desktop o Android). Safari e Firefox non la supportano bene.');
       return;
     }
     if (recording){
@@ -1640,7 +1706,7 @@ function createMicHandler(getTargetEl, btnEl){
       return;
     }
     recognition = new SpeechRecognitionCtor();
-    recognition.lang = currentLang === 'en' ? 'en-US' : 'it-IT';
+    recognition.lang = 'it-IT';
     recognition.continuous = true;
     recognition.interimResults = false;
     recognition.onresult = (e) => {
@@ -1654,17 +1720,31 @@ function createMicHandler(getTargetEl, btnEl){
         target.value = target.value + (needsSpace ? ' ' : '') + finalText + ' ';
       }
     };
-    recognition.onerror = () => {
+    recognition.onerror = (e) => {
       recording = false;
       btnEl.classList.remove('recording');
+      const messages = {
+        'not-allowed': 'Permesso al microfono negato. Controlla le impostazioni del sito nel browser (icona lucchetto/microfono nella barra degli indirizzi) e concedi l\'accesso al microfono.',
+        'service-not-allowed': 'Permesso al microfono negato dal browser o dal sistema operativo.',
+        'no-speech': 'Non ho sentito nulla. Riprova a parlare dopo aver premuto il pulsante.',
+        'audio-capture': 'Nessun microfono trovato o accessibile su questo dispositivo.',
+        'network': 'La dettatura richiede una connessione internet attiva.'
+      };
+      if (messages[e.error]) alert(messages[e.error]);
+      else console.warn('Errore dettatura:', e.error);
     };
     recognition.onend = () => {
       recording = false;
       btnEl.classList.remove('recording');
     };
-    recognition.start();
-    recording = true;
-    btnEl.classList.add('recording');
+    try{
+      recognition.start();
+      recording = true;
+      btnEl.classList.add('recording');
+    }catch(err){
+      console.warn('Impossibile avviare la dettatura:', err);
+      recording = false;
+    }
   });
 }
 
@@ -1801,17 +1881,11 @@ function applyLanguage(){
   });
   el.reportText.placeholder = t('report_placeholder');
   document.getElementById('copy-flash').textContent = t('copied');
-  document.getElementById('btn-lang-toggle').textContent = currentLang === 'it' ? 'EN' : 'IT';
   document.documentElement.lang = currentLang;
   renderBreadcrumb();
   renderIndicazione();
   renderReferto();
 }
-
-document.getElementById('btn-lang-toggle').onclick = () => {
-  currentLang = currentLang === 'it' ? 'en' : 'it';
-  applyLanguage();
-};
 
 document.getElementById('btn-confronto').onclick = () => insertConfronto(CONFRONTO_TEXT[currentLang].confronto);
 document.getElementById('btn-presa-visione').onclick = () => insertConfronto(CONFRONTO_TEXT[currentLang].presaVisione);
