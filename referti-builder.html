@@ -1,0 +1,1912 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PreDef — Composizione modulare</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<style>
+  :root{
+    --bg: #0a1420;
+    --panel: #101f2c;
+    --panel-alt: #0c1922;
+    --line: #1f3547;
+    --line-soft: #16293a;
+    --ink: #e4edf3;
+    --ink-soft: #7d97a8;
+    --accent: #3aa0d6;
+    --accent-soft: rgba(58,160,214,0.14);
+    --accent-strong: #1c6f96;
+    --accent-dim: #144a63;
+    --amber: #e0a458;
+    --amber-soft: rgba(224,164,88,0.14);
+    --danger: #d16565;
+    --font: Verdana, Geneva, Tahoma, sans-serif;
+    --radius: 3px;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    font-family: var(--font);
+    background: var(--bg);
+    color: var(--ink);
+    height:100vh;
+    overflow:hidden;
+  }
+  .app{
+    display:grid;
+    grid-template-columns: 44% 56%;
+    height:100vh;
+  }
+  .topbar{
+    grid-column: 1 / -1;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding: 10px 22px;
+    background: var(--panel-alt);
+    border-bottom: 1px solid var(--line);
+    color: var(--ink);
+    font-size:13px;
+    letter-spacing:.02em;
+  }
+  .topbar .brand{
+    font-weight:bold;
+    font-size:14px;
+    display:flex;
+    align-items:center;
+    gap:10px;
+  }
+  .brand .mark{
+    width:20px;height:20px;
+    border:2px solid var(--accent);
+    border-radius:50%;
+    position:relative;
+    flex:none;
+  }
+  .brand .mark::after{
+    content:'';
+    position:absolute;
+    left:50%; top:50%;
+    width:2px; height:12px;
+    background: var(--accent);
+    transform:translate(-50%,-50%);
+  }
+  .brand .mark::before{
+    content:'';
+    position:absolute;
+    left:50%; top:50%;
+    width:12px; height:2px;
+    background: var(--accent);
+    transform:translate(-50%,-50%);
+  }
+  .topbar-right{
+    display:flex;
+    align-items:center;
+    gap:14px;
+  }
+  .breadcrumb{
+    font-size:12px;
+    color: var(--ink-soft);
+    display:flex;
+    gap:6px;
+    align-items:center;
+  }
+  .breadcrumb .seg{
+    padding:2px 8px;
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    color: var(--ink);
+  }
+  .breadcrumb .seg.empty{
+    opacity:.5;
+    font-style:italic;
+    color: var(--ink-soft);
+  }
+  .breadcrumb .sep{ opacity:.5; }
+  .btn-settings{
+    background: transparent;
+    border: 1px solid var(--line);
+    color: var(--ink);
+    font-family: var(--font);
+    font-size:12.5px;
+    padding: 7px 12px;
+    border-radius: var(--radius);
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    gap:6px;
+  }
+  .btn-settings:hover{ border-color: var(--accent); color: var(--accent); }
+
+  .builder{
+    grid-row:2;
+    overflow-y:auto;
+    padding: 20px 22px 60px;
+    border-right: 1px solid var(--line);
+  }
+  .block{
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    margin-bottom: 16px;
+    overflow:hidden;
+  }
+  .block-head{
+    display:flex;
+    align-items:baseline;
+    gap:8px;
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--line);
+    background: var(--panel-alt);
+  }
+  .block-num{
+    font-size:11px;
+    color: var(--accent);
+    font-weight:bold;
+  }
+  .block-title{
+    font-size:13px;
+    font-weight:bold;
+    text-transform:uppercase;
+    letter-spacing:.06em;
+    color: var(--ink);
+  }
+  .block-hint{
+    margin-left:auto;
+    font-size:11px;
+    color: var(--ink-soft);
+  }
+  .block-body{
+    padding: 14px;
+  }
+  .chip-row{
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+  }
+  .chip{
+    font-family: var(--font);
+    font-size:13px;
+    padding: 7px 13px;
+    border: 1px solid var(--line);
+    background: var(--panel-alt);
+    border-radius: 999px;
+    cursor:pointer;
+    color: var(--ink);
+    transition: all .12s ease;
+  }
+  .chip:hover{
+    border-color: var(--accent);
+    background: var(--accent-soft);
+  }
+  .chip.active{
+    background: var(--accent-strong);
+    border-color: var(--accent);
+    color:#fff;
+    font-weight:bold;
+  }
+  .empty-state{
+    font-size:12.5px;
+    color: var(--ink-soft);
+    font-style:italic;
+    padding: 4px 0;
+  }
+  .subgroup{
+    margin-bottom: 12px;
+  }
+  .subgroup:last-child{ margin-bottom:0; }
+  .subgroup-label{
+    font-size:11px;
+    font-weight:bold;
+    text-transform:uppercase;
+    letter-spacing:.05em;
+    color: var(--ink-soft);
+    margin-bottom:7px;
+  }
+  .btn-report{
+    font-family: var(--font);
+    font-size:13px;
+    padding: 7px 12px;
+    border: 1px solid var(--line);
+    border-left: 3px solid var(--accent);
+    background: var(--panel-alt);
+    border-radius: var(--radius);
+    cursor:pointer;
+    color: var(--ink);
+    text-align:left;
+  }
+  .btn-report:hover{
+    background: var(--accent-soft);
+  }
+  .btn-report.neg{ border-left-color: var(--amber); }
+  .btn-report.neg:hover{ background: var(--amber-soft); }
+  .free-text{
+    width:100%;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 8px 10px;
+    font-family: var(--font);
+    font-size:13px;
+    resize: vertical;
+    min-height:38px;
+    background: var(--panel-alt);
+    color: var(--ink);
+  }
+  .add-free{
+    margin-top:8px;
+    font-size:12px;
+    padding:6px 12px;
+    border:1px solid var(--accent);
+    color: var(--accent);
+    background: transparent;
+    border-radius: var(--radius);
+    cursor:pointer;
+    font-weight:bold;
+    font-family: var(--font);
+  }
+  .add-free:hover{ background: var(--accent-soft); }
+
+  .report-panel{
+    grid-row:2;
+    display:flex;
+    flex-direction:column;
+    padding: 20px 22px;
+    overflow:hidden;
+  }
+  .report-toolbar{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    margin-bottom:10px;
+  }
+  .report-toolbar h2{
+    font-size:13px;
+    text-transform:uppercase;
+    letter-spacing:.06em;
+    margin:0;
+    color: var(--ink-soft);
+  }
+  .actions{ display:flex; gap:8px; }
+  .btn{
+    font-family: var(--font);
+    font-size:12.5px;
+    font-weight:bold;
+    padding: 8px 14px;
+    border-radius: var(--radius);
+    cursor:pointer;
+    border:1px solid var(--line);
+    background: var(--panel);
+    color: var(--ink);
+  }
+  .btn.primary{
+    background: var(--accent-strong);
+    border-color: var(--accent);
+    color:#fff;
+  }
+  .btn.primary:hover{ background: var(--accent-dim); }
+  .btn.ghost:hover{ background: var(--panel-alt); }
+  .report-doc{
+    flex:1;
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    display:flex;
+    flex-direction:column;
+    overflow:hidden;
+  }
+  .doc-meta{
+    padding: 14px 18px 10px;
+    border-bottom: 1px dashed var(--line);
+    font-size:12.5px;
+    color: var(--ink-soft);
+  }
+  .doc-meta .row{ margin-bottom:3px; }
+  .doc-meta b{ color: var(--ink); }
+  textarea.report-text{
+    flex:1;
+    border:0;
+    outline:none;
+    resize:none;
+    padding: 16px 18px;
+    font-family: var(--font);
+    font-size:13.5px;
+    line-height:1.65;
+    color: var(--ink);
+    background: var(--panel);
+  }
+  .copy-flash{
+    position:fixed;
+    bottom:22px; right:22px;
+    background: var(--accent-strong);
+    color:#fff;
+    padding:9px 16px;
+    border-radius: var(--radius);
+    font-size:13px;
+    opacity:0;
+    transform: translateY(6px);
+    transition: all .18s ease;
+    pointer-events:none;
+  }
+  .copy-flash.show{ opacity:1; transform:translateY(0); }
+
+  .settings-overlay{
+    position:fixed;
+    inset:0;
+    background: rgba(4,9,14,0.72);
+    display:none;
+    align-items:center;
+    justify-content:center;
+    z-index:100;
+  }
+  .settings-overlay.open{ display:flex; }
+  .settings-panel{
+    width: min(720px, 92vw);
+    max-height: 88vh;
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    display:flex;
+    flex-direction:column;
+    overflow:hidden;
+  }
+  .settings-head{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding: 14px 20px;
+    border-bottom: 1px solid var(--line);
+    background: var(--panel-alt);
+  }
+  .settings-head h2{
+    margin:0;
+    font-size:14px;
+    text-transform:uppercase;
+    letter-spacing:.05em;
+  }
+  .settings-close{
+    background:none;
+    border:none;
+    color: var(--ink-soft);
+    font-size:20px;
+    cursor:pointer;
+    line-height:1;
+  }
+  .settings-close:hover{ color: var(--ink); }
+  .settings-body{
+    overflow-y:auto;
+    padding: 18px 20px 26px;
+  }
+  .settings-section{
+    border: 1px solid var(--line-soft);
+    border-radius: var(--radius);
+    padding: 14px 16px;
+    margin-bottom: 14px;
+  }
+  .settings-section h3{
+    margin: 0 0 10px;
+    font-size:12px;
+    text-transform:uppercase;
+    letter-spacing:.05em;
+    color: var(--accent);
+  }
+  .field-row{
+    display:flex;
+    gap:10px;
+    margin-bottom:8px;
+    flex-wrap:wrap;
+    align-items:center;
+  }
+  .field-row label{
+    font-size:11.5px;
+    color: var(--ink-soft);
+    display:block;
+    margin-bottom:4px;
+  }
+  .field{
+    flex:1;
+    min-width:160px;
+  }
+  select, input[type=text], textarea{
+    width:100%;
+    font-family: var(--font);
+    font-size:13px;
+    padding: 7px 9px;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background: var(--panel-alt);
+    color: var(--ink);
+  }
+  textarea{ resize: vertical; min-height:46px; }
+  .checkbox-row{
+    display:flex;
+    align-items:center;
+    gap:7px;
+    font-size:12.5px;
+    color: var(--ink-soft);
+  }
+  .btn-sm{
+    font-family: var(--font);
+    font-size:12px;
+    font-weight:bold;
+    padding: 7px 13px;
+    border-radius: var(--radius);
+    cursor:pointer;
+    border:1px solid var(--accent);
+    background: transparent;
+    color: var(--accent);
+  }
+  .btn-sm:hover{ background: var(--accent-soft); }
+  .btn-sm.danger{
+    border-color: var(--danger);
+    color: var(--danger);
+  }
+  .btn-sm.danger:hover{ background: rgba(209,101,101,0.12); }
+  .reset-row{
+    text-align:right;
+    padding-top:4px;
+  }
+
+  /* ---------- LOGIN SCREEN ---------- */
+  .login-overlay{
+    position:fixed;
+    inset:0;
+    background: var(--bg);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    z-index:200;
+  }
+  .login-overlay.hidden{ display:none; }
+  .login-card{
+    width: min(380px, 92vw);
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 28px 26px;
+  }
+  .login-card .brand-login{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    margin-bottom:22px;
+    font-weight:bold;
+    font-size:15px;
+  }
+  .login-field{
+    margin-bottom:12px;
+  }
+  .login-field label{
+    font-size:11.5px;
+    color: var(--ink-soft);
+    display:block;
+    margin-bottom:4px;
+  }
+  .login-error{
+    font-size:12px;
+    color: var(--danger);
+    margin: 6px 0 4px;
+    min-height:16px;
+  }
+  .login-actions{
+    display:flex;
+    gap:8px;
+    margin-top:14px;
+  }
+  .login-actions .btn{
+    flex:1;
+    text-align:center;
+  }
+  .login-hint{
+    font-size:11.5px;
+    color: var(--ink-soft);
+    margin-top:14px;
+    line-height:1.5;
+  }
+  .app.hidden{ display:none; }
+  .user-badge{
+    font-size:12px;
+    color: var(--ink-soft);
+  }
+  .mic-btn{
+    font-family: var(--font);
+    font-size:14px;
+    padding: 7px 10px;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background: var(--panel-alt);
+    color: var(--ink);
+    cursor:pointer;
+    line-height:1;
+  }
+  .mic-btn:hover{ border-color: var(--accent); }
+  .mic-btn.recording{
+    background: var(--danger);
+    border-color: var(--danger);
+    color:#fff;
+    animation: micpulse 1.1s infinite;
+  }
+  @keyframes micpulse{
+    0%{ opacity:1; }
+    50%{ opacity:.55; }
+    100%{ opacity:1; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ================= LOGIN SCREEN ================= -->
+<div class="login-overlay" id="login-overlay">
+  <div class="login-card">
+    <div class="brand-login"><span class="mark" style="border-color:var(--accent);width:18px;height:18px;display:inline-block;border:2px solid var(--accent);border-radius:50%;position:relative;"></span> Referti — Accedi</div>
+    <div class="login-field">
+      <label>Email</label>
+      <input type="email" id="login-email" placeholder="nome@ospedale.it">
+    </div>
+    <div class="login-field">
+      <label>Password</label>
+      <input type="password" id="login-password" placeholder="••••••••">
+    </div>
+    <div class="login-error" id="login-error"></div>
+    <div class="login-actions">
+      <button class="btn ghost" id="btn-signup">Registrati</button>
+      <button class="btn primary" id="btn-signin">Accedi</button>
+    </div>
+    <div class="login-hint">Ogni utente ha il proprio account e i propri dati, sincronizzati automaticamente su ogni postazione da cui accedi.</div>
+  </div>
+</div>
+
+<div class="app hidden" id="app-root">
+  <div class="topbar">
+    <div class="brand"><span class="mark"></span> <span id="i18n-app-title">Referti — Bozza di lavoro</span></div>
+    <div class="topbar-right">
+      <div class="breadcrumb" id="breadcrumb"></div>
+      <span class="user-badge" id="user-badge"></span>
+      <button class="btn-settings" id="btn-logout">Esci</button>
+      <button class="btn-settings" id="btn-lang-toggle">EN</button>
+      <button class="btn-settings" id="btn-open-settings">⚙ <span id="i18n-settings-btn">Personalizza</span></button>
+    </div>
+  </div>
+
+  <aside class="builder">
+
+    <!-- BLOCCO 1: METODICA -->
+    <div class="block">
+      <div class="block-head">
+        <span class="block-num">01</span>
+        <span class="block-title" id="i18n-block-metodica">Metodica</span>
+      </div>
+      <div class="block-body">
+        <div class="chip-row" id="metodica-row"></div>
+      </div>
+    </div>
+
+    <!-- BLOCCO 2: ESAME -->
+    <div class="block">
+      <div class="block-head">
+        <span class="block-num">02</span>
+        <span class="block-title" id="i18n-block-esame">Esame</span>
+        <span class="block-hint" id="esame-hint">filtrato per metodica</span>
+      </div>
+      <div class="block-body" id="esame-body"></div>
+    </div>
+
+    <!-- BLOCCO 3: INDICAZIONE -->
+    <div class="block">
+      <div class="block-head">
+        <span class="block-num">03</span>
+        <span class="block-title" id="i18n-block-indicazione">Indicazione</span>
+        <span class="block-hint" id="indicazione-hint">filtrata per esame</span>
+      </div>
+      <div class="block-body" id="indicazione-body"></div>
+    </div>
+
+    <!-- BLOCCO 4: CONFRONTO CON PRECEDENTI -->
+    <div class="block">
+      <div class="block-head">
+        <span class="block-num">04</span>
+        <span class="block-title" id="i18n-block-confronto">Confronto con precedenti</span>
+      </div>
+      <div class="block-body">
+        <div class="chip-row">
+          <button class="btn-report" id="btn-confronto">Confronto</button>
+          <button class="btn-report" id="btn-presa-visione">Presa visione</button>
+          <button class="btn-report" id="btn-non-precedenti">Non precedenti</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- BLOCCO 5: REFERTO -->
+    <div class="block">
+      <div class="block-head">
+        <span class="block-num">05</span>
+        <span class="block-title" id="i18n-block-referto">Referto</span>
+        <span class="block-hint" id="referto-hint">filtrato per esame</span>
+      </div>
+      <div class="block-body" id="referto-body"></div>
+    </div>
+
+  </aside>
+
+  <main class="report-panel">
+    <div class="report-toolbar">
+      <h2 id="i18n-report-preview">Anteprima referto</h2>
+      <div class="actions">
+        <button class="btn ghost" id="btn-mic-report" title="Detta nel referto">🎤</button>
+        <button class="btn ghost" id="btn-reset">Svuota</button>
+        <button class="btn primary" id="btn-copy">Copia negli appunti</button>
+      </div>
+    </div>
+    <div class="report-doc">
+      <div class="doc-meta">
+        <div class="row"><b id="i18n-meta-metodica-label">METODICA:</b> <span id="meta-metodica">—</span></div>
+        <div class="row"><b id="i18n-meta-esame-label">ESAME:</b> <span id="meta-esame">—</span></div>
+      </div>
+      <textarea class="report-text" id="report-text" placeholder="Il referto composto apparirà qui. Puoi anche scrivere o correggere liberamente."></textarea>
+    </div>
+  </main>
+</div>
+
+<div class="copy-flash" id="copy-flash">Copiato negli appunti</div>
+
+<!-- ================= SETTINGS OVERLAY ================= -->
+<div class="settings-overlay" id="settings-overlay">
+  <div class="settings-panel">
+    <div class="settings-head">
+      <h2 id="i18n-settings-title">Personalizzazione</h2>
+      <button class="settings-close" id="settings-close">×</button>
+    </div>
+    <div class="settings-body">
+
+      <div class="settings-section">
+        <h3 id="i18n-s1-title">Aggiungi metodica</h3>
+        <div class="field-row">
+          <div class="field">
+            <label id="i18n-s1-label">Nome metodica</label>
+            <input type="text" id="new-metodica-name" placeholder="es. Mammografia">
+          </div>
+          <button class="btn-sm" id="add-metodica-btn">+ Aggiungi</button>
+        </div>
+      </div>
+
+      <div class="settings-section">
+        <h3 id="i18n-s2-title">Aggiungi esame (filtrato per metodica)</h3>
+        <div class="field-row">
+          <div class="field">
+            <label id="i18n-s2-label1">Metodica</label>
+            <select id="new-esame-metodica"></select>
+          </div>
+          <div class="field">
+            <label id="i18n-s2-label2">Nome esame</label>
+            <input type="text" id="new-esame-name" placeholder="es. RX RACHIDE CERVICALE">
+          </div>
+        </div>
+        <div class="field-row">
+          <button class="btn-sm" id="add-esame-btn">+ Aggiungi esame</button>
+        </div>
+      </div>
+
+      <div class="settings-section">
+        <h3 id="i18n-s3-title">Aggiungi indicazione (filtrata per esame)</h3>
+        <div class="field-row">
+          <div class="field">
+            <label id="i18n-s3-label1">Esame</label>
+            <select id="new-indicazione-esame"></select>
+          </div>
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label id="i18n-s3-label2">Testo indicazione</label>
+            <input type="text" id="new-indicazione-text" placeholder="es. Trauma">
+          </div>
+          <button class="btn-sm" id="mic-new-indicazione-text" title="Detta">🎤</button>
+          <button class="btn-sm" id="add-indicazione-btn">+ Aggiungi</button>
+        </div>
+      </div>
+
+      <div class="settings-section">
+        <h3 id="i18n-s4-title">Aggiungi pulsante referto</h3>
+        <div class="field-row">
+          <div class="field">
+            <label id="i18n-s4-label1">Esame</label>
+            <select id="new-referto-esame"></select>
+          </div>
+          <div class="field">
+            <label id="i18n-s4-label2">Gruppo / distretto</label>
+            <input type="text" id="new-referto-group" placeholder="es. Parenchima">
+          </div>
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label id="i18n-s4-label3">Etichetta pulsante</label>
+            <input type="text" id="new-referto-label" placeholder="es. Nella norma">
+          </div>
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label id="i18n-s4-label4">Testo inserito nel referto</label>
+            <textarea id="new-referto-text" placeholder="es. Non si evidenziano alterazioni significative."></textarea>
+          </div>
+          <button class="btn-sm" id="mic-new-referto-text" title="Detta">🎤</button>
+        </div>
+        <div class="field-row">
+          <div class="checkbox-row">
+            <input type="checkbox" id="new-referto-neg">
+            <label for="new-referto-neg" id="i18n-s4-neg" style="margin:0;">Segna come reperto da approfondire</label>
+          </div>
+          <button class="btn-sm" id="add-referto-btn">+ Aggiungi pulsante</button>
+        </div>
+      </div>
+
+      <div class="settings-section">
+        <h3 id="i18n-s5-title">Modifica o elimina un pulsante di referto</h3>
+        <div class="field-row">
+          <div class="field">
+            <label id="i18n-s5-label1">Esame</label>
+            <select id="edit-referto-esame"></select>
+          </div>
+          <div class="field">
+            <label id="i18n-s5-label2">Gruppo</label>
+            <select id="edit-referto-group"></select>
+          </div>
+          <div class="field">
+            <label id="i18n-s5-label3">Pulsante</label>
+            <select id="edit-referto-button"></select>
+          </div>
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label id="i18n-s5-label4">Etichetta pulsante</label>
+            <input type="text" id="edit-referto-label">
+          </div>
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label id="i18n-s5-label5">Testo inserito nel referto</label>
+            <textarea id="edit-referto-text"></textarea>
+          </div>
+          <button class="btn-sm" id="mic-edit-referto-text" title="Detta">🎤</button>
+        </div>
+        <div class="field-row">
+          <div class="checkbox-row">
+            <input type="checkbox" id="edit-referto-neg">
+            <label for="edit-referto-neg" id="i18n-s5-neg" style="margin:0;">Segna come reperto da approfondire</label>
+          </div>
+          <button class="btn-sm" id="save-referto-btn">Salva modifiche</button>
+          <button class="btn-sm danger" id="delete-referto-btn">Elimina pulsante</button>
+        </div>
+      </div>
+
+      <div class="settings-section">
+        <h3 id="i18n-s6-title">Modifica o elimina un'indicazione</h3>
+        <div class="field-row">
+          <div class="field">
+            <label id="i18n-s6-label1">Esame</label>
+            <select id="edit-indicazione-esame"></select>
+          </div>
+          <div class="field">
+            <label id="i18n-s6-label2">Indicazione</label>
+            <select id="edit-indicazione-item"></select>
+          </div>
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label id="i18n-s6-label3">Nuovo testo</label>
+            <input type="text" id="edit-indicazione-text">
+          </div>
+          <button class="btn-sm" id="mic-edit-indicazione-text" title="Detta">🎤</button>
+          <button class="btn-sm" id="save-indicazione-btn">Salva</button>
+          <button class="btn-sm danger" id="delete-indicazione-btn">Elimina</button>
+        </div>
+      </div>
+
+      <div class="reset-row">
+        <button class="btn-sm danger" id="btn-reset-data">Ripristina impostazioni predefinite</button>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+// ============================================================
+// DATI DI DEFAULT
+// Esami ordinati per frequenza media di richiesta (radiologia body)
+// ============================================================
+const DEFAULT_DATA = {
+  metodiche: ['Ecografia', 'RX', 'TC', 'RMN'],
+
+  esamiByMetodica: {
+    'RX': [
+      'RX TORACE 2PR',
+      'RX TORACE AP supino',
+      'RX ADDOME',
+      'RX RACHIDE LOMBOSACRALE',
+      'RX BACINO',
+      'RX GINOCCHIO',
+      'RX SPALLA',
+      'RX POLSO',
+      'RX CAVIGLIA',
+      'RX RACHIDE CERVICALE'
+    ],
+    'Ecografia': [
+      'ECOGRAFIA ADDOME COMPLETO',
+      'ECOGRAFIA TIROIDE',
+      'ECOGRAFIA ADDOME SUPERIORE',
+      'ECOGRAFIA RENALE E VESCICALE',
+      'ECOGRAFIA PARTI MOLLI',
+      'ECOCOLORDOPPLER ARTI INFERIORI VENOSO',
+      'ECOGRAFIA SCROTALE',
+      'ECOGRAFIA MAMMARIA'
+    ],
+    'TC': [
+      'TC TORACE',
+      'TC ADDOME COMPLETO',
+      'TC ADDOME SENZA E CON MDC',
+      'TC TORACE ADDOME PELVI (STADIAZIONE)',
+      'TC RACHIDE LOMBOSACRALE',
+      'TC BACINO',
+      'TC COLONNA CERVICALE',
+      'TC ANGIOGRAFIA AORTA'
+    ],
+    'RMN': [
+      'RMN RACHIDE LOMBOSACRALE',
+      'RMN GINOCCHIO',
+      'RMN SPALLA',
+      'RMN ADDOME SUPERIORE',
+      'RMN BACINO',
+      'RMN RACHIDE CERVICALE',
+      'RMN ENCEFALO'
+    ]
+  },
+
+  indicazioniByEsame: {
+    'RX TORACE 2PR': ['Tosse persistente', 'Dispnea', 'Dolore toracico', 'Follow-up oncologico', 'Inquadramento preoperatorio'],
+    'RX TORACE AP supino': ['Controllo post-procedurale', 'Paziente non collaborante', 'Monitoraggio in reparto'],
+    'RX ADDOME': ['Dolore addominale', 'Sospetta occlusione', 'Ricerca corpo estraneo'],
+    'RX RACHIDE LOMBOSACRALE': ['Lombalgia', 'Trauma', 'Sospetto cedimento vertebrale'],
+    'RX BACINO': ['Trauma', 'Coxalgia'],
+    'RX GINOCCHIO': ['Trauma', 'Gonalgia', 'Sospetta gonartrosi'],
+    'RX SPALLA': ['Trauma', 'Dolore', 'Limitazione funzionale'],
+    'RX POLSO': ['Trauma', 'Dolore'],
+    'RX CAVIGLIA': ['Trauma', 'Dolore'],
+    'RX RACHIDE CERVICALE': ['Trauma', 'Cervicalgia'],
+
+    'ECOGRAFIA ADDOME COMPLETO': ['Dolore addominale', 'Alterazione indici epatici', 'Follow-up'],
+    'ECOGRAFIA TIROIDE': ['Riscontro di nodulo palpabile', 'Controllo periodico', 'Familiarità per patologia tiroidea'],
+    'ECOGRAFIA ADDOME SUPERIORE': ['Dolore ipocondrio destro', 'Alterazione indici epatici'],
+    'ECOGRAFIA RENALE E VESCICALE': ['Dolore lombare', 'Ematuria', 'Controllo'],
+    'ECOGRAFIA PARTI MOLLI': ['Tumefazione palpabile', 'Dolore localizzato'],
+    'ECOCOLORDOPPLER ARTI INFERIORI VENOSO': ['Sospetta trombosi venosa profonda', 'Edema arto'],
+    'ECOGRAFIA SCROTALE': ['Dolore scrotale', 'Tumefazione palpabile'],
+    'ECOGRAFIA MAMMARIA': ['Riscontro di nodulo palpabile', 'Controllo'],
+
+    'TC TORACE': ['Stadiazione oncologica', 'Sospetta embolia polmonare', 'Dispnea ingravescente'],
+    'TC ADDOME COMPLETO': ['Dolore addominale acuto', 'Stadiazione neoplastica', 'Follow-up post-chirurgico'],
+    'TC ADDOME SENZA E CON MDC': ['Dolore addominale', 'Sospetta neoplasia'],
+    'TC TORACE ADDOME PELVI (STADIAZIONE)': ['Stadiazione oncologica', 'Follow-up oncologico'],
+    'TC RACHIDE LOMBOSACRALE': ['Lombalgia', 'Sospetta ernia discale'],
+    'TC BACINO': ['Trauma', 'Coxalgia'],
+    'TC COLONNA CERVICALE': ['Trauma'],
+    'TC ANGIOGRAFIA AORTA': ['Sospetta dissezione aortica', 'Follow-up aneurisma'],
+
+    'RMN RACHIDE LOMBOSACRALE': ['Lombalgia', 'Sciatalgia', 'Sospetta ernia discale'],
+    'RMN GINOCCHIO': ['Gonalgia', 'Trauma', 'Sospetta lesione meniscale'],
+    'RMN SPALLA': ['Dolore', 'Sospetta lesione della cuffia dei rotatori'],
+    'RMN ADDOME SUPERIORE': ['Riscontro incidentale di lesione epatica', 'Studio delle vie biliari'],
+    'RMN BACINO': ['Coxalgia', 'Sospetta necrosi avascolare'],
+    'RMN RACHIDE CERVICALE': ['Cervicalgia', 'Cervicobrachialgia'],
+    'RMN ENCEFALO': ['Cefalea persistente', 'Sospetta lesione ischemica', 'Vertigini']
+  },
+
+  refertoByEsame: {
+    'RX TORACE 2PR': {
+      'Parenchima': [
+        { label: 'Parenchima nella norma', text: 'Non addensamenti parenchimali a focolaio.', neg: false },
+        { label: 'Addensamento', text: 'Addensamento parenchimale in sede da definire con approfondimento clinico-radiologico.', neg: true }
+      ],
+      'Pleura': [
+        { label: 'Pleura libera', text: 'Non versamento pleurico bilateralmente.', neg: false }
+      ],
+      'Cuore e mediastino': [
+        { label: 'Cuore nella norma', text: 'Ombra cardiaca di dimensioni e morfologia nei limiti della norma.', neg: false },
+        { label: 'Mediastino nella norma', text: 'Mediastino in asse, di ampiezza regolare.', neg: false }
+      ],
+      'Scheletro': [
+        { label: 'Scheletro indenne', text: 'Non evidenti lesioni ossee focali a carico dello scheletro toracico in esame.', neg: false }
+      ]
+    },
+    'RX TORACE AP supino': {
+      'Parenchima': [
+        { label: 'Nella norma', text: 'Non evidenti addensamenti parenchimali focali, con i limiti intrinseci della proiezione singola in AP.', neg: false }
+      ],
+      'Presidi': [
+        { label: 'Presidi in sede', text: 'Presidi (CVC/SNG/drenaggi), ove presenti, in sede regolare.', neg: false }
+      ]
+    },
+    'RX ADDOME': {
+      'Gas intestinale': [
+        { label: 'Distribuzione regolare', text: 'Non evidenza di livelli idroaerei significativi.', neg: false }
+      ],
+      'Calcificazioni': [
+        { label: 'Assenti', text: 'Non calcificazioni patologiche in proiezione addominale.', neg: false }
+      ],
+      'Profili ossei': [
+        { label: 'Nella norma', text: 'Profili ossei del bacino e del rachide in esame nella norma.', neg: false }
+      ]
+    },
+    'RX RACHIDE LOMBOSACRALE': {
+      'Corpi vertebrali': [
+        { label: 'Nella norma', text: 'Non evidenti alterazioni di forma e struttura dei corpi vertebrali in esame.', neg: false }
+      ]
+    },
+    'RX BACINO': {
+      'Reperto': [
+        { label: 'Nella norma', text: 'Non evidenti rime di frattura né alterazioni strutturali a carico del bacino in esame.', neg: false }
+      ]
+    },
+    'RX GINOCCHIO': {
+      'Reperto': [
+        { label: 'Nella norma', text: 'Non evidenti esiti post-traumatici recenti; rime articolari conservate.', neg: false }
+      ]
+    },
+    'RX SPALLA': {
+      'Reperto': [
+        { label: 'Nella norma', text: 'Non evidenti alterazioni ossee focali; profilo articolare regolare.', neg: false }
+      ]
+    },
+    'RX POLSO': {
+      'Reperto': [
+        { label: 'Nella norma', text: 'Non rime di frattura; rapporti articolari conservati.', neg: false }
+      ]
+    },
+    'RX CAVIGLIA': {
+      'Reperto': [
+        { label: 'Nella norma', text: 'Non evidenti rime di frattura; mortasa tibio-astragalica congrua.', neg: false }
+      ]
+    },
+    'RX RACHIDE CERVICALE': {
+      'Corpi vertebrali': [
+        { label: 'Nella norma', text: 'Non evidenti alterazioni di forma e allineamento dei corpi vertebrali cervicali.', neg: false }
+      ]
+    },
+
+    'ECOGRAFIA ADDOME COMPLETO': {
+      'Fegato': [
+        { label: 'Fegato nella norma', text: 'Fegato di dimensioni ed ecostruttura nei limiti della norma.', neg: false }
+      ],
+      'Colecisti e vie biliari': [
+        { label: 'Nella norma', text: 'Colecisti alitiasica a pareti regolari; vie biliari non dilatate.', neg: false }
+      ],
+      'Reni': [
+        { label: 'Reni nella norma', text: 'Reni di dimensioni e morfologia conservate, senza dilatazione delle vie escretrici.', neg: false }
+      ]
+    },
+    'ECOGRAFIA TIROIDE': {
+      'Parenchima tiroideo': [
+        { label: 'Ecostruttura omogenea', text: 'Ghiandola tiroidea in sede, di dimensioni nella norma ed ecostruttura omogenea.', neg: false }
+      ],
+      'Noduli': [
+        { label: 'Non noduli', text: 'Non si evidenziano formazioni nodulari focali.', neg: false }
+      ]
+    },
+    'ECOGRAFIA ADDOME SUPERIORE': {
+      'Fegato e vie biliari': [
+        { label: 'Nella norma', text: 'Fegato, colecisti e vie biliari nei limiti della norma.', neg: false }
+      ]
+    },
+    'ECOGRAFIA RENALE E VESCICALE': {
+      'Reni e vescica': [
+        { label: 'Nella norma', text: 'Reni e vescica nei limiti della norma, senza dilatazione delle vie escretrici.', neg: false }
+      ]
+    },
+    'ECOGRAFIA PARTI MOLLI': {
+      'Reperto': [
+        { label: 'Nella norma', text: 'Non evidenti raccolte né lesioni focali nei tessuti molli in esame.', neg: false }
+      ]
+    },
+    'ECOCOLORDOPPLER ARTI INFERIORI VENOSO': {
+      'Asse venoso': [
+        { label: 'Nella norma', text: 'Pervietà e comprimibilità conservate dell’asse venoso profondo in esame; non segni di trombosi.', neg: false }
+      ]
+    },
+    'ECOGRAFIA SCROTALE': {
+      'Testicoli': [
+        { label: 'Nella norma', text: 'Testicoli in sede, di dimensioni ed ecostruttura nella norma.', neg: false }
+      ]
+    },
+    'ECOGRAFIA MAMMARIA': {
+      'Parenchima ghiandolare': [
+        { label: 'Nella norma', text: 'Parenchima ghiandolare privo di formazioni focali sospette.', neg: false }
+      ]
+    },
+
+    'TC TORACE': {
+      'Parenchima polmonare': [
+        { label: 'Nella norma', text: 'Parenchima polmonare privo di alterazioni densitometriche focali.', neg: false }
+      ],
+      'Linfonodi': [
+        { label: 'Non linfoadenopatie', text: 'Non linfoadenopatie mediastiniche o ilari di rilievo dimensionale.', neg: false }
+      ]
+    },
+    'TC ADDOME COMPLETO': {
+      'Fegato e vie biliari': [
+        { label: 'Nella norma', text: 'Fegato di dimensioni e densità nei limiti, privo di lesioni focali.', neg: false }
+      ],
+      'Linfonodi': [
+        { label: 'Non linfoadenopatie', text: 'Non linfoadenopatie retroperitoneali di rilievo dimensionale.', neg: false }
+      ]
+    },
+    'TC ADDOME SENZA E CON MDC': {
+      'Organi parenchimatosi': [
+        { label: 'Nella norma', text: 'Fegato, milza, pancreas e reni nei limiti della norma per morfologia e densitometria.', neg: false }
+      ]
+    },
+    'TC TORACE ADDOME PELVI (STADIAZIONE)': {
+      'Reperto generale': [
+        { label: 'Non secondarismi', text: 'Non evidenza di lesioni secondarie a distanza nei distretti esaminati.', neg: false }
+      ]
+    },
+    'TC RACHIDE LOMBOSACRALE': {
+      'Reperto': [
+        { label: 'Nella norma', text: 'Non evidenti alterazioni ossee significative; canale vertebrale pervio.', neg: false }
+      ]
+    },
+    'TC BACINO': {
+      'Reperto': [
+        { label: 'Nella norma', text: 'Non rime di frattura; strutture articolari conservate.', neg: false }
+      ]
+    },
+    'TC COLONNA CERVICALE': {
+      'Reperto': [
+        { label: 'Nella norma', text: 'Non evidenti rime di frattura né dislocazioni vertebrali.', neg: false }
+      ]
+    },
+    'TC ANGIOGRAFIA AORTA': {
+      'Aorta': [
+        { label: 'Nella norma', text: 'Aorta toracica e addominale di calibro regolare, senza segni di dissezione né ectasie significative.', neg: false }
+      ]
+    },
+
+    'RMN RACHIDE LOMBOSACRALE': {
+      'Dischi intervertebrali': [
+        { label: 'Nella norma', text: 'Dischi intervertebrali di segnale e altezza conservati ai livelli esaminati.', neg: false }
+      ],
+      'Canale vertebrale': [
+        { label: 'Pervio', text: 'Canale vertebrale di ampiezza conservata, privo di stenosi significative.', neg: false }
+      ]
+    },
+    'RMN GINOCCHIO': {
+      'Menischi e legamenti': [
+        { label: 'Nella norma', text: 'Menischi e legamenti crociati privi di alterazioni di segnale significative.', neg: false }
+      ]
+    },
+    'RMN SPALLA': {
+      'Cuffia dei rotatori': [
+        { label: 'Integra', text: 'Cuffia dei rotatori integra, senza alterazioni di segnale.', neg: false }
+      ]
+    },
+    'RMN ADDOME SUPERIORE': {
+      'Fegato e vie biliari': [
+        { label: 'Nella norma', text: 'Fegato e vie biliari nei limiti della norma.', neg: false }
+      ]
+    },
+    'RMN BACINO': {
+      'Teste femorali': [
+        { label: 'Nella norma', text: 'Teste femorali di segnale conservato, senza segni di necrosi avascolare.', neg: false }
+      ]
+    },
+    'RMN RACHIDE CERVICALE': {
+      'Dischi intervertebrali': [
+        { label: 'Nella norma', text: 'Dischi intervertebrali cervicali di segnale e altezza conservati.', neg: false }
+      ]
+    },
+    'RMN ENCEFALO': {
+      'Parenchima encefalico': [
+        { label: 'Nella norma', text: 'Non alterazioni di segnale focali del parenchima encefalico sovra- e sottotentoriale.', neg: false }
+      ],
+      'Sistema ventricolare': [
+        { label: 'Nella norma', text: 'Sistema ventricolare in asse, di ampiezza nei limiti della norma per età.', neg: false }
+      ]
+    }
+  }
+};
+
+// ============================================================
+// CONFIGURAZIONE SUPABASE — inserire qui i valori del progetto
+// ============================================================
+const SUPABASE_URL = https://umejthggxihtyqvcszgm.supabase.co;
+const SUPABASE_ANON_KEY = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVtZWp0aGdneGlodHlxdmNzemdtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODg4NzI0MzEsImV4cCI6MjEwNDQ0ODQzMX0.BPaujgB70aLpWSifk5nH93fuyyyfOe8Uw4RupV1YQQE;
+const supabaseClient = (window.supabase && SUPABASE_URL.indexOf('INSERISCI') === -1)
+  ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+  : null;
+
+let DATA = JSON.parse(JSON.stringify(DEFAULT_DATA));
+let currentUser = null;
+let persistTimer = null;
+
+function localCloneDefault(){
+  return JSON.parse(JSON.stringify(DEFAULT_DATA));
+}
+
+async function loadDataFromCloud(){
+  if (!supabaseClient || !currentUser) return localCloneDefault();
+  try{
+    const { data, error } = await supabaseClient
+      .from('user_data')
+      .select('data')
+      .eq('user_id', currentUser.id)
+      .maybeSingle();
+    if (error) throw error;
+    if (data && data.data) return data.data;
+  }catch(e){ console.warn('Impossibile caricare i dati dal cloud, uso i default.', e); }
+  return localCloneDefault();
+}
+
+function persist(){
+  if (!supabaseClient || !currentUser) return;
+  clearTimeout(persistTimer);
+  persistTimer = setTimeout(async () => {
+    try{
+      await supabaseClient.from('user_data').upsert({
+        user_id: currentUser.id,
+        data: DATA,
+        updated_at: new Date().toISOString()
+      });
+    }catch(e){ console.warn('Impossibile salvare i dati sul cloud.', e); }
+  }, 500);
+}
+
+// ============================================================
+// STATO
+// ============================================================
+const state = {
+  metodica: null,
+  esame: null
+};
+let indicazioneLines = [];
+let confrontoLine = null;
+let refertoLines = [];
+
+const el = {
+  metodicaRow: document.getElementById('metodica-row'),
+  esameBody: document.getElementById('esame-body'),
+  indicazioneBody: document.getElementById('indicazione-body'),
+  refertoBody: document.getElementById('referto-body'),
+  reportText: document.getElementById('report-text'),
+  metaMetodica: document.getElementById('meta-metodica'),
+  metaEsame: document.getElementById('meta-esame'),
+  breadcrumb: document.getElementById('breadcrumb'),
+  copyFlash: document.getElementById('copy-flash')
+};
+
+// ============================================================
+// RENDER — BUILDER PRINCIPALE
+// ============================================================
+function renderMetodica(){
+  el.metodicaRow.innerHTML = '';
+  DATA.metodiche.forEach(m => {
+    const b = document.createElement('button');
+    b.className = 'chip' + (state.metodica === m ? ' active' : '');
+    b.textContent = m;
+    b.onclick = () => {
+      if (state.metodica === m) return;
+      state.metodica = m;
+      state.esame = null;
+      renderAll();
+      composeText();
+    };
+    el.metodicaRow.appendChild(b);
+  });
+}
+
+function renderEsame(){
+  el.esameBody.innerHTML = '';
+  if (!state.metodica){
+    el.esameBody.innerHTML = '<div class="empty-state">Seleziona prima una metodica.</div>';
+    return;
+  }
+  const row = document.createElement('div');
+  row.className = 'chip-row';
+  const esami = DATA.esamiByMetodica[state.metodica] || [];
+  esami.forEach(e => {
+    const b = document.createElement('button');
+    b.className = 'chip' + (state.esame === e ? ' active' : '');
+    b.textContent = e;
+    b.onclick = () => {
+      if (state.esame === e) return;
+      state.esame = e;
+      renderAll();
+      composeText();
+    };
+    row.appendChild(b);
+  });
+  el.esameBody.appendChild(row);
+}
+
+function renderIndicazione(){
+  el.indicazioneBody.innerHTML = '';
+  if (!state.esame){
+    el.indicazioneBody.innerHTML = '<div class="empty-state">Seleziona prima un esame.</div>';
+    return;
+  }
+  const list = DATA.indicazioniByEsame[state.esame] || [];
+  const row = document.createElement('div');
+  row.className = 'chip-row';
+  list.forEach(txt => {
+    const b = document.createElement('button');
+    b.className = 'chip';
+    b.textContent = txt;
+    b.onclick = () => insertIndicazione(txt);
+    row.appendChild(b);
+  });
+  el.indicazioneBody.appendChild(row);
+
+  const freeWrap = document.createElement('div');
+  freeWrap.style.marginTop = '10px';
+  freeWrap.innerHTML = `
+    <textarea class="free-text" id="indicazione-free" placeholder="…oppure scrivi o detta un'indicazione libera"></textarea>
+    <div style="display:flex; gap:8px; margin-top:8px;">
+      <button class="mic-btn" id="mic-indicazione-free" title="Detta">🎤</button>
+      <button class="add-free" id="add-indicazione-free">Aggiungi</button>
+    </div>
+  `;
+  el.indicazioneBody.appendChild(freeWrap);
+  document.getElementById('add-indicazione-free').onclick = () => {
+    const ta = document.getElementById('indicazione-free');
+    if (ta.value.trim()){
+      insertIndicazione(ta.value.trim());
+      ta.value = '';
+    }
+  };
+  attachMicToIndicazioneFree();
+}
+
+function renderReferto(){
+  el.refertoBody.innerHTML = '';
+  if (!state.esame){
+    el.refertoBody.innerHTML = '<div class="empty-state">Seleziona prima un esame.</div>';
+    return;
+  }
+  const groups = DATA.refertoByEsame[state.esame];
+  if (!groups || Object.keys(groups).length === 0){
+    el.refertoBody.innerHTML = '<div class="empty-state">Nessun blocco di referto ancora definito per questo esame. Puoi aggiungerne uno da "Personalizza".</div>';
+    return;
+  }
+  Object.entries(groups).forEach(([groupName, buttons]) => {
+    const g = document.createElement('div');
+    g.className = 'subgroup';
+    const label = document.createElement('div');
+    label.className = 'subgroup-label';
+    label.textContent = groupName;
+    g.appendChild(label);
+
+    const row = document.createElement('div');
+    row.className = 'chip-row';
+    buttons.forEach(btnData => {
+      const b = document.createElement('button');
+      b.className = 'btn-report' + (btnData.neg ? ' neg' : '');
+      b.textContent = btnData.label;
+      b.onclick = () => insertReferto(btnData.text);
+      row.appendChild(b);
+    });
+    g.appendChild(row);
+    el.refertoBody.appendChild(g);
+  });
+}
+
+function renderBreadcrumb(){
+  el.breadcrumb.innerHTML = `
+    <span class="seg ${state.metodica ? '' : 'empty'}">${state.metodica || 'metodica'}</span>
+    <span class="sep">›</span>
+    <span class="seg ${state.esame ? '' : 'empty'}">${state.esame || 'esame'}</span>
+  `;
+  el.metaMetodica.textContent = state.metodica || '—';
+  el.metaEsame.textContent = state.esame || '—';
+}
+
+function renderAll(){
+  renderMetodica();
+  renderEsame();
+  renderIndicazione();
+  renderReferto();
+  renderBreadcrumb();
+}
+
+// ============================================================
+// COMPOSIZIONE TESTO REFERTO
+// ============================================================
+function composeText(){
+  const ta = el.reportText;
+  const lines = [];
+
+  if (indicazioneLines.length){
+    lines.push('Indicazione : ' + indicazioneLines.join('; '));
+  }
+  if (state.esame){
+    lines.push(state.esame);
+  }
+  if (confrontoLine){
+    lines.push(confrontoLine);
+  }
+  if (refertoLines.length){
+    if (lines.length) lines.push('');
+    lines.push(...refertoLines);
+  }
+
+  ta.value = lines.join('\n');
+  ta.scrollTop = ta.scrollHeight;
+}
+
+function insertIndicazione(txt){
+  indicazioneLines.push(txt);
+  composeText();
+}
+
+function insertConfronto(txt){
+  confrontoLine = txt;
+  composeText();
+}
+
+function insertReferto(txt){
+  refertoLines.push(txt);
+  composeText();
+}
+
+// ============================================================
+// TOOLBAR PRINCIPALE
+// ============================================================
+document.getElementById('btn-reset').onclick = () => {
+  indicazioneLines = [];
+  confrontoLine = null;
+  refertoLines = [];
+  composeText();
+};
+
+document.getElementById('btn-copy').onclick = async () => {
+  try{
+    await navigator.clipboard.writeText(el.reportText.value);
+  } catch(e){
+    el.reportText.select();
+    document.execCommand('copy');
+  }
+  el.copyFlash.classList.add('show');
+  setTimeout(() => el.copyFlash.classList.remove('show'), 1400);
+};
+
+// ============================================================
+// PERSONALIZZAZIONE — util
+// ============================================================
+function allEsami(){
+  const out = [];
+  DATA.metodiche.forEach(m => {
+    (DATA.esamiByMetodica[m] || []).forEach(e => out.push({ esame: e, metodica: m }));
+  });
+  return out;
+}
+
+function fillSelect(selectEl, items, placeholder){
+  selectEl.innerHTML = '';
+  if (placeholder){
+    const opt = document.createElement('option');
+    opt.value = '';
+    opt.textContent = placeholder;
+    opt.disabled = true;
+    opt.selected = true;
+    selectEl.appendChild(opt);
+  }
+  items.forEach(({ value, label }) => {
+    const opt = document.createElement('option');
+    opt.value = value;
+    opt.textContent = label;
+    selectEl.appendChild(opt);
+  });
+}
+
+function refreshAllSettingsSelects(){
+  fillSelect(document.getElementById('new-esame-metodica'),
+    DATA.metodiche.map(m => ({ value: m, label: m })));
+
+  const esamiOptions = allEsami().map(({esame, metodica}) => ({ value: esame, label: metodica + ' — ' + esame }));
+
+  fillSelect(document.getElementById('new-indicazione-esame'), esamiOptions, esamiOptions.length ? null : 'Nessun esame disponibile');
+  fillSelect(document.getElementById('new-referto-esame'), esamiOptions, esamiOptions.length ? null : 'Nessun esame disponibile');
+  fillSelect(document.getElementById('edit-referto-esame'), esamiOptions, esamiOptions.length ? null : 'Nessun esame disponibile');
+  fillSelect(document.getElementById('edit-indicazione-esame'), esamiOptions, esamiOptions.length ? null : 'Nessun esame disponibile');
+
+  refreshEditRefertoGroups();
+  refreshEditIndicazioneItems();
+}
+
+function refreshEditRefertoGroups(){
+  const esame = document.getElementById('edit-referto-esame').value;
+  const groups = (DATA.refertoByEsame[esame]) ? Object.keys(DATA.refertoByEsame[esame]) : [];
+  fillSelect(document.getElementById('edit-referto-group'), groups.map(g => ({ value: g, label: g })), groups.length ? null : 'Nessun gruppo');
+  refreshEditRefertoButtons();
+}
+
+function refreshEditRefertoButtons(){
+  const esame = document.getElementById('edit-referto-esame').value;
+  const group = document.getElementById('edit-referto-group').value;
+  const buttons = (DATA.refertoByEsame[esame] && DATA.refertoByEsame[esame][group]) ? DATA.refertoByEsame[esame][group] : [];
+  fillSelect(document.getElementById('edit-referto-button'), buttons.map((b, i) => ({ value: i, label: b.label })), buttons.length ? null : 'Nessun pulsante');
+  loadEditRefertoFields();
+}
+
+function loadEditRefertoFields(){
+  const esame = document.getElementById('edit-referto-esame').value;
+  const group = document.getElementById('edit-referto-group').value;
+  const idx = document.getElementById('edit-referto-button').value;
+  const labelInput = document.getElementById('edit-referto-label');
+  const textInput = document.getElementById('edit-referto-text');
+  const negInput = document.getElementById('edit-referto-neg');
+  const btn = (DATA.refertoByEsame[esame] && DATA.refertoByEsame[esame][group] && DATA.refertoByEsame[esame][group][idx]) || null;
+  if (btn){
+    labelInput.value = btn.label;
+    textInput.value = btn.text;
+    negInput.checked = !!btn.neg;
+  } else {
+    labelInput.value = '';
+    textInput.value = '';
+    negInput.checked = false;
+  }
+}
+
+function refreshEditIndicazioneItems(){
+  const esame = document.getElementById('edit-indicazione-esame').value;
+  const list = DATA.indicazioniByEsame[esame] || [];
+  fillSelect(document.getElementById('edit-indicazione-item'), list.map((t, i) => ({ value: i, label: t })), list.length ? null : 'Nessuna indicazione');
+  loadEditIndicazioneField();
+}
+
+function loadEditIndicazioneField(){
+  const esame = document.getElementById('edit-indicazione-esame').value;
+  const idx = document.getElementById('edit-indicazione-item').value;
+  const input = document.getElementById('edit-indicazione-text');
+  const list = DATA.indicazioniByEsame[esame] || [];
+  input.value = (idx !== '' && list[idx] !== undefined) ? list[idx] : '';
+}
+
+// ============================================================
+// PERSONALIZZAZIONE — azioni
+// ============================================================
+document.getElementById('btn-open-settings').onclick = () => {
+  refreshAllSettingsSelects();
+  document.getElementById('settings-overlay').classList.add('open');
+};
+document.getElementById('settings-close').onclick = () => {
+  document.getElementById('settings-overlay').classList.remove('open');
+};
+document.getElementById('settings-overlay').addEventListener('click', (e) => {
+  if (e.target.id === 'settings-overlay') e.currentTarget.classList.remove('open');
+});
+
+document.getElementById('add-metodica-btn').onclick = () => {
+  const input = document.getElementById('new-metodica-name');
+  const name = input.value.trim();
+  if (!name) return;
+  if (!DATA.metodiche.includes(name)){
+    DATA.metodiche.push(name);
+    DATA.esamiByMetodica[name] = DATA.esamiByMetodica[name] || [];
+  }
+  input.value = '';
+  persist();
+  refreshAllSettingsSelects();
+  renderAll();
+};
+
+document.getElementById('add-esame-btn').onclick = () => {
+  const metodica = document.getElementById('new-esame-metodica').value;
+  const input = document.getElementById('new-esame-name');
+  const name = input.value.trim();
+  if (!metodica || !name) return;
+  DATA.esamiByMetodica[metodica] = DATA.esamiByMetodica[metodica] || [];
+  if (!DATA.esamiByMetodica[metodica].includes(name)){
+    DATA.esamiByMetodica[metodica].push(name);
+  }
+  input.value = '';
+  persist();
+  refreshAllSettingsSelects();
+  renderAll();
+};
+
+document.getElementById('add-indicazione-btn').onclick = () => {
+  const esame = document.getElementById('new-indicazione-esame').value;
+  const input = document.getElementById('new-indicazione-text');
+  const text = input.value.trim();
+  if (!esame || !text) return;
+  DATA.indicazioniByEsame[esame] = DATA.indicazioniByEsame[esame] || [];
+  DATA.indicazioniByEsame[esame].push(text);
+  input.value = '';
+  persist();
+  refreshAllSettingsSelects();
+  renderAll();
+};
+
+document.getElementById('add-referto-btn').onclick = () => {
+  const esame = document.getElementById('new-referto-esame').value;
+  const group = document.getElementById('new-referto-group').value.trim();
+  const label = document.getElementById('new-referto-label').value.trim();
+  const text = document.getElementById('new-referto-text').value.trim();
+  const neg = document.getElementById('new-referto-neg').checked;
+  if (!esame || !group || !label || !text) return;
+  DATA.refertoByEsame[esame] = DATA.refertoByEsame[esame] || {};
+  DATA.refertoByEsame[esame][group] = DATA.refertoByEsame[esame][group] || [];
+  DATA.refertoByEsame[esame][group].push({ label, text, neg });
+
+  document.getElementById('new-referto-group').value = '';
+  document.getElementById('new-referto-label').value = '';
+  document.getElementById('new-referto-text').value = '';
+  document.getElementById('new-referto-neg').checked = false;
+
+  persist();
+  refreshAllSettingsSelects();
+  renderAll();
+};
+
+['edit-referto-esame'].forEach(id => {
+  document.getElementById(id).addEventListener('change', refreshEditRefertoGroups);
+});
+document.getElementById('edit-referto-group').addEventListener('change', refreshEditRefertoButtons);
+document.getElementById('edit-referto-button').addEventListener('change', loadEditRefertoFields);
+
+document.getElementById('save-referto-btn').onclick = () => {
+  const esame = document.getElementById('edit-referto-esame').value;
+  const group = document.getElementById('edit-referto-group').value;
+  const idx = document.getElementById('edit-referto-button').value;
+  if (!esame || !group || idx === '') return;
+  const btn = DATA.refertoByEsame[esame] && DATA.refertoByEsame[esame][group] && DATA.refertoByEsame[esame][group][idx];
+  if (!btn) return;
+  btn.label = document.getElementById('edit-referto-label').value.trim() || btn.label;
+  btn.text = document.getElementById('edit-referto-text').value.trim() || btn.text;
+  btn.neg = document.getElementById('edit-referto-neg').checked;
+  persist();
+  refreshEditRefertoButtons();
+  renderAll();
+};
+
+document.getElementById('delete-referto-btn').onclick = () => {
+  const esame = document.getElementById('edit-referto-esame').value;
+  const group = document.getElementById('edit-referto-group').value;
+  const idx = document.getElementById('edit-referto-button').value;
+  if (!esame || !group || idx === '') return;
+  DATA.refertoByEsame[esame][group].splice(idx, 1);
+  if (DATA.refertoByEsame[esame][group].length === 0){
+    delete DATA.refertoByEsame[esame][group];
+  }
+  persist();
+  refreshEditRefertoGroups();
+  renderAll();
+};
+
+document.getElementById('edit-indicazione-esame').addEventListener('change', refreshEditIndicazioneItems);
+document.getElementById('edit-indicazione-item').addEventListener('change', loadEditIndicazioneField);
+
+document.getElementById('save-indicazione-btn').onclick = () => {
+  const esame = document.getElementById('edit-indicazione-esame').value;
+  const idx = document.getElementById('edit-indicazione-item').value;
+  const newText = document.getElementById('edit-indicazione-text').value.trim();
+  if (!esame || idx === '' || !newText) return;
+  DATA.indicazioniByEsame[esame][idx] = newText;
+  persist();
+  refreshEditIndicazioneItems();
+  renderAll();
+};
+
+document.getElementById('delete-indicazione-btn').onclick = () => {
+  const esame = document.getElementById('edit-indicazione-esame').value;
+  const idx = document.getElementById('edit-indicazione-item').value;
+  if (!esame || idx === '') return;
+  DATA.indicazioniByEsame[esame].splice(idx, 1);
+  persist();
+  refreshEditIndicazioneItems();
+  renderAll();
+};
+
+document.getElementById('btn-reset-data').onclick = () => {
+  if (!confirm(t('confirm_reset'))) return;
+  DATA = JSON.parse(JSON.stringify(DEFAULT_DATA));
+  persist();
+  state.metodica = null;
+  state.esame = null;
+  indicazioneLines = [];
+  confrontoLine = null;
+  refertoLines = [];
+  refreshAllSettingsSelects();
+  renderAll();
+  composeText();
+};
+
+// ============================================================
+// DETTATURA VOCALE (Web Speech API)
+// ============================================================
+const SpeechRecognitionCtor = window.SpeechRecognition || window.webkitSpeechRecognition || null;
+
+function createMicHandler(getTargetEl, btnEl){
+  let recognition = null;
+  let recording = false;
+  btnEl.addEventListener('click', () => {
+    const target = getTargetEl();
+    if (!target) return;
+    if (!SpeechRecognitionCtor){
+      alert(currentLang === 'en'
+        ? 'Voice dictation is not supported by this browser. Try Chrome or Edge.'
+        : 'La dettatura vocale non è supportata da questo browser. Prova con Chrome o Edge.');
+      return;
+    }
+    if (recording){
+      recognition && recognition.stop();
+      return;
+    }
+    recognition = new SpeechRecognitionCtor();
+    recognition.lang = currentLang === 'en' ? 'en-US' : 'it-IT';
+    recognition.continuous = true;
+    recognition.interimResults = false;
+    recognition.onresult = (e) => {
+      let finalText = '';
+      for (let i = e.resultIndex; i < e.results.length; i++){
+        if (e.results[i].isFinal) finalText += e.results[i][0].transcript;
+      }
+      finalText = finalText.trim();
+      if (finalText){
+        const needsSpace = target.value && !/[\s\n]$/.test(target.value);
+        target.value = target.value + (needsSpace ? ' ' : '') + finalText + ' ';
+      }
+    };
+    recognition.onerror = () => {
+      recording = false;
+      btnEl.classList.remove('recording');
+    };
+    recognition.onend = () => {
+      recording = false;
+      btnEl.classList.remove('recording');
+    };
+    recognition.start();
+    recording = true;
+    btnEl.classList.add('recording');
+  });
+}
+
+createMicHandler(() => el.reportText, document.getElementById('btn-mic-report'));
+createMicHandler(() => document.getElementById('new-indicazione-text'), document.getElementById('mic-new-indicazione-text'));
+createMicHandler(() => document.getElementById('new-referto-text'), document.getElementById('mic-new-referto-text'));
+createMicHandler(() => document.getElementById('edit-referto-text'), document.getElementById('mic-edit-referto-text'));
+createMicHandler(() => document.getElementById('edit-indicazione-text'), document.getElementById('mic-edit-indicazione-text'));
+
+// mic per il campo "indicazione libera", ricreato ad ogni render
+function attachMicToIndicazioneFree(){
+  const input = document.getElementById('indicazione-free');
+  const micBtn = document.getElementById('mic-indicazione-free');
+  if (input && micBtn){
+    createMicHandler(() => input, micBtn);
+  }
+}
+
+// ============================================================
+// LINGUA — IT / EN (interfaccia; i contenuti clinici restano in italiano)
+// ============================================================
+let currentLang = 'it';
+const I18N = {
+  it: {
+    app_title: 'Referti — Bozza di lavoro',
+    settings_btn: 'Personalizza',
+    block_metodica: 'Metodica',
+    block_esame: 'Esame',
+    hint_esame: 'filtrato per metodica',
+    block_indicazione: 'Indicazione',
+    hint_indicazione: 'filtrata per esame',
+    block_confronto: 'Confronto con precedenti',
+    btn_confronto: 'Confronto',
+    btn_presa_visione: 'Presa visione',
+    btn_non_precedenti: 'Non precedenti',
+    block_referto: 'Referto',
+    hint_referto: 'filtrato per esame',
+    report_preview: 'Anteprima referto',
+    btn_clear: 'Svuota',
+    btn_copy: 'Copia negli appunti',
+    copied: 'Copiato negli appunti',
+    meta_metodica: 'METODICA:',
+    meta_esame: 'ESAME:',
+    report_placeholder: 'Il referto composto apparirà qui. Puoi anche scrivere, correggere o dettare liberamente.',
+    settings_title: 'Personalizzazione',
+    s1_title: 'Aggiungi metodica', s1_label: 'Nome metodica',
+    s2_title: 'Aggiungi esame (filtrato per metodica)', s2_label1: 'Metodica', s2_label2: 'Nome esame',
+    s3_title: 'Aggiungi indicazione (filtrata per esame)', s3_label1: 'Esame', s3_label2: 'Testo indicazione',
+    s4_title: 'Aggiungi pulsante referto', s4_label1: 'Esame', s4_label2: 'Gruppo / distretto', s4_label3: 'Etichetta pulsante', s4_label4: 'Testo inserito nel referto', s4_neg: 'Segna come reperto da approfondire',
+    s5_title: 'Modifica o elimina un pulsante di referto', s5_label1: 'Esame', s5_label2: 'Gruppo', s5_label3: 'Pulsante', s5_label4: 'Etichetta pulsante', s5_label5: 'Testo inserito nel referto', s5_neg: 'Segna come reperto da approfondire',
+    s6_title: "Modifica o elimina un'indicazione", s6_label1: 'Esame', s6_label2: 'Indicazione', s6_label3: 'Nuovo testo',
+    reset_data: 'Ripristina impostazioni predefinite',
+    add_generic: '+ Aggiungi', add_esame: '+ Aggiungi esame', add_referto: '+ Aggiungi pulsante',
+    save_changes: 'Salva modifiche', delete: 'Elimina', delete_btn: 'Elimina pulsante', save: 'Salva',
+    logout: 'Esci', confirm_reset: 'Ripristinare tutti i dati ai valori predefiniti? Le personalizzazioni aggiunte andranno perse.'
+  },
+  en: {
+    app_title: 'Reports — Working draft',
+    settings_btn: 'Customize',
+    block_metodica: 'Modality',
+    block_esame: 'Exam',
+    hint_esame: 'filtered by modality',
+    block_indicazione: 'Indication',
+    hint_indicazione: 'filtered by exam',
+    block_confronto: 'Comparison with priors',
+    btn_confronto: 'Comparison',
+    btn_presa_visione: 'Reviewed',
+    btn_non_precedenti: 'No priors',
+    block_referto: 'Report',
+    hint_referto: 'filtered by exam',
+    report_preview: 'Report preview',
+    btn_clear: 'Clear',
+    btn_copy: 'Copy to clipboard',
+    copied: 'Copied to clipboard',
+    meta_metodica: 'MODALITY:',
+    meta_esame: 'EXAM:',
+    report_placeholder: 'The composed report will appear here. You can also type, correct or dictate freely.',
+    settings_title: 'Customization',
+    s1_title: 'Add modality', s1_label: 'Modality name',
+    s2_title: 'Add exam (filtered by modality)', s2_label1: 'Modality', s2_label2: 'Exam name',
+    s3_title: 'Add indication (filtered by exam)', s3_label1: 'Exam', s3_label2: 'Indication text',
+    s4_title: 'Add report button', s4_label1: 'Exam', s4_label2: 'Group / region', s4_label3: 'Button label', s4_label4: 'Text inserted into report', s4_neg: 'Flag as finding requiring follow-up',
+    s5_title: 'Edit or delete a report button', s5_label1: 'Exam', s5_label2: 'Group', s5_label3: 'Button', s5_label4: 'Button label', s5_label5: 'Text inserted into report', s5_neg: 'Flag as finding requiring follow-up',
+    s6_title: 'Edit or delete an indication', s6_label1: 'Exam', s6_label2: 'Indication', s6_label3: 'New text',
+    reset_data: 'Restore default settings',
+    add_generic: '+ Add', add_esame: '+ Add exam', add_referto: '+ Add button',
+    save_changes: 'Save changes', delete: 'Delete', delete_btn: 'Delete button', save: 'Save',
+    logout: 'Log out', confirm_reset: 'Restore all data to defaults? Any customizations you added will be lost.'
+  }
+};
+
+const CONFRONTO_TEXT = {
+  it: {
+    confronto: 'Confronto con precedente analogo del ',
+    presaVisione: 'Presa visione di precedente analogo del ',
+    nonPrecedenti: 'Non disponibili precedenti per confronto.'
+  },
+  en: {
+    confronto: 'Comparison with similar prior exam dated ',
+    presaVisione: 'Reviewed similar prior exam dated ',
+    nonPrecedenti: 'No priors available for comparison.'
+  }
+};
+
+function t(key){
+  return (I18N[currentLang] && I18N[currentLang][key]) || key;
+}
+
+function applyLanguage(){
+  const map = {
+    'i18n-app-title': 'app_title', 'i18n-settings-btn': 'settings_btn',
+    'i18n-block-metodica': 'block_metodica', 'i18n-block-esame': 'block_esame',
+    'esame-hint': 'hint_esame', 'i18n-block-indicazione': 'block_indicazione',
+    'indicazione-hint': 'hint_indicazione', 'i18n-block-confronto': 'block_confronto',
+    'btn-confronto': 'btn_confronto', 'btn-presa-visione': 'btn_presa_visione',
+    'btn-non-precedenti': 'btn_non_precedenti', 'i18n-block-referto': 'block_referto',
+    'referto-hint': 'hint_referto', 'i18n-report-preview': 'report_preview',
+    'btn-reset': 'btn_clear', 'btn-copy': 'btn_copy',
+    'i18n-meta-metodica-label': 'meta_metodica', 'i18n-meta-esame-label': 'meta_esame',
+    'i18n-settings-title': 'settings_title',
+    'i18n-s1-title': 's1_title', 'i18n-s1-label': 's1_label', 'add-metodica-btn': 'add_generic',
+    'i18n-s2-title': 's2_title', 'i18n-s2-label1': 's2_label1', 'i18n-s2-label2': 's2_label2', 'add-esame-btn': 'add_esame',
+    'i18n-s3-title': 's3_title', 'i18n-s3-label1': 's3_label1', 'i18n-s3-label2': 's3_label2', 'add-indicazione-btn': 'add_generic',
+    'i18n-s4-title': 's4_title', 'i18n-s4-label1': 's4_label1', 'i18n-s4-label2': 's4_label2', 'i18n-s4-label3': 's4_label3', 'i18n-s4-label4': 's4_label4', 'i18n-s4-neg': 's4_neg', 'add-referto-btn': 'add_referto',
+    'i18n-s5-title': 's5_title', 'i18n-s5-label1': 's5_label1', 'i18n-s5-label2': 's5_label2', 'i18n-s5-label3': 's5_label3', 'i18n-s5-label4': 's5_label4', 'i18n-s5-label5': 's5_label5', 'i18n-s5-neg': 's5_neg',
+    'save-referto-btn': 'save_changes', 'delete-referto-btn': 'delete_btn',
+    'i18n-s6-title': 's6_title', 'i18n-s6-label1': 's6_label1', 'i18n-s6-label2': 's6_label2', 'i18n-s6-label3': 's6_label3',
+    'save-indicazione-btn': 'save', 'delete-indicazione-btn': 'delete',
+    'btn-reset-data': 'reset_data', 'btn-logout': 'logout'
+  };
+  Object.entries(map).forEach(([id, key]) => {
+    const elm = document.getElementById(id);
+    if (elm) elm.textContent = t(key);
+  });
+  el.reportText.placeholder = t('report_placeholder');
+  document.getElementById('copy-flash').textContent = t('copied');
+  document.getElementById('btn-lang-toggle').textContent = currentLang === 'it' ? 'EN' : 'IT';
+  document.documentElement.lang = currentLang;
+  renderBreadcrumb();
+  renderIndicazione();
+  renderReferto();
+}
+
+document.getElementById('btn-lang-toggle').onclick = () => {
+  currentLang = currentLang === 'it' ? 'en' : 'it';
+  applyLanguage();
+};
+
+document.getElementById('btn-confronto').onclick = () => insertConfronto(CONFRONTO_TEXT[currentLang].confronto);
+document.getElementById('btn-presa-visione').onclick = () => insertConfronto(CONFRONTO_TEXT[currentLang].presaVisione);
+document.getElementById('btn-non-precedenti').onclick = () => insertConfronto(CONFRONTO_TEXT[currentLang].nonPrecedenti);
+
+// ============================================================
+// AUTENTICAZIONE (Supabase)
+// ============================================================
+const loginOverlay = document.getElementById('login-overlay');
+const appRoot = document.getElementById('app-root');
+
+function showLogin(message){
+  loginOverlay.classList.remove('hidden');
+  appRoot.classList.add('hidden');
+  document.getElementById('login-error').textContent = message || '';
+}
+
+async function showApp(){
+  loginOverlay.classList.add('hidden');
+  appRoot.classList.remove('hidden');
+  document.getElementById('user-badge').textContent = currentUser ? currentUser.email : '';
+  DATA = await loadDataFromCloud();
+  state.metodica = null;
+  state.esame = null;
+  indicazioneLines = [];
+  confrontoLine = null;
+  refertoLines = [];
+  refreshAllSettingsSelects();
+  renderAll();
+  composeText();
+  applyLanguage();
+}
+
+document.getElementById('btn-signin').onclick = async () => {
+  if (!supabaseClient){
+    showLogin('Configurazione cloud mancante: inserisci SUPABASE_URL e SUPABASE_ANON_KEY nel codice.');
+    return;
+  }
+  const email = document.getElementById('login-email').value.trim();
+  const password = document.getElementById('login-password').value;
+  const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
+  if (error){
+    document.getElementById('login-error').textContent = error.message;
+    return;
+  }
+  currentUser = data.user;
+  await showApp();
+};
+
+document.getElementById('btn-signup').onclick = async () => {
+  if (!supabaseClient){
+    showLogin('Configurazione cloud mancante: inserisci SUPABASE_URL e SUPABASE_ANON_KEY nel codice.');
+    return;
+  }
+  const email = document.getElementById('login-email').value.trim();
+  const password = document.getElementById('login-password').value;
+  if (!email || !password || password.length < 6){
+    document.getElementById('login-error').textContent = 'Inserisci una email valida e una password di almeno 6 caratteri.';
+    return;
+  }
+  const { data, error } = await supabaseClient.auth.signUp({ email, password });
+  if (error){
+    document.getElementById('login-error').textContent = error.message;
+    return;
+  }
+  if (data.user && !data.session){
+    document.getElementById('login-error').textContent = 'Registrazione avvenuta: controlla la tua email per confermare l\'account, poi accedi.';
+    return;
+  }
+  currentUser = data.user;
+  await showApp();
+};
+
+document.getElementById('btn-logout').onclick = async () => {
+  if (supabaseClient) await supabaseClient.auth.signOut();
+  currentUser = null;
+  showLogin();
+};
+
+// ============================================================
+// AVVIO
+// ============================================================
+(async function init(){
+  if (!supabaseClient){
+    showLogin('Configurazione cloud non ancora impostata. Vedi le istruzioni per completare il collegamento a Supabase.');
+    return;
+  }
+  const { data: { session } } = await supabaseClient.auth.getSession();
+  if (session && session.user){
+    currentUser = session.user;
+    await showApp();
+  } else {
+    showLogin();
+  }
+})();
+</script>
+</body>
+</html>
