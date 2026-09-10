@@ -1,0 +1,1126 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Il mio account — Referti</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<style>
+  :root{
+    --bg: #0a1420;
+    --panel: #101f2c;
+    --panel-alt: #0c1922;
+    --line: #1f3547;
+    --line-soft: #16293a;
+    --ink: #e4edf3;
+    --ink-soft: #7d97a8;
+    --accent: #3aa0d6;
+    --accent-soft: rgba(58,160,214,0.14);
+    --accent-strong: #1c6f96;
+    --accent-dim: #144a63;
+    --amber: #e0a458;
+    --amber-soft: rgba(224,164,88,0.14);
+    --danger: #d16565;
+    --font: Verdana, Geneva, Tahoma, sans-serif;
+    --radius: 3px;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    font-family: var(--font);
+    background: var(--bg);
+    color: var(--ink);
+    min-height:100vh;
+  }
+  .topbar{
+    position:sticky;
+    top:0;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding: 10px 22px;
+    background: var(--panel-alt);
+    border-bottom: 1px solid var(--line);
+    font-size:13px;
+    letter-spacing:.02em;
+    z-index:10;
+  }
+  .brand{
+    font-weight:bold;
+    font-size:14px;
+    display:flex;
+    align-items:center;
+    gap:10px;
+  }
+  .brand .mark{
+    width:20px;height:20px;
+    border:2px solid var(--accent);
+    border-radius:50%;
+    position:relative;
+    flex:none;
+  }
+  .brand .mark::after{
+    content:'';
+    position:absolute; left:50%; top:50%;
+    width:2px; height:12px;
+    background: var(--accent);
+    transform:translate(-50%,-50%);
+  }
+  .brand .mark::before{
+    content:'';
+    position:absolute; left:50%; top:50%;
+    width:12px; height:2px;
+    background: var(--accent);
+    transform:translate(-50%,-50%);
+  }
+  .topbar-right{ display:flex; align-items:center; gap:10px; }
+  .btn-settings{
+    background: transparent;
+    border: 1px solid var(--line);
+    color: var(--ink);
+    font-family: var(--font);
+    font-size:12.5px;
+    padding: 7px 12px;
+    border-radius: var(--radius);
+    cursor:pointer;
+    text-decoration:none;
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+  }
+  .btn-settings:hover{ border-color: var(--accent); color: var(--accent); }
+
+  .page{
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 28px 22px 80px;
+  }
+  .page h1{
+    font-size:18px;
+    margin: 4px 0 22px;
+  }
+  .page h2{
+    font-size:13px;
+    text-transform:uppercase;
+    letter-spacing:.06em;
+    color: var(--ink-soft);
+    margin: 32px 0 12px;
+  }
+  .page h2:first-of-type{ margin-top:0; }
+
+  .card{
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 16px 18px;
+    margin-bottom: 16px;
+  }
+  .plan-row{
+    display:flex;
+    align-items:baseline;
+    gap:8px;
+    font-size:13.5px;
+    margin-bottom:8px;
+  }
+  .plan-badge{
+    display:inline-block;
+    padding:3px 10px;
+    border-radius:999px;
+    background: var(--accent-soft);
+    color: var(--accent);
+    font-size:11.5px;
+    font-weight:bold;
+    text-transform:uppercase;
+    letter-spacing:.04em;
+  }
+  .muted{ color: var(--ink-soft); font-size:12.5px; line-height:1.6; }
+  .field-message{
+    font-size:12px;
+    min-height:16px;
+    margin-top:4px;
+  }
+  .field-message.ok{ color: var(--accent); }
+  .field-message.error{ color: var(--danger); }
+
+  .settings-section{
+    border: 1px solid var(--line-soft);
+    border-radius: var(--radius);
+    padding: 14px 16px;
+    margin-bottom: 14px;
+  }
+  .settings-section h3{
+    margin: 0 0 10px;
+    font-size:12px;
+    text-transform:uppercase;
+    letter-spacing:.05em;
+    color: var(--accent);
+  }
+  .field-row{
+    display:flex;
+    gap:10px;
+    margin-bottom:8px;
+    flex-wrap:wrap;
+    align-items:center;
+  }
+  .field-row label{
+    font-size:11.5px;
+    color: var(--ink-soft);
+    display:block;
+    margin-bottom:4px;
+  }
+  .field{ flex:1; min-width:160px; }
+  select, input[type=text], input[type=email], input[type=password], textarea{
+    width:100%;
+    font-family: var(--font);
+    font-size:13px;
+    padding: 7px 9px;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background: var(--panel-alt);
+    color: var(--ink);
+  }
+  input:disabled{ opacity:.6; }
+  textarea{ resize: vertical; min-height:46px; }
+  .checkbox-row{
+    display:flex;
+    align-items:center;
+    gap:7px;
+    font-size:12.5px;
+    color: var(--ink-soft);
+  }
+  .btn-sm{
+    font-family: var(--font);
+    font-size:12px;
+    font-weight:bold;
+    padding: 7px 13px;
+    border-radius: var(--radius);
+    cursor:pointer;
+    border:1px solid var(--accent);
+    background: transparent;
+    color: var(--accent);
+  }
+  .btn-sm:hover{ background: var(--accent-soft); }
+  .btn-sm.danger{ border-color: var(--danger); color: var(--danger); }
+  .btn-sm.danger:hover{ background: rgba(209,101,101,0.12); }
+  .reset-row{ text-align:right; padding-top:4px; }
+
+  .gate{
+    position:fixed; inset:0;
+    background: var(--bg);
+    display:flex; align-items:center; justify-content:center;
+    font-size:13px; color: var(--ink-soft);
+  }
+  .hidden{ display:none; }
+</style>
+</head>
+<body>
+
+<div class="gate" id="gate">Verifica accesso in corso…</div>
+
+<div id="page-root" class="hidden">
+  <div class="topbar">
+    <div class="brand"><span class="mark"></span> Il mio account</div>
+    <div class="topbar-right">
+      <a class="btn-settings" href="index.html">← Torna al referto</a>
+      <button class="btn-settings" id="btn-logout">Esci</button>
+    </div>
+  </div>
+
+  <div class="page">
+    <h1>Il mio account</h1>
+
+    <h2>Profilo</h2>
+    <div class="card">
+      <div class="field-row">
+        <div class="field">
+          <label>Email</label>
+          <input type="email" id="profile-email" disabled>
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label>Nuova password</label>
+          <input type="password" id="new-password" placeholder="Almeno 6 caratteri">
+        </div>
+        <div class="field">
+          <label>Conferma nuova password</label>
+          <input type="password" id="confirm-password">
+        </div>
+      </div>
+      <div class="field-row">
+        <button class="btn-sm" id="update-password-btn">Aggiorna password</button>
+      </div>
+      <div class="field-message" id="password-message"></div>
+    </div>
+
+    <h2>Abbonamento</h2>
+    <div class="card">
+      <div class="plan-row">
+        <span class="plan-badge">Gratuito</span>
+        <span class="muted">Piano attuale</span>
+      </div>
+      <p class="muted">La gestione degli abbonamenti a pagamento sarà disponibile prossimamente. Quando sarà attiva, potrai gestire da qui il tuo piano e i metodi di pagamento.</p>
+    </div>
+
+    <h2>Personalizzazione referti</h2>
+
+    <div class="settings-section">
+      <h3>Aggiungi metodica</h3>
+      <div class="field-row">
+        <div class="field">
+          <label>Nome metodica</label>
+          <input type="text" id="new-metodica-name" placeholder="es. Mammografia">
+        </div>
+        <button class="btn-sm" id="add-metodica-btn">+ Aggiungi</button>
+      </div>
+    </div>
+
+    <div class="settings-section">
+      <h3>Aggiungi esame (filtrato per metodica)</h3>
+      <div class="field-row">
+        <div class="field">
+          <label>Metodica</label>
+          <select id="new-esame-metodica"></select>
+        </div>
+        <div class="field">
+          <label>Nome esame</label>
+          <input type="text" id="new-esame-name" placeholder="es. RX RACHIDE CERVICALE">
+        </div>
+      </div>
+      <div class="field-row">
+        <button class="btn-sm" id="add-esame-btn">+ Aggiungi esame</button>
+      </div>
+    </div>
+
+    <div class="settings-section">
+      <h3>Elimina esame</h3>
+      <div class="field-row">
+        <div class="field">
+          <label>Esame da eliminare</label>
+          <select id="delete-esame-select"></select>
+        </div>
+        <button class="btn-sm danger" id="delete-esame-btn">Elimina esame</button>
+      </div>
+    </div>
+
+    <div class="settings-section">
+      <h3>Aggiungi indicazione (filtrata per esame)</h3>
+      <div class="field-row">
+        <div class="field">
+          <label>Esame</label>
+          <select id="new-indicazione-esame"></select>
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label>Testo indicazione</label>
+          <input type="text" id="new-indicazione-text" placeholder="es. Trauma">
+        </div>
+        <button class="btn-sm" id="mic-new-indicazione-text" title="Detta">🎤</button>
+        <button class="btn-sm" id="add-indicazione-btn">+ Aggiungi</button>
+      </div>
+    </div>
+
+    <div class="settings-section">
+      <h3>Aggiungi pulsante referto</h3>
+      <div class="field-row">
+        <div class="field">
+          <label>Esame</label>
+          <select id="new-referto-esame"></select>
+        </div>
+        <div class="field">
+          <label>Gruppo / distretto</label>
+          <input type="text" id="new-referto-group" placeholder="es. Parenchima">
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label>Etichetta pulsante</label>
+          <input type="text" id="new-referto-label" placeholder="es. Nella norma">
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label>Testo inserito nel referto</label>
+          <textarea id="new-referto-text" placeholder="es. Non si evidenziano alterazioni significative."></textarea>
+        </div>
+        <button class="btn-sm" id="mic-new-referto-text" title="Detta">🎤</button>
+      </div>
+      <div class="field-row">
+        <div class="checkbox-row">
+          <input type="checkbox" id="new-referto-neg">
+          <label for="new-referto-neg" style="margin:0;">Segna come reperto da approfondire</label>
+        </div>
+        <button class="btn-sm" id="add-referto-btn">+ Aggiungi pulsante</button>
+      </div>
+    </div>
+
+    <div class="settings-section">
+      <h3>Modifica o elimina un pulsante di referto</h3>
+      <div class="field-row">
+        <div class="field">
+          <label>Esame</label>
+          <select id="edit-referto-esame"></select>
+        </div>
+        <div class="field">
+          <label>Gruppo</label>
+          <select id="edit-referto-group"></select>
+        </div>
+        <div class="field">
+          <label>Pulsante</label>
+          <select id="edit-referto-button"></select>
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label>Etichetta pulsante</label>
+          <input type="text" id="edit-referto-label">
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label>Testo inserito nel referto</label>
+          <textarea id="edit-referto-text"></textarea>
+        </div>
+        <button class="btn-sm" id="mic-edit-referto-text" title="Detta">🎤</button>
+      </div>
+      <div class="field-row">
+        <div class="checkbox-row">
+          <input type="checkbox" id="edit-referto-neg">
+          <label for="edit-referto-neg" style="margin:0;">Segna come reperto da approfondire</label>
+        </div>
+        <button class="btn-sm" id="save-referto-btn">Salva modifiche</button>
+        <button class="btn-sm danger" id="delete-referto-btn">Elimina pulsante</button>
+      </div>
+    </div>
+
+    <div class="settings-section">
+      <h3>Modifica o elimina un'indicazione</h3>
+      <div class="field-row">
+        <div class="field">
+          <label>Esame</label>
+          <select id="edit-indicazione-esame"></select>
+        </div>
+        <div class="field">
+          <label>Indicazione</label>
+          <select id="edit-indicazione-item"></select>
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label>Nuovo testo</label>
+          <input type="text" id="edit-indicazione-text">
+        </div>
+        <button class="btn-sm" id="mic-edit-indicazione-text" title="Detta">🎤</button>
+        <button class="btn-sm" id="save-indicazione-btn">Salva</button>
+        <button class="btn-sm danger" id="delete-indicazione-btn">Elimina</button>
+      </div>
+    </div>
+
+    <div class="reset-row">
+      <button class="btn-sm danger" id="btn-reset-data">Ripristina impostazioni predefinite</button>
+    </div>
+
+  </div>
+</div>
+
+<script>
+// ============================================================
+// DATI DI DEFAULT (identici a index.html)
+// ============================================================
+const DEFAULT_DATA = {
+  metodiche: ['Ecografia', 'RX', 'TC', 'RMN'],
+
+  esamiByMetodica: {
+    'RX': [
+      'RX TORACE 2PR',
+      'RX TORACE AP supino',
+      'RX ADDOME',
+      'RX RACHIDE LOMBOSACRALE',
+      'RX BACINO',
+      'RX GINOCCHIO',
+      'RX SPALLA',
+      'RX POLSO',
+      'RX CAVIGLIA',
+      'RX RACHIDE CERVICALE'
+    ],
+    'Ecografia': [
+      'ECOGRAFIA ADDOME COMPLETO',
+      'ECOGRAFIA TIROIDE',
+      'ECOGRAFIA ADDOME SUPERIORE',
+      'ECOGRAFIA RENALE E VESCICALE',
+      'ECOGRAFIA PARTI MOLLI',
+      'ECOCOLORDOPPLER ARTI INFERIORI VENOSO',
+      'ECOGRAFIA SCROTALE',
+      'ECOGRAFIA MAMMARIA'
+    ],
+    'TC': [
+      'TC TORACE',
+      'TC ADDOME COMPLETO',
+      'TC ADDOME SENZA E CON MDC',
+      'TC TORACE ADDOME PELVI (STADIAZIONE)',
+      'TC RACHIDE LOMBOSACRALE',
+      'TC BACINO',
+      'TC COLONNA CERVICALE',
+      'TC ANGIOGRAFIA AORTA'
+    ],
+    'RMN': [
+      'RMN RACHIDE LOMBOSACRALE',
+      'RMN GINOCCHIO',
+      'RMN SPALLA',
+      'RMN ADDOME SUPERIORE',
+      'RMN BACINO',
+      'RMN RACHIDE CERVICALE',
+      'RMN ENCEFALO'
+    ]
+  },
+
+  indicazioniByEsame: {
+    'RX TORACE 2PR': ['Tosse persistente', 'Dispnea', 'Dolore toracico', 'Follow-up oncologico', 'Inquadramento preoperatorio'],
+    'RX TORACE AP supino': ['Controllo post-procedurale', 'Paziente non collaborante', 'Monitoraggio in reparto'],
+    'RX ADDOME': ['Dolore addominale', 'Sospetta occlusione', 'Ricerca corpo estraneo'],
+    'RX RACHIDE LOMBOSACRALE': ['Lombalgia', 'Trauma', 'Sospetto cedimento vertebrale'],
+    'RX BACINO': ['Trauma', 'Coxalgia'],
+    'RX GINOCCHIO': ['Trauma', 'Gonalgia', 'Sospetta gonartrosi'],
+    'RX SPALLA': ['Trauma', 'Dolore', 'Limitazione funzionale'],
+    'RX POLSO': ['Trauma', 'Dolore'],
+    'RX CAVIGLIA': ['Trauma', 'Dolore'],
+    'RX RACHIDE CERVICALE': ['Trauma', 'Cervicalgia'],
+
+    'ECOGRAFIA ADDOME COMPLETO': ['Dolore addominale', 'Alterazione indici epatici', 'Follow-up'],
+    'ECOGRAFIA TIROIDE': ['Riscontro di nodulo palpabile', 'Controllo periodico', 'Familiarità per patologia tiroidea'],
+    'ECOGRAFIA ADDOME SUPERIORE': ['Dolore ipocondrio destro', 'Alterazione indici epatici'],
+    'ECOGRAFIA RENALE E VESCICALE': ['Dolore lombare', 'Ematuria', 'Controllo'],
+    'ECOGRAFIA PARTI MOLLI': ['Tumefazione palpabile', 'Dolore localizzato'],
+    'ECOCOLORDOPPLER ARTI INFERIORI VENOSO': ['Sospetta trombosi venosa profonda', 'Edema arto'],
+    'ECOGRAFIA SCROTALE': ['Dolore scrotale', 'Tumefazione palpabile'],
+    'ECOGRAFIA MAMMARIA': ['Riscontro di nodulo palpabile', 'Controllo'],
+
+    'TC TORACE': ['Stadiazione oncologica', 'Sospetta embolia polmonare', 'Dispnea ingravescente'],
+    'TC ADDOME COMPLETO': ['Dolore addominale acuto', 'Stadiazione neoplastica', 'Follow-up post-chirurgico'],
+    'TC ADDOME SENZA E CON MDC': ['Dolore addominale', 'Sospetta neoplasia'],
+    'TC TORACE ADDOME PELVI (STADIAZIONE)': ['Stadiazione oncologica', 'Follow-up oncologico'],
+    'TC RACHIDE LOMBOSACRALE': ['Lombalgia', 'Sospetta ernia discale'],
+    'TC BACINO': ['Trauma', 'Coxalgia'],
+    'TC COLONNA CERVICALE': ['Trauma'],
+    'TC ANGIOGRAFIA AORTA': ['Sospetta dissezione aortica', 'Follow-up aneurisma'],
+
+    'RMN RACHIDE LOMBOSACRALE': ['Lombalgia', 'Sciatalgia', 'Sospetta ernia discale'],
+    'RMN GINOCCHIO': ['Gonalgia', 'Trauma', 'Sospetta lesione meniscale'],
+    'RMN SPALLA': ['Dolore', 'Sospetta lesione della cuffia dei rotatori'],
+    'RMN ADDOME SUPERIORE': ['Riscontro incidentale di lesione epatica', 'Studio delle vie biliari'],
+    'RMN BACINO': ['Coxalgia', 'Sospetta necrosi avascolare'],
+    'RMN RACHIDE CERVICALE': ['Cervicalgia', 'Cervicobrachialgia'],
+    'RMN ENCEFALO': ['Cefalea persistente', 'Sospetta lesione ischemica', 'Vertigini']
+  },
+
+  refertoByEsame: {
+    'RX TORACE 2PR': {
+      'Parenchima': [
+        { label: 'Parenchima nella norma', text: 'Non addensamenti parenchimali a focolaio.', neg: false },
+        { label: 'Addensamento', text: 'Addensamento parenchimale in sede da definire con approfondimento clinico-radiologico.', neg: true }
+      ],
+      'Pleura': [
+        { label: 'Pleura libera', text: 'Non versamento pleurico bilateralmente.', neg: false }
+      ],
+      'Cuore e mediastino': [
+        { label: 'Cuore nella norma', text: 'Ombra cardiaca di dimensioni e morfologia nei limiti della norma.', neg: false },
+        { label: 'Mediastino nella norma', text: 'Mediastino in asse, di ampiezza regolare.', neg: false }
+      ],
+      'Scheletro': [
+        { label: 'Scheletro indenne', text: 'Non evidenti lesioni ossee focali a carico dello scheletro toracico in esame.', neg: false }
+      ]
+    },
+    'RX TORACE AP supino': {
+      'Parenchima': [
+        { label: 'Nella norma', text: 'Non evidenti addensamenti parenchimali focali, con i limiti intrinseci della proiezione singola in AP.', neg: false }
+      ],
+      'Presidi': [
+        { label: 'Presidi in sede', text: 'Presidi (CVC/SNG/drenaggi), ove presenti, in sede regolare.', neg: false }
+      ]
+    },
+    'RX ADDOME': {
+      'Gas intestinale': [
+        { label: 'Distribuzione regolare', text: 'Non evidenza di livelli idroaerei significativi.', neg: false }
+      ],
+      'Calcificazioni': [
+        { label: 'Assenti', text: 'Non calcificazioni patologiche in proiezione addominale.', neg: false }
+      ],
+      'Profili ossei': [
+        { label: 'Nella norma', text: 'Profili ossei del bacino e del rachide in esame nella norma.', neg: false }
+      ]
+    },
+    'RX RACHIDE LOMBOSACRALE': {
+      'Corpi vertebrali': [
+        { label: 'Nella norma', text: 'Non evidenti alterazioni di forma e struttura dei corpi vertebrali in esame.', neg: false }
+      ]
+    },
+    'RX BACINO': {
+      'Reperto': [
+        { label: 'Nella norma', text: 'Non evidenti rime di frattura né alterazioni strutturali a carico del bacino in esame.', neg: false }
+      ]
+    },
+    'RX GINOCCHIO': {
+      'Reperto': [
+        { label: 'Nella norma', text: 'Non evidenti esiti post-traumatici recenti; rime articolari conservate.', neg: false }
+      ]
+    },
+    'RX SPALLA': {
+      'Reperto': [
+        { label: 'Nella norma', text: 'Non evidenti alterazioni ossee focali; profilo articolare regolare.', neg: false }
+      ]
+    },
+    'RX POLSO': {
+      'Reperto': [
+        { label: 'Nella norma', text: 'Non rime di frattura; rapporti articolari conservati.', neg: false }
+      ]
+    },
+    'RX CAVIGLIA': {
+      'Reperto': [
+        { label: 'Nella norma', text: 'Non evidenti rime di frattura; mortasa tibio-astragalica congrua.', neg: false }
+      ]
+    },
+    'RX RACHIDE CERVICALE': {
+      'Corpi vertebrali': [
+        { label: 'Nella norma', text: 'Non evidenti alterazioni di forma e allineamento dei corpi vertebrali cervicali.', neg: false }
+      ]
+    },
+
+    'ECOGRAFIA ADDOME COMPLETO': {
+      'Fegato': [
+        { label: 'Fegato nella norma', text: 'Fegato di dimensioni ed ecostruttura nei limiti della norma.', neg: false }
+      ],
+      'Colecisti e vie biliari': [
+        { label: 'Nella norma', text: 'Colecisti alitiasica a pareti regolari; vie biliari non dilatate.', neg: false }
+      ],
+      'Reni': [
+        { label: 'Reni nella norma', text: 'Reni di dimensioni e morfologia conservate, senza dilatazione delle vie escretrici.', neg: false }
+      ]
+    },
+    'ECOGRAFIA TIROIDE': {
+      'Parenchima tiroideo': [
+        { label: 'Ecostruttura omogenea', text: 'Ghiandola tiroidea in sede, di dimensioni nella norma ed ecostruttura omogenea.', neg: false }
+      ],
+      'Noduli': [
+        { label: 'Non noduli', text: 'Non si evidenziano formazioni nodulari focali.', neg: false }
+      ]
+    },
+    'ECOGRAFIA ADDOME SUPERIORE': {
+      'Fegato e vie biliari': [
+        { label: 'Nella norma', text: 'Fegato, colecisti e vie biliari nei limiti della norma.', neg: false }
+      ]
+    },
+    'ECOGRAFIA RENALE E VESCICALE': {
+      'Reni e vescica': [
+        { label: 'Nella norma', text: 'Reni e vescica nei limiti della norma, senza dilatazione delle vie escretrici.', neg: false }
+      ]
+    },
+    'ECOGRAFIA PARTI MOLLI': {
+      'Reperto': [
+        { label: 'Nella norma', text: 'Non evidenti raccolte né lesioni focali nei tessuti molli in esame.', neg: false }
+      ]
+    },
+    'ECOCOLORDOPPLER ARTI INFERIORI VENOSO': {
+      'Asse venoso': [
+        { label: 'Nella norma', text: 'Pervietà e comprimibilità conservate dell’asse venoso profondo in esame; non segni di trombosi.', neg: false }
+      ]
+    },
+    'ECOGRAFIA SCROTALE': {
+      'Testicoli': [
+        { label: 'Nella norma', text: 'Testicoli in sede, di dimensioni ed ecostruttura nella norma.', neg: false }
+      ]
+    },
+    'ECOGRAFIA MAMMARIA': {
+      'Parenchima ghiandolare': [
+        { label: 'Nella norma', text: 'Parenchima ghiandolare privo di formazioni focali sospette.', neg: false }
+      ]
+    },
+
+    'TC TORACE': {
+      'Parenchima polmonare': [
+        { label: 'Nella norma', text: 'Parenchima polmonare privo di alterazioni densitometriche focali.', neg: false }
+      ],
+      'Linfonodi': [
+        { label: 'Non linfoadenopatie', text: 'Non linfoadenopatie mediastiniche o ilari di rilievo dimensionale.', neg: false }
+      ]
+    },
+    'TC ADDOME COMPLETO': {
+      'Fegato e vie biliari': [
+        { label: 'Nella norma', text: 'Fegato di dimensioni e densità nei limiti, privo di lesioni focali.', neg: false }
+      ],
+      'Linfonodi': [
+        { label: 'Non linfoadenopatie', text: 'Non linfoadenopatie retroperitoneali di rilievo dimensionale.', neg: false }
+      ]
+    },
+    'TC ADDOME SENZA E CON MDC': {
+      'Organi parenchimatosi': [
+        { label: 'Nella norma', text: 'Fegato, milza, pancreas e reni nei limiti della norma per morfologia e densitometria.', neg: false }
+      ]
+    },
+    'TC TORACE ADDOME PELVI (STADIAZIONE)': {
+      'Reperto generale': [
+        { label: 'Non secondarismi', text: 'Non evidenza di lesioni secondarie a distanza nei distretti esaminati.', neg: false }
+      ]
+    },
+    'TC RACHIDE LOMBOSACRALE': {
+      'Reperto': [
+        { label: 'Nella norma', text: 'Non evidenti alterazioni ossee significative; canale vertebrale pervio.', neg: false }
+      ]
+    },
+    'TC BACINO': {
+      'Reperto': [
+        { label: 'Nella norma', text: 'Non rime di frattura; strutture articolari conservate.', neg: false }
+      ]
+    },
+    'TC COLONNA CERVICALE': {
+      'Reperto': [
+        { label: 'Nella norma', text: 'Non evidenti rime di frattura né dislocazioni vertebrali.', neg: false }
+      ]
+    },
+    'TC ANGIOGRAFIA AORTA': {
+      'Aorta': [
+        { label: 'Nella norma', text: 'Aorta toracica e addominale di calibro regolare, senza segni di dissezione né ectasie significative.', neg: false }
+      ]
+    },
+
+    'RMN RACHIDE LOMBOSACRALE': {
+      'Dischi intervertebrali': [
+        { label: 'Nella norma', text: 'Dischi intervertebrali di segnale e altezza conservati ai livelli esaminati.', neg: false }
+      ],
+      'Canale vertebrale': [
+        { label: 'Pervio', text: 'Canale vertebrale di ampiezza conservata, privo di stenosi significative.', neg: false }
+      ]
+    },
+    'RMN GINOCCHIO': {
+      'Menischi e legamenti': [
+        { label: 'Nella norma', text: 'Menischi e legamenti crociati privi di alterazioni di segnale significative.', neg: false }
+      ]
+    },
+    'RMN SPALLA': {
+      'Cuffia dei rotatori': [
+        { label: 'Integra', text: 'Cuffia dei rotatori integra, senza alterazioni di segnale.', neg: false }
+      ]
+    },
+    'RMN ADDOME SUPERIORE': {
+      'Fegato e vie biliari': [
+        { label: 'Nella norma', text: 'Fegato e vie biliari nei limiti della norma.', neg: false }
+      ]
+    },
+    'RMN BACINO': {
+      'Teste femorali': [
+        { label: 'Nella norma', text: 'Teste femorali di segnale conservato, senza segni di necrosi avascolare.', neg: false }
+      ]
+    },
+    'RMN RACHIDE CERVICALE': {
+      'Dischi intervertebrali': [
+        { label: 'Nella norma', text: 'Dischi intervertebrali cervicali di segnale e altezza conservati.', neg: false }
+      ]
+    },
+    'RMN ENCEFALO': {
+      'Parenchima encefalico': [
+        { label: 'Nella norma', text: 'Non alterazioni di segnale focali del parenchima encefalico sovra- e sottotentoriale.', neg: false }
+      ],
+      'Sistema ventricolare': [
+        { label: 'Nella norma', text: 'Sistema ventricolare in asse, di ampiezza nei limiti della norma per età.', neg: false }
+      ]
+    }
+  }
+};
+
+// ============================================================
+// CONFIGURAZIONE SUPABASE (identica a index.html)
+// ============================================================
+const SUPABASE_URL = 'https://umejthggxihtyqvcszgm.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVtZWp0aGdneGlodHlxdmNzemdtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODg4NzI0MzEsImV4cCI6MjEwNDQ0ODQzMX0.BPaujgB70aLpWSifk5nH93fuyyyfOe8Uw4RupV1YQQE';
+const supabaseClient = (window.supabase && SUPABASE_URL.indexOf('INSERISCI') === -1)
+  ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+  : null;
+
+let DATA = JSON.parse(JSON.stringify(DEFAULT_DATA));
+let currentUser = null;
+let persistTimer = null;
+
+function localCloneDefault(){
+  return JSON.parse(JSON.stringify(DEFAULT_DATA));
+}
+
+async function loadDataFromCloud(){
+  if (!supabaseClient || !currentUser) return localCloneDefault();
+  try{
+    const { data, error } = await supabaseClient
+      .from('user_data')
+      .select('data')
+      .eq('user_id', currentUser.id)
+      .maybeSingle();
+    if (error) throw error;
+    if (data && data.data) return data.data;
+  }catch(e){ console.warn('Impossibile caricare i dati dal cloud, uso i default.', e); }
+  return localCloneDefault();
+}
+
+function persist(){
+  if (!supabaseClient || !currentUser) return;
+  clearTimeout(persistTimer);
+  persistTimer = setTimeout(async () => {
+    try{
+      await supabaseClient.from('user_data').upsert({
+        user_id: currentUser.id,
+        data: DATA,
+        updated_at: new Date().toISOString()
+      });
+    }catch(e){ console.warn('Impossibile salvare i dati sul cloud.', e); }
+  }, 500);
+}
+
+// ============================================================
+// PERSONALIZZAZIONE — utility per i menu a tendina
+// ============================================================
+function allEsami(){
+  const out = [];
+  DATA.metodiche.forEach(m => {
+    (DATA.esamiByMetodica[m] || []).forEach(e => out.push({ esame: e, metodica: m }));
+  });
+  return out;
+}
+
+function fillSelect(selectEl, items, placeholder){
+  selectEl.innerHTML = '';
+  if (placeholder){
+    const opt = document.createElement('option');
+    opt.value = '';
+    opt.textContent = placeholder;
+    opt.disabled = true;
+    opt.selected = true;
+    selectEl.appendChild(opt);
+  }
+  items.forEach(({ value, label }) => {
+    const opt = document.createElement('option');
+    opt.value = value;
+    opt.textContent = label;
+    selectEl.appendChild(opt);
+  });
+}
+
+function refreshAllSettingsSelects(){
+  fillSelect(document.getElementById('new-esame-metodica'),
+    DATA.metodiche.map(m => ({ value: m, label: m })));
+
+  const esamiOptions = allEsami().map(({esame, metodica}) => ({ value: esame, label: metodica + ' — ' + esame }));
+
+  fillSelect(document.getElementById('new-indicazione-esame'), esamiOptions, esamiOptions.length ? null : 'Nessun esame disponibile');
+  fillSelect(document.getElementById('new-referto-esame'), esamiOptions, esamiOptions.length ? null : 'Nessun esame disponibile');
+  fillSelect(document.getElementById('edit-referto-esame'), esamiOptions, esamiOptions.length ? null : 'Nessun esame disponibile');
+  fillSelect(document.getElementById('edit-indicazione-esame'), esamiOptions, esamiOptions.length ? null : 'Nessun esame disponibile');
+  fillSelect(document.getElementById('delete-esame-select'), esamiOptions, esamiOptions.length ? null : 'Nessun esame disponibile');
+
+  refreshEditRefertoGroups();
+  refreshEditIndicazioneItems();
+}
+
+function refreshEditRefertoGroups(){
+  const esame = document.getElementById('edit-referto-esame').value;
+  const groups = (DATA.refertoByEsame[esame]) ? Object.keys(DATA.refertoByEsame[esame]) : [];
+  fillSelect(document.getElementById('edit-referto-group'), groups.map(g => ({ value: g, label: g })), groups.length ? null : 'Nessun gruppo');
+  refreshEditRefertoButtons();
+}
+
+function refreshEditRefertoButtons(){
+  const esame = document.getElementById('edit-referto-esame').value;
+  const group = document.getElementById('edit-referto-group').value;
+  const buttons = (DATA.refertoByEsame[esame] && DATA.refertoByEsame[esame][group]) ? DATA.refertoByEsame[esame][group] : [];
+  fillSelect(document.getElementById('edit-referto-button'), buttons.map((b, i) => ({ value: i, label: b.label })), buttons.length ? null : 'Nessun pulsante');
+  loadEditRefertoFields();
+}
+
+function loadEditRefertoFields(){
+  const esame = document.getElementById('edit-referto-esame').value;
+  const group = document.getElementById('edit-referto-group').value;
+  const idx = document.getElementById('edit-referto-button').value;
+  const labelInput = document.getElementById('edit-referto-label');
+  const textInput = document.getElementById('edit-referto-text');
+  const negInput = document.getElementById('edit-referto-neg');
+  const btn = (DATA.refertoByEsame[esame] && DATA.refertoByEsame[esame][group] && DATA.refertoByEsame[esame][group][idx]) || null;
+  if (btn){
+    labelInput.value = btn.label;
+    textInput.value = btn.text;
+    negInput.checked = !!btn.neg;
+  } else {
+    labelInput.value = '';
+    textInput.value = '';
+    negInput.checked = false;
+  }
+}
+
+function refreshEditIndicazioneItems(){
+  const esame = document.getElementById('edit-indicazione-esame').value;
+  const list = DATA.indicazioniByEsame[esame] || [];
+  fillSelect(document.getElementById('edit-indicazione-item'), list.map((t, i) => ({ value: i, label: t })), list.length ? null : 'Nessuna indicazione');
+  loadEditIndicazioneField();
+}
+
+function loadEditIndicazioneField(){
+  const esame = document.getElementById('edit-indicazione-esame').value;
+  const idx = document.getElementById('edit-indicazione-item').value;
+  const input = document.getElementById('edit-indicazione-text');
+  const list = DATA.indicazioniByEsame[esame] || [];
+  input.value = (idx !== '' && list[idx] !== undefined) ? list[idx] : '';
+}
+
+// ============================================================
+// PERSONALIZZAZIONE — azioni
+// ============================================================
+document.getElementById('add-metodica-btn').onclick = () => {
+  const input = document.getElementById('new-metodica-name');
+  const name = input.value.trim();
+  if (!name) return;
+  if (!DATA.metodiche.includes(name)){
+    DATA.metodiche.push(name);
+    DATA.esamiByMetodica[name] = DATA.esamiByMetodica[name] || [];
+  }
+  input.value = '';
+  persist();
+  refreshAllSettingsSelects();
+};
+
+document.getElementById('add-esame-btn').onclick = () => {
+  const metodica = document.getElementById('new-esame-metodica').value;
+  const input = document.getElementById('new-esame-name');
+  const name = input.value.trim();
+  if (!metodica || !name) return;
+  DATA.esamiByMetodica[metodica] = DATA.esamiByMetodica[metodica] || [];
+  if (!DATA.esamiByMetodica[metodica].includes(name)){
+    DATA.esamiByMetodica[metodica].push(name);
+  }
+  input.value = '';
+  persist();
+  refreshAllSettingsSelects();
+};
+
+document.getElementById('delete-esame-btn').onclick = () => {
+  const esame = document.getElementById('delete-esame-select').value;
+  if (!esame) return;
+  if (!confirm('Eliminare l\'esame "' + esame + '"? Verranno eliminate anche tutte le indicazioni e i pulsanti di referto associati a questo esame.')) return;
+
+  DATA.metodiche.forEach(m => {
+    if (DATA.esamiByMetodica[m]){
+      DATA.esamiByMetodica[m] = DATA.esamiByMetodica[m].filter(e => e !== esame);
+    }
+  });
+  delete DATA.indicazioniByEsame[esame];
+  delete DATA.refertoByEsame[esame];
+
+  persist();
+  refreshAllSettingsSelects();
+};
+
+document.getElementById('add-indicazione-btn').onclick = () => {
+  const esame = document.getElementById('new-indicazione-esame').value;
+  const input = document.getElementById('new-indicazione-text');
+  const text = input.value.trim();
+  if (!esame || !text) return;
+  DATA.indicazioniByEsame[esame] = DATA.indicazioniByEsame[esame] || [];
+  DATA.indicazioniByEsame[esame].push(text);
+  input.value = '';
+  persist();
+  refreshAllSettingsSelects();
+};
+
+document.getElementById('add-referto-btn').onclick = () => {
+  const esame = document.getElementById('new-referto-esame').value;
+  const group = document.getElementById('new-referto-group').value.trim();
+  const label = document.getElementById('new-referto-label').value.trim();
+  const text = document.getElementById('new-referto-text').value.trim();
+  const neg = document.getElementById('new-referto-neg').checked;
+  if (!esame || !group || !label || !text) return;
+  DATA.refertoByEsame[esame] = DATA.refertoByEsame[esame] || {};
+  DATA.refertoByEsame[esame][group] = DATA.refertoByEsame[esame][group] || [];
+  DATA.refertoByEsame[esame][group].push({ label, text, neg });
+
+  document.getElementById('new-referto-group').value = '';
+  document.getElementById('new-referto-label').value = '';
+  document.getElementById('new-referto-text').value = '';
+  document.getElementById('new-referto-neg').checked = false;
+
+  persist();
+  refreshAllSettingsSelects();
+};
+
+document.getElementById('edit-referto-esame').addEventListener('change', refreshEditRefertoGroups);
+document.getElementById('edit-referto-group').addEventListener('change', refreshEditRefertoButtons);
+document.getElementById('edit-referto-button').addEventListener('change', loadEditRefertoFields);
+
+document.getElementById('save-referto-btn').onclick = () => {
+  const esame = document.getElementById('edit-referto-esame').value;
+  const group = document.getElementById('edit-referto-group').value;
+  const idx = document.getElementById('edit-referto-button').value;
+  if (!esame || !group || idx === '') return;
+  const btn = DATA.refertoByEsame[esame] && DATA.refertoByEsame[esame][group] && DATA.refertoByEsame[esame][group][idx];
+  if (!btn) return;
+  btn.label = document.getElementById('edit-referto-label').value.trim() || btn.label;
+  btn.text = document.getElementById('edit-referto-text').value.trim() || btn.text;
+  btn.neg = document.getElementById('edit-referto-neg').checked;
+  persist();
+  refreshEditRefertoButtons();
+};
+
+document.getElementById('delete-referto-btn').onclick = () => {
+  const esame = document.getElementById('edit-referto-esame').value;
+  const group = document.getElementById('edit-referto-group').value;
+  const idx = document.getElementById('edit-referto-button').value;
+  if (!esame || !group || idx === '') return;
+  DATA.refertoByEsame[esame][group].splice(idx, 1);
+  if (DATA.refertoByEsame[esame][group].length === 0){
+    delete DATA.refertoByEsame[esame][group];
+  }
+  persist();
+  refreshEditRefertoGroups();
+};
+
+document.getElementById('edit-indicazione-esame').addEventListener('change', refreshEditIndicazioneItems);
+document.getElementById('edit-indicazione-item').addEventListener('change', loadEditIndicazioneField);
+
+document.getElementById('save-indicazione-btn').onclick = () => {
+  const esame = document.getElementById('edit-indicazione-esame').value;
+  const idx = document.getElementById('edit-indicazione-item').value;
+  const newText = document.getElementById('edit-indicazione-text').value.trim();
+  if (!esame || idx === '' || !newText) return;
+  DATA.indicazioniByEsame[esame][idx] = newText;
+  persist();
+  refreshEditIndicazioneItems();
+};
+
+document.getElementById('delete-indicazione-btn').onclick = () => {
+  const esame = document.getElementById('edit-indicazione-esame').value;
+  const idx = document.getElementById('edit-indicazione-item').value;
+  if (!esame || idx === '') return;
+  DATA.indicazioniByEsame[esame].splice(idx, 1);
+  persist();
+  refreshEditIndicazioneItems();
+};
+
+document.getElementById('btn-reset-data').onclick = () => {
+  if (!confirm('Ripristinare tutti i dati ai valori predefiniti? Le personalizzazioni aggiunte andranno perse.')) return;
+  DATA = JSON.parse(JSON.stringify(DEFAULT_DATA));
+  persist();
+  refreshAllSettingsSelects();
+};
+
+// ============================================================
+// DETTATURA VOCALE (Web Speech API) — stessi campi di testo libero
+// ============================================================
+const SpeechRecognitionCtor = window.SpeechRecognition || window.webkitSpeechRecognition || null;
+
+function createMicHandler(getTargetEl, btnEl){
+  let recognition = null;
+  let recording = false;
+  btnEl.addEventListener('click', () => {
+    const target = getTargetEl();
+    if (!target) return;
+    if (!SpeechRecognitionCtor){
+      alert('La dettatura vocale non è supportata da questo browser. Usa Chrome o Edge.');
+      return;
+    }
+    if (recording){
+      recognition && recognition.stop();
+      return;
+    }
+    recognition = new SpeechRecognitionCtor();
+    recognition.lang = 'it-IT';
+    recognition.continuous = true;
+    recognition.interimResults = false;
+    recognition.onresult = (e) => {
+      let finalText = '';
+      for (let i = e.resultIndex; i < e.results.length; i++){
+        if (e.results[i].isFinal) finalText += e.results[i][0].transcript;
+      }
+      finalText = finalText.trim();
+      if (finalText){
+        const needsSpace = target.value && !/[\s\n]$/.test(target.value);
+        target.value = target.value + (needsSpace ? ' ' : '') + finalText + ' ';
+      }
+    };
+    recognition.onerror = (e) => {
+      recording = false;
+      btnEl.classList.remove('recording');
+      const messages = {
+        'not-allowed': 'Permesso al microfono negato. Controlla le impostazioni del sito nel browser.',
+        'no-speech': 'Non ho sentito nulla. Riprova.',
+        'audio-capture': 'Nessun microfono trovato.',
+        'network': 'La dettatura richiede una connessione internet attiva.'
+      };
+      if (messages[e.error]) alert(messages[e.error]);
+    };
+    recognition.onend = () => {
+      recording = false;
+      btnEl.classList.remove('recording');
+    };
+    try{
+      recognition.start();
+      recording = true;
+    }catch(err){ console.warn('Impossibile avviare la dettatura:', err); }
+  });
+}
+
+createMicHandler(() => document.getElementById('new-indicazione-text'), document.getElementById('mic-new-indicazione-text'));
+createMicHandler(() => document.getElementById('new-referto-text'), document.getElementById('mic-new-referto-text'));
+createMicHandler(() => document.getElementById('edit-referto-text'), document.getElementById('mic-edit-referto-text'));
+createMicHandler(() => document.getElementById('edit-indicazione-text'), document.getElementById('mic-edit-indicazione-text'));
+
+// ============================================================
+// PROFILO
+// ============================================================
+document.getElementById('update-password-btn').onclick = async () => {
+  const pw1 = document.getElementById('new-password').value;
+  const pw2 = document.getElementById('confirm-password').value;
+  const msg = document.getElementById('password-message');
+  msg.className = 'field-message';
+  if (pw1.length < 6){
+    msg.textContent = 'La password deve avere almeno 6 caratteri.';
+    msg.classList.add('error');
+    return;
+  }
+  if (pw1 !== pw2){
+    msg.textContent = 'Le due password non coincidono.';
+    msg.classList.add('error');
+    return;
+  }
+  const { error } = await supabaseClient.auth.updateUser({ password: pw1 });
+  if (error){
+    msg.textContent = error.message;
+    msg.classList.add('error');
+    return;
+  }
+  msg.textContent = 'Password aggiornata correttamente.';
+  msg.classList.add('ok');
+  document.getElementById('new-password').value = '';
+  document.getElementById('confirm-password').value = '';
+};
+
+document.getElementById('btn-logout').onclick = async () => {
+  if (supabaseClient) await supabaseClient.auth.signOut();
+  window.location.href = 'index.html';
+};
+
+// ============================================================
+// AVVIO — richiede una sessione valida, altrimenti torna a index.html
+// ============================================================
+(async function init(){
+  if (!supabaseClient){
+    document.getElementById('gate').textContent = 'Configurazione cloud mancante.';
+    return;
+  }
+  const { data: { session } } = await supabaseClient.auth.getSession();
+  if (!session || !session.user){
+    window.location.href = 'index.html';
+    return;
+  }
+  currentUser = session.user;
+  document.getElementById('profile-email').value = currentUser.email || '';
+  DATA = await loadDataFromCloud();
+  refreshAllSettingsSelects();
+  document.getElementById('gate').classList.add('hidden');
+  document.getElementById('page-root').classList.remove('hidden');
+})();
+</script>
+</body>
+</html>
