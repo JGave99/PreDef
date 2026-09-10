@@ -204,6 +204,41 @@
   .btn-sm.danger:hover{ background: rgba(209,101,101,0.12); }
   .reset-row{ text-align:right; padding-top:4px; }
 
+  .ai-voce-item{
+    border: 1px solid var(--line-soft);
+    border-left: 3px solid var(--accent);
+    border-radius: var(--radius);
+    padding: 10px 12px;
+    margin-bottom: 8px;
+    background: var(--panel-alt);
+  }
+  .ai-voce-item.neg{ border-left-color: var(--amber); }
+  .ai-voce-item.added{ opacity:.45; }
+  .ai-voce-item .voce-row{
+    display:flex;
+    gap:8px;
+    margin-bottom:6px;
+    flex-wrap:wrap;
+  }
+  .ai-voce-item .voce-row input, .ai-voce-item .voce-row textarea{
+    flex:1;
+    min-width:140px;
+  }
+  .ai-voce-actions{
+    display:flex;
+    gap:8px;
+    justify-content:flex-end;
+  }
+  .ai-warning{
+    background: var(--amber-soft);
+    border: 1px solid var(--amber);
+    color: var(--amber);
+    border-radius: var(--radius);
+    padding: 8px 12px;
+    font-size:12.5px;
+    margin-bottom:12px;
+  }
+
   .gate{
     position:fixed; inset:0;
     background: var(--bg);
@@ -260,6 +295,45 @@
         <span class="muted">Piano attuale</span>
       </div>
       <p class="muted">La gestione degli abbonamenti a pagamento sarà disponibile prossimamente. Quando sarà attiva, potrai gestire da qui il tuo piano e i metodi di pagamento.</p>
+    </div>
+
+    <h2>Scomponi un referto esistente</h2>
+    <div class="card">
+      <p class="muted" style="margin-top:0;">
+        Incolla qui un referto che hai già scritto (o dettalo). Il sistema proverà a riconoscere l'esame — se è già in libreria — e a scomporre il resto in voci riutilizzabili, una frase per volta, che potrai rivedere prima di aggiungerle alla tua libreria. Tutto avviene qui nel browser: il testo non viene inviato a nessun servizio esterno.
+      </p>
+      <div class="field-row">
+        <div class="field">
+          <label>Testo del referto</label>
+          <textarea id="ai-report-text" style="min-height:110px;" placeholder="Incolla qui il testo del referto…"></textarea>
+        </div>
+        <button class="btn-sm" id="mic-ai-report-text" title="Detta">🎤</button>
+      </div>
+      <div class="field-row">
+        <button class="btn-sm" id="ai-analyze-btn">Analizza referto</button>
+      </div>
+      <div class="field-message" id="ai-message"></div>
+
+      <div id="ai-results" class="hidden" style="margin-top:16px;">
+        <div class="field-row">
+          <div class="field">
+            <label>Metodica riconosciuta</label>
+            <input type="text" id="ai-metodica-riconosciuta" disabled>
+          </div>
+          <div class="field">
+            <label>Esame riconosciuto</label>
+            <input type="text" id="ai-esame-riconosciuto" disabled>
+          </div>
+        </div>
+        <div id="ai-indicazione-row" class="field-row hidden">
+          <div class="field">
+            <label>Indicazione riconosciuta</label>
+            <input type="text" id="ai-indicazione-riconosciuta" disabled>
+          </div>
+        </div>
+        <p class="muted" style="margin:10px 0 6px;">Voci proposte — rivedi e aggiungi solo quelle corrette:</p>
+        <div id="ai-voci-list"></div>
+      </div>
     </div>
 
     <h2>Personalizzazione referti</h2>
@@ -1065,6 +1139,248 @@ createMicHandler(() => document.getElementById('new-indicazione-text'), document
 createMicHandler(() => document.getElementById('new-referto-text'), document.getElementById('mic-new-referto-text'));
 createMicHandler(() => document.getElementById('edit-referto-text'), document.getElementById('mic-edit-referto-text'));
 createMicHandler(() => document.getElementById('edit-indicazione-text'), document.getElementById('mic-edit-indicazione-text'));
+createMicHandler(() => document.getElementById('ai-report-text'), document.getElementById('mic-ai-report-text'));
+
+// ============================================================
+// SCOMPOSIZIONE REFERTO — analisi locale a regole (nessuna IA, nessun invio dati)
+// ============================================================
+
+// Parole chiave per indovinare il gruppo/distretto anatomico di ogni frase.
+const KEYWORD_GROUPS = [
+  [/pleur/i, 'Pleura'],
+  [/mediastin/i, 'Mediastino'],
+  [/cuore|cardiac/i, 'Cuore'],
+  [/scheletr|osse[ao]|frattur/i, 'Scheletro'],
+  [/fegato|epatic/i, 'Fegato'],
+  [/colecist|vie biliari/i, 'Colecisti e vie biliari'],
+  [/mils?a|splen/i, 'Milza'],
+  [/pancrea/i, 'Pancreas'],
+  [/ren[ei]\b|escretri/i, 'Reni'],
+  [/vescica/i, 'Vescica'],
+  [/colon|coprostasi/i, 'Colon'],
+  [/anse intestinali/i, 'Anse intestinali'],
+  [/aria libera|pneumoperitoneo|idroaere/i, 'Cavità peritoneale'],
+  [/linfonod/i, 'Linfonodi'],
+  [/aort/i, 'Aorta'],
+  [/menisc|legament/i, 'Menischi e legamenti'],
+  [/cuffia dei rotatori/i, 'Cuffia dei rotatori'],
+  [/disc[oi] intervertebr/i, 'Dischi intervertebrali'],
+  [/canale vertebrale/i, 'Canale vertebrale'],
+  [/test[ae] femoral/i, 'Teste femorali'],
+  [/tiroide/i, 'Tiroide'],
+  [/testicol/i, 'Testicoli'],
+  [/parenchima/i, 'Parenchima'],
+  [/calcificazion/i, 'Calcificazioni']
+];
+
+function guessGroup(sentence){
+  for (const [rx, label] of KEYWORD_GROUPS){
+    if (rx.test(sentence)) return label;
+  }
+  return 'Referto';
+}
+
+// Le frasi normali in italiano radiologico iniziano quasi sempre con una
+// negazione ("Non...") o con espressioni come "nella norma"; le frasi che
+// affermano direttamente un reperto vengono segnate come da approfondire.
+function guessNeg(sentence){
+  const s = sentence.trim();
+  const normalPattern = /^(non\s|nella norma|nei limiti|regolare|assente|conservat)/i;
+  return !normalPattern.test(s);
+}
+
+function guessLabel(sentence){
+  const clean = sentence.replace(/[.!?]+$/, '').trim();
+  const words = clean.split(/\s+/);
+  const short = words.slice(0, 5).join(' ');
+  return words.length > 5 ? short + '…' : short;
+}
+
+function parseReportText(rawText){
+  const raw = rawText.trim();
+  const upperRaw = raw.toUpperCase();
+
+  let foundEsame = null, foundMetodica = null, esameEsistente = false, body = raw;
+
+  // 1. Cerca tra gli esami già presenti in libreria
+  outer:
+  for (const m of DATA.metodiche){
+    for (const e of (DATA.esamiByMetodica[m] || [])){
+      const idx = upperRaw.indexOf(e.toUpperCase());
+      if (idx !== -1){
+        foundEsame = e;
+        foundMetodica = m;
+        esameEsistente = true;
+        body = raw.slice(0, idx) + raw.slice(idx + e.length);
+        break outer;
+      }
+    }
+  }
+
+  // 2. Se non trovato, prova a riconoscere una metodica per parola chiave
+  //    e considera la sequenza iniziale in maiuscolo come nome dell'esame
+  if (!foundEsame){
+    const metodicaKeywords = [
+      ['RX', /\bRX\b/i],
+      ['TC', /\bTC\b/i],
+      ['RMN', /\bR[MN]N\b|\bRISONANZA\b/i],
+      ['Ecografia', /\bECOGRAFIA\b|\bECOCOLORDOPPLER\b/i]
+    ];
+    for (const [m, rx] of metodicaKeywords){
+      if (rx.test(raw)){ foundMetodica = m; break; }
+    }
+    const match = raw.match(/^([A-ZÀ-Ý0-9°\s]{4,60}?)(?=\s+[A-ZÀ-Ý][a-zà-ý])/);
+    if (match){
+      foundEsame = match[1].trim();
+      body = raw.slice(match[1].length);
+    }
+  }
+
+  // 3. Suddividi il resto del testo in frasi
+  const sentences = body
+    .split(/(?<=[.!?])\s+/)
+    .map(s => s.trim())
+    .filter(s => s.length > 3);
+
+  const voci = sentences.map(s => ({
+    gruppo: guessGroup(s),
+    etichetta: guessLabel(s),
+    testo: s,
+    neg: guessNeg(s)
+  }));
+
+  return {
+    metodica: foundMetodica || '',
+    esame: foundEsame || '',
+    esame_esistente: esameEsistente,
+    indicazione: '',
+    voci_referto: voci
+  };
+}
+
+document.getElementById('ai-analyze-btn').onclick = () => {
+  const msg = document.getElementById('ai-message');
+  const text = document.getElementById('ai-report-text').value.trim();
+  msg.className = 'field-message';
+  document.getElementById('ai-results').classList.add('hidden');
+
+  if (!text){
+    msg.textContent = 'Incolla prima il testo del referto.';
+    msg.classList.add('error');
+    return;
+  }
+
+  const result = parseReportText(text);
+
+  if (!result.esame){
+    msg.textContent = 'Non sono riuscito a riconoscere un esame in questo testo. Puoi comunque compilare i campi manualmente qui sotto, oppure usare il pannello di personalizzazione più in basso.';
+    msg.classList.add('error');
+  } else if (!result.voci_referto.length){
+    msg.textContent = 'Esame riconosciuto, ma non ho trovato frasi da scomporre nel resto del testo.';
+    msg.classList.add('error');
+  } else {
+    msg.textContent = '';
+  }
+
+  renderAiResults(result);
+};
+
+function renderAiResults(result){
+  document.getElementById('ai-metodica-riconosciuta').value = result.metodica || '';
+  document.getElementById('ai-esame-riconosciuto').value = result.esame || '';
+
+  const indRow = document.getElementById('ai-indicazione-row');
+  if (result.indicazione){
+    indRow.classList.remove('hidden');
+    document.getElementById('ai-indicazione-riconosciuta').value = result.indicazione;
+  } else {
+    indRow.classList.add('hidden');
+  }
+
+  const list = document.getElementById('ai-voci-list');
+  list.innerHTML = '';
+
+  if (result.warning){
+    const w = document.createElement('div');
+    w.className = 'ai-warning';
+    w.textContent = '⚠ ' + result.warning;
+    list.appendChild(w);
+  }
+
+  (result.voci_referto || []).forEach((voce, idx) => {
+    const item = document.createElement('div');
+    item.className = 'ai-voce-item' + (voce.neg ? ' neg' : '');
+    item.innerHTML = `
+      <div class="voce-row">
+        <input type="text" data-field="gruppo" value="${escapeAttr(voce.gruppo || '')}" placeholder="Gruppo">
+        <input type="text" data-field="etichetta" value="${escapeAttr(voce.etichetta || '')}" placeholder="Etichetta">
+      </div>
+      <div class="voce-row">
+        <textarea data-field="testo" placeholder="Testo">${escapeHtml(voce.testo || '')}</textarea>
+      </div>
+      <div class="voce-row" style="align-items:center;">
+        <label class="checkbox-row" style="margin:0;">
+          <input type="checkbox" data-field="neg" ${voce.neg ? 'checked' : ''}> reperto da approfondire
+        </label>
+      </div>
+      <div class="ai-voce-actions">
+        <button class="btn-sm danger" data-action="scarta">Scarta</button>
+        <button class="btn-sm" data-action="aggiungi">+ Aggiungi alla libreria</button>
+      </div>
+    `;
+    item.querySelector('[data-action="scarta"]').onclick = () => item.remove();
+    item.querySelector('[data-action="aggiungi"]').onclick = () => {
+      const gruppo = item.querySelector('[data-field="gruppo"]').value.trim();
+      const etichetta = item.querySelector('[data-field="etichetta"]').value.trim();
+      const testo = item.querySelector('[data-field="testo"]').value.trim();
+      const neg = item.querySelector('[data-field="neg"]').checked;
+      if (!gruppo || !etichetta || !testo) return;
+      aggiungiVoceAllaLibreria(result, gruppo, etichetta, testo, neg);
+      item.classList.add('added');
+      item.querySelector('[data-action="aggiungi"]').textContent = '✓ Aggiunta';
+      item.querySelector('[data-action="aggiungi"]').disabled = true;
+    };
+    list.appendChild(item);
+  });
+
+  document.getElementById('ai-results').classList.remove('hidden');
+}
+
+function aggiungiVoceAllaLibreria(result, gruppo, etichetta, testo, neg){
+  const metodica = result.metodica;
+  const esame = result.esame;
+  if (!metodica || !esame) return;
+
+  if (!DATA.metodiche.includes(metodica)){
+    DATA.metodiche.push(metodica);
+    DATA.esamiByMetodica[metodica] = DATA.esamiByMetodica[metodica] || [];
+  }
+  DATA.esamiByMetodica[metodica] = DATA.esamiByMetodica[metodica] || [];
+  if (!DATA.esamiByMetodica[metodica].includes(esame)){
+    DATA.esamiByMetodica[metodica].push(esame);
+  }
+
+  DATA.refertoByEsame[esame] = DATA.refertoByEsame[esame] || {};
+  DATA.refertoByEsame[esame][gruppo] = DATA.refertoByEsame[esame][gruppo] || [];
+  DATA.refertoByEsame[esame][gruppo].push({ label: etichetta, text: testo, neg });
+
+  if (result.indicazione){
+    DATA.indicazioniByEsame[esame] = DATA.indicazioniByEsame[esame] || [];
+    if (!DATA.indicazioniByEsame[esame].includes(result.indicazione)){
+      DATA.indicazioniByEsame[esame].push(result.indicazione);
+    }
+  }
+
+  persist();
+  refreshAllSettingsSelects();
+}
+
+function escapeHtml(s){
+  return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+function escapeAttr(s){
+  return escapeHtml(s).replace(/"/g, '&quot;');
+}
 
 // ============================================================
 // PROFILO
