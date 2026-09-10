@@ -583,7 +583,7 @@
       <div class="breadcrumb" id="breadcrumb"></div>
       <span class="user-badge" id="user-badge"></span>
       <button class="btn-settings" id="btn-logout">Esci</button>
-      <button class="btn-settings" id="btn-open-settings">⚙ <span id="i18n-settings-btn">Personalizza</span></button>
+      <a class="btn-settings" href="account.html">👤 Il mio account</a>
     </div>
   </div>
 
@@ -668,176 +668,6 @@
 </div>
 
 <div class="copy-flash" id="copy-flash">Copiato negli appunti</div>
-
-<!-- ================= SETTINGS OVERLAY ================= -->
-<div class="settings-overlay" id="settings-overlay">
-  <div class="settings-panel">
-    <div class="settings-head">
-      <h2 id="i18n-settings-title">Personalizzazione</h2>
-      <button class="settings-close" id="settings-close">×</button>
-    </div>
-    <div class="settings-body">
-
-      <div class="settings-section">
-        <h3 id="i18n-s1-title">Aggiungi metodica</h3>
-        <div class="field-row">
-          <div class="field">
-            <label id="i18n-s1-label">Nome metodica</label>
-            <input type="text" id="new-metodica-name" placeholder="es. Mammografia">
-          </div>
-          <button class="btn-sm" id="add-metodica-btn">+ Aggiungi</button>
-        </div>
-      </div>
-
-      <div class="settings-section">
-        <h3 id="i18n-s2-title">Aggiungi esame (filtrato per metodica)</h3>
-        <div class="field-row">
-          <div class="field">
-            <label id="i18n-s2-label1">Metodica</label>
-            <select id="new-esame-metodica"></select>
-          </div>
-          <div class="field">
-            <label id="i18n-s2-label2">Nome esame</label>
-            <input type="text" id="new-esame-name" placeholder="es. RX RACHIDE CERVICALE">
-          </div>
-        </div>
-        <div class="field-row">
-          <button class="btn-sm" id="add-esame-btn">+ Aggiungi esame</button>
-        </div>
-      </div>
-
-      <div class="settings-section">
-        <h3>Elimina esame</h3>
-        <div class="field-row">
-          <div class="field">
-            <label>Esame da eliminare</label>
-            <select id="delete-esame-select"></select>
-          </div>
-          <button class="btn-sm danger" id="delete-esame-btn">Elimina esame</button>
-        </div>
-      </div>
-
-      <div class="settings-section">
-        <h3 id="i18n-s3-title">Aggiungi indicazione (filtrata per esame)</h3>
-        <div class="field-row">
-          <div class="field">
-            <label id="i18n-s3-label1">Esame</label>
-            <select id="new-indicazione-esame"></select>
-          </div>
-        </div>
-        <div class="field-row">
-          <div class="field">
-            <label id="i18n-s3-label2">Testo indicazione</label>
-            <input type="text" id="new-indicazione-text" placeholder="es. Trauma">
-          </div>
-          <button class="btn-sm" id="mic-new-indicazione-text" title="Detta">🎤</button>
-          <button class="btn-sm" id="add-indicazione-btn">+ Aggiungi</button>
-        </div>
-      </div>
-
-      <div class="settings-section">
-        <h3 id="i18n-s4-title">Aggiungi pulsante referto</h3>
-        <div class="field-row">
-          <div class="field">
-            <label id="i18n-s4-label1">Esame</label>
-            <select id="new-referto-esame"></select>
-          </div>
-          <div class="field">
-            <label id="i18n-s4-label2">Gruppo / distretto</label>
-            <input type="text" id="new-referto-group" placeholder="es. Parenchima">
-          </div>
-        </div>
-        <div class="field-row">
-          <div class="field">
-            <label id="i18n-s4-label3">Etichetta pulsante</label>
-            <input type="text" id="new-referto-label" placeholder="es. Nella norma">
-          </div>
-        </div>
-        <div class="field-row">
-          <div class="field">
-            <label id="i18n-s4-label4">Testo inserito nel referto</label>
-            <textarea id="new-referto-text" placeholder="es. Non si evidenziano alterazioni significative."></textarea>
-          </div>
-          <button class="btn-sm" id="mic-new-referto-text" title="Detta">🎤</button>
-        </div>
-        <div class="field-row">
-          <div class="checkbox-row">
-            <input type="checkbox" id="new-referto-neg">
-            <label for="new-referto-neg" id="i18n-s4-neg" style="margin:0;">Segna come reperto da approfondire</label>
-          </div>
-          <button class="btn-sm" id="add-referto-btn">+ Aggiungi pulsante</button>
-        </div>
-      </div>
-
-      <div class="settings-section">
-        <h3 id="i18n-s5-title">Modifica o elimina un pulsante di referto</h3>
-        <div class="field-row">
-          <div class="field">
-            <label id="i18n-s5-label1">Esame</label>
-            <select id="edit-referto-esame"></select>
-          </div>
-          <div class="field">
-            <label id="i18n-s5-label2">Gruppo</label>
-            <select id="edit-referto-group"></select>
-          </div>
-          <div class="field">
-            <label id="i18n-s5-label3">Pulsante</label>
-            <select id="edit-referto-button"></select>
-          </div>
-        </div>
-        <div class="field-row">
-          <div class="field">
-            <label id="i18n-s5-label4">Etichetta pulsante</label>
-            <input type="text" id="edit-referto-label">
-          </div>
-        </div>
-        <div class="field-row">
-          <div class="field">
-            <label id="i18n-s5-label5">Testo inserito nel referto</label>
-            <textarea id="edit-referto-text"></textarea>
-          </div>
-          <button class="btn-sm" id="mic-edit-referto-text" title="Detta">🎤</button>
-        </div>
-        <div class="field-row">
-          <div class="checkbox-row">
-            <input type="checkbox" id="edit-referto-neg">
-            <label for="edit-referto-neg" id="i18n-s5-neg" style="margin:0;">Segna come reperto da approfondire</label>
-          </div>
-          <button class="btn-sm" id="save-referto-btn">Salva modifiche</button>
-          <button class="btn-sm danger" id="delete-referto-btn">Elimina pulsante</button>
-        </div>
-      </div>
-
-      <div class="settings-section">
-        <h3 id="i18n-s6-title">Modifica o elimina un'indicazione</h3>
-        <div class="field-row">
-          <div class="field">
-            <label id="i18n-s6-label1">Esame</label>
-            <select id="edit-indicazione-esame"></select>
-          </div>
-          <div class="field">
-            <label id="i18n-s6-label2">Indicazione</label>
-            <select id="edit-indicazione-item"></select>
-          </div>
-        </div>
-        <div class="field-row">
-          <div class="field">
-            <label id="i18n-s6-label3">Nuovo testo</label>
-            <input type="text" id="edit-indicazione-text">
-          </div>
-          <button class="btn-sm" id="mic-edit-indicazione-text" title="Detta">🎤</button>
-          <button class="btn-sm" id="save-indicazione-btn">Salva</button>
-          <button class="btn-sm danger" id="delete-indicazione-btn">Elimina</button>
-        </div>
-      </div>
-
-      <div class="reset-row">
-        <button class="btn-sm danger" id="btn-reset-data">Ripristina impostazioni predefinite</button>
-      </div>
-
-    </div>
-  </div>
-</div>
 
 <script>
 // ============================================================
@@ -1195,9 +1025,6 @@ const state = {
   metodica: null,
   esame: null
 };
-let indicazioneLines = [];
-let confrontoLine = null;
-let refertoLines = [];
 let urgenzaMode = false;
 
 const el = {
@@ -1226,7 +1053,6 @@ function renderMetodica(){
       state.metodica = m;
       state.esame = null;
       renderAll();
-      composeText();
     };
     el.metodicaRow.appendChild(b);
   });
@@ -1249,7 +1075,7 @@ function renderEsame(){
       if (state.esame === e) return;
       state.esame = e;
       renderAll();
-      composeText();
+      appendToReport(e, '\n');
     };
     row.appendChild(b);
   });
@@ -1347,63 +1173,46 @@ function renderAll(){
 
 // ============================================================
 // COMPOSIZIONE TESTO REFERTO
+// Il testo nella casella è l'unica fonte di verità: i pulsanti aggiungono
+// testo in coda a ciò che c'è già, senza mai ricostruire o toccare il
+// resto — così le modifiche manuali e le cancellazioni restano intatte.
 // ============================================================
-function composeText(){
+function appendToReport(text, trailingNewlines){
   const ta = el.reportText;
-  const lines = [];
-
-  if (indicazioneLines.length){
-    const label = urgenzaMode
-      ? "Esame eseguito in regime d'urgenza con indicazione clinica: "
-      : 'Indicazione : ';
-    lines.push(label + indicazioneLines.join('; '));
-  }
-  if (state.esame){
-    lines.push(state.esame);
-  }
-  if (confrontoLine){
-    lines.push(confrontoLine);
-  }
-  if (refertoLines.length){
-    if (lines.length) lines.push('');
-    lines.push(...refertoLines);
-  }
-
-  ta.value = lines.join('\n');
+  let value = ta.value;
+  if (value.length && !value.endsWith('\n')) value += '\n';
+  value += text + (trailingNewlines !== undefined ? trailingNewlines : '\n');
+  ta.value = value;
   ta.scrollTop = ta.scrollHeight;
 }
 
 function insertIndicazione(txt){
-  indicazioneLines.push(txt);
-  composeText();
+  const label = urgenzaMode
+    ? "Esame eseguito in regime d'urgenza con indicazione clinica: "
+    : 'Indicazione : ';
+  appendToReport(label + txt, '\n\n');
 }
 
 function insertConfronto(txt){
-  confrontoLine = txt;
-  composeText();
+  appendToReport(txt, '\n');
 }
 
 function insertReferto(txt){
-  refertoLines.push(txt);
-  composeText();
+  appendToReport(txt, '\n');
 }
 
 document.getElementById('btn-urgenza-toggle').onclick = () => {
   urgenzaMode = !urgenzaMode;
   document.getElementById('btn-urgenza-toggle').classList.toggle('active', urgenzaMode);
-  composeText();
 };
 
 // ============================================================
 // TOOLBAR PRINCIPALE
 // ============================================================
 document.getElementById('btn-reset').onclick = () => {
-  indicazioneLines = [];
-  confrontoLine = null;
-  refertoLines = [];
   urgenzaMode = false;
   document.getElementById('btn-urgenza-toggle').classList.remove('active');
-  composeText();
+  el.reportText.value = '';
 };
 
 document.getElementById('btn-copy').onclick = async () => {
@@ -1415,275 +1224,6 @@ document.getElementById('btn-copy').onclick = async () => {
   }
   el.copyFlash.classList.add('show');
   setTimeout(() => el.copyFlash.classList.remove('show'), 1400);
-};
-
-// ============================================================
-// PERSONALIZZAZIONE — util
-// ============================================================
-function allEsami(){
-  const out = [];
-  DATA.metodiche.forEach(m => {
-    (DATA.esamiByMetodica[m] || []).forEach(e => out.push({ esame: e, metodica: m }));
-  });
-  return out;
-}
-
-function fillSelect(selectEl, items, placeholder){
-  selectEl.innerHTML = '';
-  if (placeholder){
-    const opt = document.createElement('option');
-    opt.value = '';
-    opt.textContent = placeholder;
-    opt.disabled = true;
-    opt.selected = true;
-    selectEl.appendChild(opt);
-  }
-  items.forEach(({ value, label }) => {
-    const opt = document.createElement('option');
-    opt.value = value;
-    opt.textContent = label;
-    selectEl.appendChild(opt);
-  });
-}
-
-function refreshAllSettingsSelects(){
-  fillSelect(document.getElementById('new-esame-metodica'),
-    DATA.metodiche.map(m => ({ value: m, label: m })));
-
-  const esamiOptions = allEsami().map(({esame, metodica}) => ({ value: esame, label: metodica + ' — ' + esame }));
-
-  fillSelect(document.getElementById('new-indicazione-esame'), esamiOptions, esamiOptions.length ? null : 'Nessun esame disponibile');
-  fillSelect(document.getElementById('new-referto-esame'), esamiOptions, esamiOptions.length ? null : 'Nessun esame disponibile');
-  fillSelect(document.getElementById('edit-referto-esame'), esamiOptions, esamiOptions.length ? null : 'Nessun esame disponibile');
-  fillSelect(document.getElementById('edit-indicazione-esame'), esamiOptions, esamiOptions.length ? null : 'Nessun esame disponibile');
-  fillSelect(document.getElementById('delete-esame-select'), esamiOptions, esamiOptions.length ? null : 'Nessun esame disponibile');
-
-  refreshEditRefertoGroups();
-  refreshEditIndicazioneItems();
-}
-
-function refreshEditRefertoGroups(){
-  const esame = document.getElementById('edit-referto-esame').value;
-  const groups = (DATA.refertoByEsame[esame]) ? Object.keys(DATA.refertoByEsame[esame]) : [];
-  fillSelect(document.getElementById('edit-referto-group'), groups.map(g => ({ value: g, label: g })), groups.length ? null : 'Nessun gruppo');
-  refreshEditRefertoButtons();
-}
-
-function refreshEditRefertoButtons(){
-  const esame = document.getElementById('edit-referto-esame').value;
-  const group = document.getElementById('edit-referto-group').value;
-  const buttons = (DATA.refertoByEsame[esame] && DATA.refertoByEsame[esame][group]) ? DATA.refertoByEsame[esame][group] : [];
-  fillSelect(document.getElementById('edit-referto-button'), buttons.map((b, i) => ({ value: i, label: b.label })), buttons.length ? null : 'Nessun pulsante');
-  loadEditRefertoFields();
-}
-
-function loadEditRefertoFields(){
-  const esame = document.getElementById('edit-referto-esame').value;
-  const group = document.getElementById('edit-referto-group').value;
-  const idx = document.getElementById('edit-referto-button').value;
-  const labelInput = document.getElementById('edit-referto-label');
-  const textInput = document.getElementById('edit-referto-text');
-  const negInput = document.getElementById('edit-referto-neg');
-  const btn = (DATA.refertoByEsame[esame] && DATA.refertoByEsame[esame][group] && DATA.refertoByEsame[esame][group][idx]) || null;
-  if (btn){
-    labelInput.value = btn.label;
-    textInput.value = btn.text;
-    negInput.checked = !!btn.neg;
-  } else {
-    labelInput.value = '';
-    textInput.value = '';
-    negInput.checked = false;
-  }
-}
-
-function refreshEditIndicazioneItems(){
-  const esame = document.getElementById('edit-indicazione-esame').value;
-  const list = DATA.indicazioniByEsame[esame] || [];
-  fillSelect(document.getElementById('edit-indicazione-item'), list.map((t, i) => ({ value: i, label: t })), list.length ? null : 'Nessuna indicazione');
-  loadEditIndicazioneField();
-}
-
-function loadEditIndicazioneField(){
-  const esame = document.getElementById('edit-indicazione-esame').value;
-  const idx = document.getElementById('edit-indicazione-item').value;
-  const input = document.getElementById('edit-indicazione-text');
-  const list = DATA.indicazioniByEsame[esame] || [];
-  input.value = (idx !== '' && list[idx] !== undefined) ? list[idx] : '';
-}
-
-// ============================================================
-// PERSONALIZZAZIONE — azioni
-// ============================================================
-document.getElementById('btn-open-settings').onclick = () => {
-  refreshAllSettingsSelects();
-  document.getElementById('settings-overlay').classList.add('open');
-};
-document.getElementById('settings-close').onclick = () => {
-  document.getElementById('settings-overlay').classList.remove('open');
-};
-document.getElementById('settings-overlay').addEventListener('click', (e) => {
-  if (e.target.id === 'settings-overlay') e.currentTarget.classList.remove('open');
-});
-
-document.getElementById('add-metodica-btn').onclick = () => {
-  const input = document.getElementById('new-metodica-name');
-  const name = input.value.trim();
-  if (!name) return;
-  if (!DATA.metodiche.includes(name)){
-    DATA.metodiche.push(name);
-    DATA.esamiByMetodica[name] = DATA.esamiByMetodica[name] || [];
-  }
-  input.value = '';
-  persist();
-  refreshAllSettingsSelects();
-  renderAll();
-};
-
-document.getElementById('add-esame-btn').onclick = () => {
-  const metodica = document.getElementById('new-esame-metodica').value;
-  const input = document.getElementById('new-esame-name');
-  const name = input.value.trim();
-  if (!metodica || !name) return;
-  DATA.esamiByMetodica[metodica] = DATA.esamiByMetodica[metodica] || [];
-  if (!DATA.esamiByMetodica[metodica].includes(name)){
-    DATA.esamiByMetodica[metodica].push(name);
-  }
-  input.value = '';
-  persist();
-  refreshAllSettingsSelects();
-  renderAll();
-};
-
-document.getElementById('delete-esame-btn').onclick = () => {
-  const esame = document.getElementById('delete-esame-select').value;
-  if (!esame) return;
-  if (!confirm('Eliminare l\'esame "' + esame + '"? Verranno eliminate anche tutte le indicazioni e i pulsanti di referto associati a questo esame.')) return;
-
-  DATA.metodiche.forEach(m => {
-    if (DATA.esamiByMetodica[m]){
-      DATA.esamiByMetodica[m] = DATA.esamiByMetodica[m].filter(e => e !== esame);
-    }
-  });
-  delete DATA.indicazioniByEsame[esame];
-  delete DATA.refertoByEsame[esame];
-
-  if (state.esame === esame){
-    state.esame = null;
-  }
-
-  persist();
-  refreshAllSettingsSelects();
-  renderAll();
-  composeText();
-};
-
-document.getElementById('add-indicazione-btn').onclick = () => {
-  const esame = document.getElementById('new-indicazione-esame').value;
-  const input = document.getElementById('new-indicazione-text');
-  const text = input.value.trim();
-  if (!esame || !text) return;
-  DATA.indicazioniByEsame[esame] = DATA.indicazioniByEsame[esame] || [];
-  DATA.indicazioniByEsame[esame].push(text);
-  input.value = '';
-  persist();
-  refreshAllSettingsSelects();
-  renderAll();
-};
-
-document.getElementById('add-referto-btn').onclick = () => {
-  const esame = document.getElementById('new-referto-esame').value;
-  const group = document.getElementById('new-referto-group').value.trim();
-  const label = document.getElementById('new-referto-label').value.trim();
-  const text = document.getElementById('new-referto-text').value.trim();
-  const neg = document.getElementById('new-referto-neg').checked;
-  if (!esame || !group || !label || !text) return;
-  DATA.refertoByEsame[esame] = DATA.refertoByEsame[esame] || {};
-  DATA.refertoByEsame[esame][group] = DATA.refertoByEsame[esame][group] || [];
-  DATA.refertoByEsame[esame][group].push({ label, text, neg });
-
-  document.getElementById('new-referto-group').value = '';
-  document.getElementById('new-referto-label').value = '';
-  document.getElementById('new-referto-text').value = '';
-  document.getElementById('new-referto-neg').checked = false;
-
-  persist();
-  refreshAllSettingsSelects();
-  renderAll();
-};
-
-['edit-referto-esame'].forEach(id => {
-  document.getElementById(id).addEventListener('change', refreshEditRefertoGroups);
-});
-document.getElementById('edit-referto-group').addEventListener('change', refreshEditRefertoButtons);
-document.getElementById('edit-referto-button').addEventListener('change', loadEditRefertoFields);
-
-document.getElementById('save-referto-btn').onclick = () => {
-  const esame = document.getElementById('edit-referto-esame').value;
-  const group = document.getElementById('edit-referto-group').value;
-  const idx = document.getElementById('edit-referto-button').value;
-  if (!esame || !group || idx === '') return;
-  const btn = DATA.refertoByEsame[esame] && DATA.refertoByEsame[esame][group] && DATA.refertoByEsame[esame][group][idx];
-  if (!btn) return;
-  btn.label = document.getElementById('edit-referto-label').value.trim() || btn.label;
-  btn.text = document.getElementById('edit-referto-text').value.trim() || btn.text;
-  btn.neg = document.getElementById('edit-referto-neg').checked;
-  persist();
-  refreshEditRefertoButtons();
-  renderAll();
-};
-
-document.getElementById('delete-referto-btn').onclick = () => {
-  const esame = document.getElementById('edit-referto-esame').value;
-  const group = document.getElementById('edit-referto-group').value;
-  const idx = document.getElementById('edit-referto-button').value;
-  if (!esame || !group || idx === '') return;
-  DATA.refertoByEsame[esame][group].splice(idx, 1);
-  if (DATA.refertoByEsame[esame][group].length === 0){
-    delete DATA.refertoByEsame[esame][group];
-  }
-  persist();
-  refreshEditRefertoGroups();
-  renderAll();
-};
-
-document.getElementById('edit-indicazione-esame').addEventListener('change', refreshEditIndicazioneItems);
-document.getElementById('edit-indicazione-item').addEventListener('change', loadEditIndicazioneField);
-
-document.getElementById('save-indicazione-btn').onclick = () => {
-  const esame = document.getElementById('edit-indicazione-esame').value;
-  const idx = document.getElementById('edit-indicazione-item').value;
-  const newText = document.getElementById('edit-indicazione-text').value.trim();
-  if (!esame || idx === '' || !newText) return;
-  DATA.indicazioniByEsame[esame][idx] = newText;
-  persist();
-  refreshEditIndicazioneItems();
-  renderAll();
-};
-
-document.getElementById('delete-indicazione-btn').onclick = () => {
-  const esame = document.getElementById('edit-indicazione-esame').value;
-  const idx = document.getElementById('edit-indicazione-item').value;
-  if (!esame || idx === '') return;
-  DATA.indicazioniByEsame[esame].splice(idx, 1);
-  persist();
-  refreshEditIndicazioneItems();
-  renderAll();
-};
-
-document.getElementById('btn-reset-data').onclick = () => {
-  if (!confirm(t('confirm_reset'))) return;
-  DATA = JSON.parse(JSON.stringify(DEFAULT_DATA));
-  persist();
-  state.metodica = null;
-  state.esame = null;
-  indicazioneLines = [];
-  confrontoLine = null;
-  refertoLines = [];
-  urgenzaMode = false;
-  document.getElementById('btn-urgenza-toggle').classList.remove('active');
-  refreshAllSettingsSelects();
-  renderAll();
-  composeText();
 };
 
 // ============================================================
@@ -1749,10 +1289,6 @@ function createMicHandler(getTargetEl, btnEl){
 }
 
 createMicHandler(() => el.reportText, document.getElementById('btn-mic-report'));
-createMicHandler(() => document.getElementById('new-indicazione-text'), document.getElementById('mic-new-indicazione-text'));
-createMicHandler(() => document.getElementById('new-referto-text'), document.getElementById('mic-new-referto-text'));
-createMicHandler(() => document.getElementById('edit-referto-text'), document.getElementById('mic-edit-referto-text'));
-createMicHandler(() => document.getElementById('edit-indicazione-text'), document.getElementById('mic-edit-indicazione-text'));
 
 // mic per il campo "indicazione libera", ricreato ad ogni render
 function attachMicToIndicazioneFree(){
@@ -1910,12 +1446,10 @@ async function showApp(){
   DATA = await loadDataFromCloud();
   state.metodica = null;
   state.esame = null;
-  indicazioneLines = [];
-  confrontoLine = null;
-  refertoLines = [];
-  refreshAllSettingsSelects();
+  urgenzaMode = false;
+  document.getElementById('btn-urgenza-toggle').classList.remove('active');
+  el.reportText.value = '';
   renderAll();
-  composeText();
   applyLanguage();
 }
 
@@ -1924,6 +1458,67 @@ document.getElementById('btn-signin').onclick = async () => {
     showLogin('Configurazione cloud mancante: inserisci SUPABASE_URL e SUPABASE_ANON_KEY nel codice.');
     return;
   }
+  const email = document.getElementById('login-email').value.trim();
+  const password = document.getElementById('login-password').value;
+  const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
+  if (error){
+    document.getElementById('login-error').textContent = error.message;
+    return;
+  }
+  currentUser = data.user;
+  await showApp();
+};
+
+document.getElementById('btn-signup').onclick = async () => {
+  if (!supabaseClient){
+    showLogin('Configurazione cloud mancante: inserisci SUPABASE_URL e SUPABASE_ANON_KEY nel codice.');
+    return;
+  }
+  const email = document.getElementById('login-email').value.trim();
+  const password = document.getElementById('login-password').value;
+  if (!email || !password || password.length < 6){
+    document.getElementById('login-error').textContent = 'Inserisci una email valida e una password di almeno 6 caratteri.';
+    return;
+  }
+  const { data, error } = await supabaseClient.auth.signUp({ email, password });
+  if (error){
+    document.getElementById('login-error').textContent = error.message;
+    return;
+  }
+  if (data.user && !data.session){
+    document.getElementById('login-error').textContent = 'Registrazione avvenuta: controlla la tua email per confermare l\'account, poi accedi.';
+    return;
+  }
+  currentUser = data.user;
+  await showApp();
+};
+
+document.getElementById('btn-logout').onclick = async () => {
+  if (supabaseClient) await supabaseClient.auth.signOut();
+  currentUser = null;
+  showLogin();
+};
+
+// ============================================================
+// AVVIO
+// ============================================================
+(async function init(){
+  if (!supabaseClient){
+    showLogin('Configurazione cloud non ancora impostata. Vedi le istruzioni per completare il collegamento a Supabase.');
+    return;
+  }
+  const { data: { session } } = await supabaseClient.auth.getSession();
+  if (session && session.user){
+    currentUser = session.user;
+    await showApp();
+  } else {
+    showLogin();
+  }
+})();
+</script>
+</body>
+</html>
+
   const email = document.getElementById('login-email').value.trim();
   const password = document.getElementById('login-password').value;
   const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
