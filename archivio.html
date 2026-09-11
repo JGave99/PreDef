@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Archivio — Referti</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<style>
+  :root{
+    --bg: #0a1420;
+    --panel: #101f2c;
+    --panel-alt: #0c1922;
+    --line: #1f3547;
+    --line-soft: #16293a;
+    --ink: #e4edf3;
+    --ink-soft: #7d97a8;
+    --accent: #3aa0d6;
+    --accent-soft: rgba(58,160,214,0.14);
+    --accent-strong: #1c6f96;
+    --accent-dim: #144a63;
+    --amber: #e0a458;
+    --amber-soft: rgba(224,164,88,0.14);
+    --danger: #d16565;
+    --font: Verdana, Geneva, Tahoma, sans-serif;
+    --radius: 3px;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    font-family: var(--font);
+    background: var(--bg);
+    color: var(--ink);
+    min-height:100vh;
+  }
+  .topbar{
+    position:sticky;
+    top:0;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding: 10px 22px;
+    background: var(--panel-alt);
+    border-bottom: 1px solid var(--line);
+    font-size:13px;
+    z-index:10;
+  }
+  .brand{
+    font-weight:bold;
+    font-size:14px;
+    display:flex;
+    align-items:center;
+    gap:10px;
+  }
+  .brand .mark{
+    width:20px;height:20px;
+    border:2px solid var(--accent);
+    border-radius:50%;
+    position:relative;
+    flex:none;
+  }
+  .brand .mark::after{
+    content:'';
+    position:absolute; left:50%; top:50%;
+    width:2px; height:12px;
+    background: var(--accent);
+    transform:translate(-50%,-50%);
+  }
+  .brand .mark::before{
+    content:'';
+    position:absolute; left:50%; top:50%;
+    width:12px; height:2px;
+    background: var(--accent);
+    transform:translate(-50%,-50%);
+  }
+  .topbar-right{ display:flex; align-items:center; gap:10px; }
+  .btn-settings{
+    background: transparent;
+    border: 1px solid var(--line);
+    color: var(--ink);
+    font-family: var(--font);
+    font-size:12.5px;
+    padding: 7px 12px;
+    border-radius: var(--radius);
+    cursor:pointer;
+    text-decoration:none;
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+  }
+  .btn-settings:hover{ border-color: var(--accent); color: var(--accent); }
+
+  .page{
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 28px 22px 80px;
+  }
+  .page h1{
+    font-size:18px;
+    margin: 4px 0 6px;
+  }
+  .page .subtitle{
+    font-size:12.5px;
+    color: var(--ink-soft);
+    margin: 0 0 22px;
+    line-height:1.6;
+  }
+
+  .toolbar-row{
+    display:flex;
+    gap:10px;
+    margin-bottom:18px;
+    flex-wrap:wrap;
+  }
+  .toolbar-row input, .toolbar-row select{
+    font-family: var(--font);
+    font-size:13px;
+    padding: 8px 10px;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background: var(--panel);
+    color: var(--ink);
+  }
+  .toolbar-row input{ flex:1; min-width:200px; }
+
+  .empty-state{
+    text-align:center;
+    color: var(--ink-soft);
+    font-size:13px;
+    padding: 60px 20px;
+    border: 1px dashed var(--line);
+    border-radius: var(--radius);
+  }
+
+  .archive-item{
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    margin-bottom: 12px;
+    overflow:hidden;
+  }
+  .archive-head{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding: 12px 14px;
+    cursor:pointer;
+    background: var(--panel-alt);
+  }
+  .archive-head .esame-name{
+    font-weight:bold;
+    font-size:13.5px;
+    flex:1;
+  }
+  .archive-head .esame-name.empty{
+    font-style:italic;
+    color: var(--ink-soft);
+    font-weight:normal;
+  }
+  .archive-head .date{
+    font-size:11.5px;
+    color: var(--ink-soft);
+  }
+  .archive-head .chevron{
+    color: var(--ink-soft);
+    font-size:11px;
+    transition: transform .15s ease;
+  }
+  .archive-item.open .chevron{ transform: rotate(90deg); }
+  .archive-body{
+    display:none;
+    padding: 14px;
+    border-top: 1px solid var(--line);
+  }
+  .archive-item.open .archive-body{ display:block; }
+  .archive-text{
+    white-space: pre-wrap;
+    font-size:13px;
+    line-height:1.6;
+    background: var(--panel-alt);
+    border: 1px solid var(--line-soft);
+    border-radius: var(--radius);
+    padding: 12px 14px;
+    margin: 0 0 10px;
+  }
+  .archive-actions{
+    display:flex;
+    gap:8px;
+    justify-content:flex-end;
+  }
+  .btn-sm{
+    font-family: var(--font);
+    font-size:12px;
+    font-weight:bold;
+    padding: 7px 13px;
+    border-radius: var(--radius);
+    cursor:pointer;
+    border:1px solid var(--accent);
+    background: transparent;
+    color: var(--accent);
+  }
+  .btn-sm:hover{ background: var(--accent-soft); }
+  .btn-sm.danger{ border-color: var(--danger); color: var(--danger); }
+  .btn-sm.danger:hover{ background: rgba(209,101,101,0.12); }
+
+  .gate{
+    position:fixed; inset:0;
+    background: var(--bg);
+    display:flex; align-items:center; justify-content:center;
+    font-size:13px; color: var(--ink-soft);
+  }
+  .hidden{ display:none; }
+
+  .copy-flash{
+    position:fixed;
+    bottom:22px; right:22px;
+    background: var(--accent-strong);
+    color:#fff;
+    padding:9px 16px;
+    border-radius: var(--radius);
+    font-size:13px;
+    opacity:0;
+    transform: translateY(6px);
+    transition: all .18s ease;
+    pointer-events:none;
+  }
+  .copy-flash.show{ opacity:1; transform:translateY(0); }
+</style>
+</head>
+<body>
+
+<div class="gate" id="gate">Verifica accesso in corso…</div>
+
+<div id="page-root" class="hidden">
+  <div class="topbar">
+    <div class="brand"><span class="mark"></span> Archivio referti</div>
+    <div class="topbar-right">
+      <a class="btn-settings" href="index.html">← Torna al referto</a>
+    </div>
+  </div>
+
+  <div class="page">
+    <h1>Archivio referti</h1>
+    <p class="subtitle">
+      Qui trovi i referti che hai salvato manualmente dal modulo di refertazione. Restano visibili solo a te, e sono pensati per essere già privi di dati identificativi del paziente — controlla sempre prima di salvarne di nuovi.
+    </p>
+
+    <div class="toolbar-row">
+      <input type="text" id="search-input" placeholder="Cerca per nome esame o testo…">
+      <select id="filter-esame"><option value="">Tutti gli esami</option></select>
+    </div>
+
+    <div id="archive-list"></div>
+    <div id="empty-state" class="empty-state hidden">Nessun referto archiviato per ora. Da "Anteprima referto", una volta composto, usa "Salva nell'archivio" per iniziare a costruire il tuo archivio.</div>
+  </div>
+</div>
+
+<div class="copy-flash" id="copy-flash">Copiato negli appunti</div>
+
+<script>
+const SUPABASE_URL = 'https://umejthggxihtyqvcszgm.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVtZWp0aGdneGlodHlxdmNzemdtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODg4NzI0MzEsImV4cCI6MjEwNDQ0ODQzMX0.BPaujgB70aLpWSifk5nH93fuyyyfOe8Uw4RupV1YQQE';
+const supabaseClient = (window.supabase && SUPABASE_URL.indexOf('INSERISCI') === -1)
+  ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+  : null;
+
+let currentUser = null;
+let allEntries = [];
+
+function escapeHtml(s){
+  return (s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+function formatDate(iso){
+  const d = new Date(iso);
+  return d.toLocaleDateString('it-IT', { day: '2-digit', month: '2-digit', year: 'numeric' }) +
+    ' ' + d.toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' });
+}
+
+async function loadEntries(){
+  const { data, error } = await supabaseClient
+    .from('report_archive')
+    .select('id, esame, testo, created_at')
+    .eq('user_id', currentUser.id)
+    .order('created_at', { ascending: false });
+  if (error){
+    document.getElementById('archive-list').innerHTML = '<div class="empty-state">Errore nel caricamento dell\'archivio: ' + escapeHtml(error.message) + '</div>';
+    return;
+  }
+  allEntries = data || [];
+  populateEsameFilter();
+  renderList();
+}
+
+function populateEsameFilter(){
+  const select = document.getElementById('filter-esame');
+  const current = select.value;
+  const esami = Array.from(new Set(allEntries.map(e => e.esame).filter(Boolean))).sort();
+  select.innerHTML = '<option value="">Tutti gli esami</option>' +
+    esami.map(e => '<option value="' + escapeHtml(e) + '">' + escapeHtml(e) + '</option>').join('');
+  select.value = current;
+}
+
+function renderList(){
+  const search = document.getElementById('search-input').value.trim().toLowerCase();
+  const esameFilter = document.getElementById('filter-esame').value;
+
+  const filtered = allEntries.filter(entry => {
+    if (esameFilter && entry.esame !== esameFilter) return false;
+    if (search){
+      const haystack = ((entry.esame || '') + ' ' + entry.testo).toLowerCase();
+      if (!haystack.includes(search)) return false;
+    }
+    return true;
+  });
+
+  const list = document.getElementById('archive-list');
+  const empty = document.getElementById('empty-state');
+  list.innerHTML = '';
+
+  if (!filtered.length){
+    empty.classList.remove('hidden');
+    empty.textContent = allEntries.length
+      ? 'Nessun referto corrisponde alla ricerca.'
+      : 'Nessun referto archiviato per ora. Da "Anteprima referto", una volta composto, usa "Salva nell\'archivio" per iniziare a costruire il tuo archivio.';
+    return;
+  }
+  empty.classList.add('hidden');
+
+  filtered.forEach(entry => {
+    const item = document.createElement('div');
+    item.className = 'archive-item';
+    item.innerHTML = `
+      <div class="archive-head">
+        <span class="chevron">▶</span>
+        <span class="esame-name ${entry.esame ? '' : 'empty'}">${entry.esame ? escapeHtml(entry.esame) : 'Esame non specificato'}</span>
+        <span class="date">${formatDate(entry.created_at)}</span>
+      </div>
+      <div class="archive-body">
+        <pre class="archive-text">${escapeHtml(entry.testo)}</pre>
+        <div class="archive-actions">
+          <button class="btn-sm danger" data-action="elimina">Elimina</button>
+          <button class="btn-sm" data-action="copia">Copia negli appunti</button>
+        </div>
+      </div>
+    `;
+    item.querySelector('.archive-head').onclick = () => item.classList.toggle('open');
+    item.querySelector('[data-action="copia"]').onclick = async (e) => {
+      e.stopPropagation();
+      try{
+        await navigator.clipboard.writeText(entry.testo);
+      }catch(err){
+        const ta = document.createElement('textarea');
+        ta.value = entry.testo;
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand('copy');
+        document.body.removeChild(ta);
+      }
+      const flash = document.getElementById('copy-flash');
+      flash.classList.add('show');
+      setTimeout(() => flash.classList.remove('show'), 1400);
+    };
+    item.querySelector('[data-action="elimina"]').onclick = async (e) => {
+      e.stopPropagation();
+      if (!confirm('Eliminare definitivamente questo referto dall\'archivio?')) return;
+      const { error } = await supabaseClient.from('report_archive').delete().eq('id', entry.id);
+      if (error){
+        alert('Errore durante l\'eliminazione: ' + error.message);
+        return;
+      }
+      allEntries = allEntries.filter(x => x.id !== entry.id);
+      populateEsameFilter();
+      renderList();
+    };
+    list.appendChild(item);
+  });
+}
+
+document.getElementById('search-input').addEventListener('input', renderList);
+document.getElementById('filter-esame').addEventListener('change', renderList);
+
+(async function init(){
+  if (!supabaseClient){
+    document.getElementById('gate').textContent = 'Configurazione cloud mancante.';
+    return;
+  }
+  const { data: { session } } = await supabaseClient.auth.getSession();
+  if (!session || !session.user){
+    window.location.href = 'index.html';
+    return;
+  }
+  currentUser = session.user;
+  await loadEntries();
+  document.getElementById('gate').classList.add('hidden');
+  document.getElementById('page-root').classList.remove('hidden');
+})();
+</script>
+</body>
+</html>
