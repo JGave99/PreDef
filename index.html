@@ -583,6 +583,7 @@
       <div class="breadcrumb" id="breadcrumb"></div>
       <span class="user-badge" id="user-badge"></span>
       <button class="btn-settings" id="btn-logout">Esci</button>
+      <a class="btn-settings" href="archivio.html">📁 Archivio</a>
       <a class="btn-settings" href="account.html">👤 Il mio account</a>
     </div>
   </div>
@@ -654,6 +655,7 @@
       <div class="actions">
         <button class="btn ghost" id="btn-mic-report" title="Detta nel referto">🎤</button>
         <button class="btn ghost" id="btn-reset">Svuota</button>
+        <button class="btn ghost" id="btn-archive">Salva nell'archivio</button>
         <button class="btn primary" id="btn-copy">Copia negli appunti</button>
       </div>
     </div>
@@ -1272,6 +1274,43 @@ document.getElementById('btn-copy').onclick = async () => {
   }
   el.copyFlash.classList.add('show');
   setTimeout(() => el.copyFlash.classList.remove('show'), 1400);
+};
+
+document.getElementById('btn-archive').onclick = async () => {
+  const testo = el.reportText.value.trim();
+  if (!testo){
+    alert('Non c\'è nulla da salvare: il referto è vuoto.');
+    return;
+  }
+  if (!confirm('Salvare questo referto nell\'archivio così come appare ora?\n\nAssicurati che sia privo di dati identificativi del paziente (nome, data di nascita, codice fiscale, numero di accettazione, medico richiedente, ecc.) prima di procedere.')){
+    return;
+  }
+  if (!supabaseClient || !currentUser){
+    alert('Devi essere connesso per salvare nell\'archivio.');
+    return;
+  }
+  const btn = document.getElementById('btn-archive');
+  btn.disabled = true;
+  try{
+    const { error } = await supabaseClient.from('report_archive').insert({
+      user_id: currentUser.id,
+      esame: state.esame || null,
+      testo: testo
+    });
+    if (error){
+      alert('Errore durante il salvataggio: ' + error.message);
+    } else {
+      el.copyFlash.textContent = 'Salvato nell\'archivio';
+      el.copyFlash.classList.add('show');
+      setTimeout(() => {
+        el.copyFlash.classList.remove('show');
+        el.copyFlash.textContent = t('copied');
+      }, 1600);
+    }
+  }catch(e){
+    alert('Errore durante il salvataggio: ' + e.message);
+  }
+  btn.disabled = false;
 };
 
 // ============================================================
