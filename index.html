@@ -1027,8 +1027,8 @@ const state = {
 };
 let urgenzaMode = false;
 let indicazioneLines = [];
-let confrontoLine = null;
 let lastHeaderText = '';
+let pendingEsameOpen = false;
 
 const el = {
   metodicaRow: document.getElementById('metodica-row'),
@@ -1056,7 +1056,6 @@ function renderMetodica(){
       state.metodica = m;
       state.esame = null;
       renderAll();
-      rebuildHeader();
     };
     el.metodicaRow.appendChild(b);
   });
@@ -1079,7 +1078,7 @@ function renderEsame(){
       if (state.esame === e) return;
       state.esame = e;
       renderAll();
-      rebuildHeader();
+      insertEsameLine(e);
     };
     row.appendChild(b);
   });
@@ -1181,22 +1180,17 @@ function renderAll(){
 // stesse righe in cima, in quest'ordine fisso, e viene ricalcolata ad
 // ogni cambiamento. Tutto ciò che segue (il corpo del referto) resta
 // testo libero: i pulsanti vi aggiungono righe in coda, e le modifiche
-// o cancellazioni fatte a mano lì non vengono mai toccate.
+// o cancellazioni fatte a mano lì non vengono mai toccate. Solo
+// l'Indicazione occupa una riga fissa in cima; Esame e Confronto si
+// aggiungono invece in coda, uno sotto l'altro senza riga vuota fra
+// loro — così puoi refertare più esami di seguito nello stesso referto.
 // ============================================================
 function computeHeader(){
-  let header = '';
-  if (indicazioneLines.length){
-    const label = urgenzaMode
-      ? "Esame eseguito in regime d'urgenza con indicazione clinica: "
-      : 'Indicazione: ';
-    header += label + indicazioneLines.join('; ') + '\n\n';
-  }
-  if (state.esame){
-    header += state.esame + '\n';
-    if (confrontoLine) header += confrontoLine + '\n';
-    header += '\n';
-  }
-  return header;
+  if (!indicazioneLines.length) return '';
+  const label = urgenzaMode
+    ? "Esame eseguito in regime d'urgenza con indicazione clinica: "
+    : 'Indicazione: ';
+  return label + indicazioneLines.join('; ') + '\n\n';
 }
 
 function rebuildHeader(){
@@ -1224,12 +1218,27 @@ function insertIndicazione(txt){
   rebuildHeader();
 }
 
+function insertEsameLine(esameName){
+  const ta = el.reportText;
+  // separa dal contenuto precedente (indicazione o esame/referto già scritti)
+  // con una riga vuota, a meno che non ce ne sia già una
+  if (ta.value.length && !ta.value.endsWith('\n\n')){
+    appendToReport('', '\n');
+  }
+  appendToReport(esameName, '\n');
+  pendingEsameOpen = true;
+}
+
 function insertConfronto(txt){
-  confrontoLine = txt;
-  rebuildHeader();
+  appendToReport(txt, '\n\n');
+  pendingEsameOpen = false;
 }
 
 function insertReferto(txt){
+  if (pendingEsameOpen){
+    appendToReport('', '\n');
+    pendingEsameOpen = false;
+  }
   appendToReport(txt, '\n');
 }
 
@@ -1245,8 +1254,8 @@ document.getElementById('btn-urgenza-toggle').onclick = () => {
 document.getElementById('btn-reset').onclick = () => {
   urgenzaMode = false;
   indicazioneLines = [];
-  confrontoLine = null;
   lastHeaderText = '';
+  pendingEsameOpen = false;
   document.getElementById('btn-urgenza-toggle').classList.remove('active');
   el.reportText.value = '';
 };
@@ -1484,8 +1493,8 @@ async function showApp(){
   state.esame = null;
   urgenzaMode = false;
   indicazioneLines = [];
-  confrontoLine = null;
   lastHeaderText = '';
+  pendingEsameOpen = false;
   document.getElementById('btn-urgenza-toggle').classList.remove('active');
   el.reportText.value = '';
   renderAll();
