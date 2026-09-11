@@ -1026,6 +1026,9 @@ const state = {
   esame: null
 };
 let urgenzaMode = false;
+let indicazioneLines = [];
+let confrontoLine = null;
+let lastHeaderText = '';
 
 const el = {
   metodicaRow: document.getElementById('metodica-row'),
@@ -1053,6 +1056,7 @@ function renderMetodica(){
       state.metodica = m;
       state.esame = null;
       renderAll();
+      rebuildHeader();
     };
     el.metodicaRow.appendChild(b);
   });
@@ -1075,7 +1079,7 @@ function renderEsame(){
       if (state.esame === e) return;
       state.esame = e;
       renderAll();
-      appendToReport(e, '\n');
+      rebuildHeader();
     };
     row.appendChild(b);
   });
@@ -1173,10 +1177,39 @@ function renderAll(){
 
 // ============================================================
 // COMPOSIZIONE TESTO REFERTO
-// Il testo nella casella è l'unica fonte di verità: i pulsanti aggiungono
-// testo in coda a ciò che c'è già, senza mai ricostruire o toccare il
-// resto — così le modifiche manuali e le cancellazioni restano intatte.
+// L'intestazione (Indicazione / Esame / Confronto) occupa sempre le
+// stesse righe in cima, in quest'ordine fisso, e viene ricalcolata ad
+// ogni cambiamento. Tutto ciò che segue (il corpo del referto) resta
+// testo libero: i pulsanti vi aggiungono righe in coda, e le modifiche
+// o cancellazioni fatte a mano lì non vengono mai toccate.
 // ============================================================
+function computeHeader(){
+  let header = '';
+  if (indicazioneLines.length){
+    const label = urgenzaMode
+      ? "Esame eseguito in regime d'urgenza con indicazione clinica: "
+      : 'Indicazione: ';
+    header += label + indicazioneLines.join('; ') + '\n\n';
+  }
+  if (state.esame){
+    header += state.esame + '\n';
+    if (confrontoLine) header += confrontoLine + '\n';
+    header += '\n';
+  }
+  return header;
+}
+
+function rebuildHeader(){
+  const ta = el.reportText;
+  const current = ta.value;
+  const body = (lastHeaderText && current.startsWith(lastHeaderText))
+    ? current.slice(lastHeaderText.length)
+    : current;
+  const newHeader = computeHeader();
+  ta.value = newHeader + body;
+  lastHeaderText = newHeader;
+}
+
 function appendToReport(text, trailingNewlines){
   const ta = el.reportText;
   let value = ta.value;
@@ -1187,14 +1220,13 @@ function appendToReport(text, trailingNewlines){
 }
 
 function insertIndicazione(txt){
-  const label = urgenzaMode
-    ? "Esame eseguito in regime d'urgenza con indicazione clinica: "
-    : 'Indicazione : ';
-  appendToReport(label + txt, '\n\n');
+  indicazioneLines.push(txt);
+  rebuildHeader();
 }
 
 function insertConfronto(txt){
-  appendToReport(txt, '\n');
+  confrontoLine = txt;
+  rebuildHeader();
 }
 
 function insertReferto(txt){
@@ -1204,6 +1236,7 @@ function insertReferto(txt){
 document.getElementById('btn-urgenza-toggle').onclick = () => {
   urgenzaMode = !urgenzaMode;
   document.getElementById('btn-urgenza-toggle').classList.toggle('active', urgenzaMode);
+  rebuildHeader();
 };
 
 // ============================================================
@@ -1211,6 +1244,9 @@ document.getElementById('btn-urgenza-toggle').onclick = () => {
 // ============================================================
 document.getElementById('btn-reset').onclick = () => {
   urgenzaMode = false;
+  indicazioneLines = [];
+  confrontoLine = null;
+  lastHeaderText = '';
   document.getElementById('btn-urgenza-toggle').classList.remove('active');
   el.reportText.value = '';
 };
@@ -1447,6 +1483,9 @@ async function showApp(){
   state.metodica = null;
   state.esame = null;
   urgenzaMode = false;
+  indicazioneLines = [];
+  confrontoLine = null;
+  lastHeaderText = '';
   document.getElementById('btn-urgenza-toggle').classList.remove('active');
   el.reportText.value = '';
   renderAll();
@@ -1458,67 +1497,6 @@ document.getElementById('btn-signin').onclick = async () => {
     showLogin('Configurazione cloud mancante: inserisci SUPABASE_URL e SUPABASE_ANON_KEY nel codice.');
     return;
   }
-  const email = document.getElementById('login-email').value.trim();
-  const password = document.getElementById('login-password').value;
-  const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
-  if (error){
-    document.getElementById('login-error').textContent = error.message;
-    return;
-  }
-  currentUser = data.user;
-  await showApp();
-};
-
-document.getElementById('btn-signup').onclick = async () => {
-  if (!supabaseClient){
-    showLogin('Configurazione cloud mancante: inserisci SUPABASE_URL e SUPABASE_ANON_KEY nel codice.');
-    return;
-  }
-  const email = document.getElementById('login-email').value.trim();
-  const password = document.getElementById('login-password').value;
-  if (!email || !password || password.length < 6){
-    document.getElementById('login-error').textContent = 'Inserisci una email valida e una password di almeno 6 caratteri.';
-    return;
-  }
-  const { data, error } = await supabaseClient.auth.signUp({ email, password });
-  if (error){
-    document.getElementById('login-error').textContent = error.message;
-    return;
-  }
-  if (data.user && !data.session){
-    document.getElementById('login-error').textContent = 'Registrazione avvenuta: controlla la tua email per confermare l\'account, poi accedi.';
-    return;
-  }
-  currentUser = data.user;
-  await showApp();
-};
-
-document.getElementById('btn-logout').onclick = async () => {
-  if (supabaseClient) await supabaseClient.auth.signOut();
-  currentUser = null;
-  showLogin();
-};
-
-// ============================================================
-// AVVIO
-// ============================================================
-(async function init(){
-  if (!supabaseClient){
-    showLogin('Configurazione cloud non ancora impostata. Vedi le istruzioni per completare il collegamento a Supabase.');
-    return;
-  }
-  const { data: { session } } = await supabaseClient.auth.getSession();
-  if (session && session.user){
-    currentUser = session.user;
-    await showApp();
-  } else {
-    showLogin();
-  }
-})();
-</script>
-</body>
-</html>
-
   const email = document.getElementById('login-email').value.trim();
   const password = document.getElementById('login-password').value;
   const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
