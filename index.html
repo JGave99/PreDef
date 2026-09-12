@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>PreDef — Composizione modulare</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
@@ -680,6 +681,7 @@
         <button class="btn ghost" id="btn-mic-report" title="Detta nel referto">🎤</button>
         <button class="btn ghost" id="btn-reset">Svuota</button>
         <button class="btn ghost" id="btn-archive">Salva nell'archivio</button>
+        <button class="btn ghost" id="btn-open-print">🖨 Stampa</button>
         <button class="btn primary" id="btn-copy">Copia negli appunti</button>
       </div>
     </div>
@@ -694,6 +696,56 @@
 </div>
 
 <div class="copy-flash" id="copy-flash">Copiato negli appunti</div>
+
+<!-- ================= PANNELLO STAMPA ================= -->
+<div class="settings-overlay" id="print-overlay">
+  <div class="settings-panel" style="width:min(480px, 92vw);">
+    <div class="settings-head">
+      <h2>Stampa referto</h2>
+      <button class="settings-close" id="print-close">×</button>
+    </div>
+    <div class="settings-body">
+      <div class="settings-section">
+        <h3>Carta intestata (opzionale)</h3>
+        <div class="field-row">
+          <div class="field">
+            <label>File PDF della carta intestata</label>
+            <input type="file" id="letterhead-file" accept="application/pdf">
+          </div>
+        </div>
+        <p style="font-size:12px; color:var(--ink-soft); margin-top:4px;">
+          Se non carichi nulla, verrà generata una pagina bianca con solo il testo — utile se usi fogli di carta intestata già prestampati nella stampante.
+        </p>
+      </div>
+      <div class="settings-section">
+        <h3>Posizione del testo</h3>
+        <div class="field-row">
+          <div class="field">
+            <label>Margine superiore (mm)</label>
+            <input type="text" id="margin-top" value="40">
+          </div>
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label>Margine sinistro (mm)</label>
+            <input type="text" id="margin-left" value="20">
+          </div>
+          <div class="field">
+            <label>Margine destro (mm)</label>
+            <input type="text" id="margin-right" value="20">
+          </div>
+        </div>
+        <p style="font-size:12px; color:var(--ink-soft); margin-top:4px;">
+          Regola il margine superiore in base allo spazio occupato dal logo/intestazione, così il testo non ci finisce sopra.
+        </p>
+      </div>
+      <div class="field-message" id="print-message" style="font-size:12px; min-height:16px;"></div>
+      <div class="field-row" style="justify-content:flex-end;">
+        <button class="btn-sm" id="print-generate-btn">Genera e stampa</button>
+      </div>
+    </div>
+  </div>
+</div>
 
 <script>
 // ============================================================
@@ -1333,6 +1385,123 @@ document.getElementById('btn-archive').onclick = async () => {
     }
   }catch(e){
     alert('Errore durante il salvataggio: ' + e.message);
+  }
+  btn.disabled = false;
+};
+
+// ============================================================
+// STAMPA — inserisce il testo su una carta intestata PDF (se caricata)
+// o su una pagina bianca, poi apre la finestra di stampa
+// ============================================================
+function mmToPt(mm){ return mm * 2.834645669; }
+
+function wrapTextToLines(text, font, fontSize, maxWidth){
+  const paragraphs = text.split('\n');
+  const lines = [];
+  paragraphs.forEach(para => {
+    if (!para){ lines.push(''); return; }
+    const words = para.split(' ');
+    let current = '';
+    words.forEach(word => {
+      const test = current ? current + ' ' + word : word;
+      if (font.widthOfTextAtSize(test, fontSize) > maxWidth && current){
+        lines.push(current);
+        current = word;
+      } else {
+        current = test;
+      }
+    });
+    lines.push(current);
+  });
+  return lines;
+}
+
+document.getElementById('btn-open-print').onclick = () => {
+  if (!el.reportText.value.trim()){
+    alert('Non c\'è nulla da stampare: il referto è vuoto.');
+    return;
+  }
+  document.getElementById('print-message').textContent = '';
+  document.getElementById('print-overlay').classList.add('open');
+};
+document.getElementById('print-close').onclick = () => {
+  document.getElementById('print-overlay').classList.remove('open');
+};
+document.getElementById('print-overlay').addEventListener('click', (e) => {
+  if (e.target.id === 'print-overlay') e.currentTarget.classList.remove('open');
+});
+
+document.getElementById('print-generate-btn').onclick = async () => {
+  const msg = document.getElementById('print-message');
+  msg.className = 'field-message';
+  msg.textContent = '';
+
+  const marginTop = parseFloat(document.getElementById('margin-top').value) || 40;
+  const marginLeft = parseFloat(document.getElementById('margin-left').value) || 20;
+  const marginRight = parseFloat(document.getElementById('margin-right').value) || 20;
+  const testo = el.reportText.value;
+  const fileInput = document.getElementById('letterhead-file');
+  const btn = document.getElementById('print-generate-btn');
+
+  btn.disabled = true;
+  msg.textContent = 'Generazione del PDF in corso…';
+
+  try{
+    const { PDFDocument, StandardFonts, rgb } = PDFLib;
+    let pdfDoc, hasTemplate = false, templateIndex = 0, width, height;
+
+    if (fileInput.files && fileInput.files[0]){
+      const bytes = await fileInput.files[0].arrayBuffer();
+      pdfDoc = await PDFDocument.load(bytes);
+      hasTemplate = true;
+      const firstPage = pdfDoc.getPage(0);
+      ({ width, height } = firstPage.getSize());
+    } else {
+      pdfDoc = await PDFDocument.create();
+      width = 595.28; height = 841.89; // A4
+      pdfDoc.addPage([width, height]);
+    }
+
+    const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
+    const fontSize = 11;
+    const lineHeight = fontSize * 1.4;
+    const bottomMargin = mmToPt(20);
+    const maxWidth = width - mmToPt(marginLeft) - mmToPt(marginRight);
+
+    const lines = wrapTextToLines(testo, font, fontSize, maxWidth);
+
+    let page = pdfDoc.getPage(pdfDoc.getPageCount() - 1);
+    let y = height - mmToPt(marginTop);
+
+    for (const line of lines){
+      if (y < bottomMargin){
+        if (hasTemplate){
+          const [copied] = await pdfDoc.copyPages(pdfDoc, [templateIndex]);
+          page = pdfDoc.addPage(copied);
+        } else {
+          page = pdfDoc.addPage([width, height]);
+        }
+        y = height - mmToPt(marginTop);
+      }
+      page.drawText(line, { x: mmToPt(marginLeft), y, size: fontSize, font, color: rgb(0, 0, 0) });
+      y -= lineHeight;
+    }
+
+    const pdfBytes = await pdfDoc.save();
+    const blob = new Blob([pdfBytes], { type: 'application/pdf' });
+    const url = URL.createObjectURL(blob);
+    const printWindow = window.open(url, '_blank');
+
+    if (!printWindow){
+      msg.textContent = 'Il browser ha bloccato l\'apertura della finestra. Consenti i popup per questo sito e riprova.';
+      msg.classList.add('error');
+    } else {
+      setTimeout(() => { try{ printWindow.print(); }catch(e){} }, 800);
+      document.getElementById('print-overlay').classList.remove('open');
+    }
+  }catch(e){
+    msg.textContent = 'Errore durante la generazione del PDF: ' + e.message;
+    msg.classList.add('error');
   }
   btn.disabled = false;
 };
