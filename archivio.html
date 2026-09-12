@@ -5,24 +5,27 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Archivio — Referti</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
   :root{
-    --bg: #0a1420;
-    --panel: #101f2c;
-    --panel-alt: #0c1922;
-    --line: #1f3547;
-    --line-soft: #16293a;
-    --ink: #e4edf3;
-    --ink-soft: #7d97a8;
-    --accent: #3aa0d6;
-    --accent-soft: rgba(58,160,214,0.14);
-    --accent-strong: #1c6f96;
-    --accent-dim: #144a63;
-    --amber: #e0a458;
-    --amber-soft: rgba(224,164,88,0.14);
-    --danger: #d16565;
-    --font: Verdana, Geneva, Tahoma, sans-serif;
-    --radius: 3px;
+    --bg: #0f172a;
+    --panel: #1e293b;
+    --panel-alt: #0b1120;
+    --line: #334155;
+    --line-soft: #334155;
+    --ink: #f8fafc;
+    --ink-soft: #94a3b8;
+    --accent: #38bdf8;
+    --accent-soft: rgba(56,189,248,0.08);
+    --accent-strong: #0284c7;
+    --accent-dim: #0369a1;
+    --amber: #f59e0b;
+    --amber-soft: rgba(245,158,11,0.12);
+    --danger: #ef4444;
+    --font: 'Inter', -apple-system, sans-serif;
+    --radius: 8px;
+    --radius-lg: 10px;
   }
   *{box-sizing:border-box;}
   body{
@@ -38,15 +41,15 @@
     display:flex;
     align-items:center;
     justify-content:space-between;
-    padding: 10px 22px;
+    padding: 12px 24px;
     background: var(--panel-alt);
     border-bottom: 1px solid var(--line);
     font-size:13px;
     z-index:10;
   }
   .brand{
-    font-weight:bold;
-    font-size:14px;
+    font-weight:600;
+    font-size:15px;
     display:flex;
     align-items:center;
     gap:10px;
@@ -78,24 +81,26 @@
     border: 1px solid var(--line);
     color: var(--ink);
     font-family: var(--font);
-    font-size:12.5px;
-    padding: 7px 12px;
-    border-radius: var(--radius);
+    font-size:13px;
+    padding: 7px 14px;
+    border-radius: 6px;
     cursor:pointer;
     text-decoration:none;
     display:inline-flex;
     align-items:center;
     gap:6px;
+    transition: all .2s ease;
   }
-  .btn-settings:hover{ border-color: var(--accent); color: var(--accent); }
+  .btn-settings:hover{ background-color: var(--line); border-color: var(--ink-soft); }
 
   .page{
     max-width: 860px;
     margin: 0 auto;
-    padding: 28px 22px 80px;
+    padding: 32px 24px 80px;
   }
   .page h1{
-    font-size:18px;
+    font-size:19px;
+    font-weight:700;
     margin: 4px 0 6px;
   }
   .page .subtitle{
@@ -114,12 +119,14 @@
   .toolbar-row input, .toolbar-row select{
     font-family: var(--font);
     font-size:13px;
-    padding: 8px 10px;
+    padding: 9px 12px;
     border: 1px solid var(--line);
-    border-radius: var(--radius);
+    border-radius: 6px;
     background: var(--panel);
     color: var(--ink);
+    transition: border-color .2s;
   }
+  .toolbar-row input:focus, .toolbar-row select:focus{ outline:none; border-color: var(--accent); }
   .toolbar-row input{ flex:1; min-width:200px; }
 
   .empty-state{
@@ -128,26 +135,27 @@
     font-size:13px;
     padding: 60px 20px;
     border: 1px dashed var(--line);
-    border-radius: var(--radius);
+    border-radius: var(--radius-lg);
   }
 
   .archive-item{
     background: var(--panel);
     border: 1px solid var(--line);
-    border-radius: var(--radius);
+    border-radius: var(--radius-lg);
     margin-bottom: 12px;
     overflow:hidden;
+    transition: border-color .2s;
   }
+  .archive-item:hover{ border-color: var(--ink-soft); }
   .archive-head{
     display:flex;
     align-items:center;
     gap:10px;
-    padding: 12px 14px;
+    padding: 14px 16px;
     cursor:pointer;
-    background: var(--panel-alt);
   }
   .archive-head .esame-name{
-    font-weight:bold;
+    font-weight:600;
     font-size:13.5px;
     flex:1;
   }
@@ -161,26 +169,28 @@
     color: var(--ink-soft);
   }
   .archive-head .chevron{
-    color: var(--ink-soft);
+    color: var(--accent);
     font-size:11px;
     transition: transform .15s ease;
   }
   .archive-item.open .chevron{ transform: rotate(90deg); }
   .archive-body{
     display:none;
-    padding: 14px;
+    padding: 0 16px 16px;
     border-top: 1px solid var(--line);
   }
-  .archive-item.open .archive-body{ display:block; }
+  .archive-item.open .archive-body{ display:block; padding-top:14px; }
   .archive-text{
     white-space: pre-wrap;
+    font-family: 'SFMono-Regular', Consolas, monospace;
     font-size:13px;
     line-height:1.6;
-    background: var(--panel-alt);
+    background: var(--bg);
     border: 1px solid var(--line-soft);
     border-radius: var(--radius);
     padding: 12px 14px;
     margin: 0 0 10px;
+    color: #e2e8f0;
   }
   .archive-actions{
     display:flex;
@@ -189,18 +199,19 @@
   }
   .btn-sm{
     font-family: var(--font);
-    font-size:12px;
-    font-weight:bold;
-    padding: 7px 13px;
-    border-radius: var(--radius);
+    font-size:12.5px;
+    font-weight:600;
+    padding: 7px 14px;
+    border-radius: 6px;
     cursor:pointer;
     border:1px solid var(--accent);
     background: transparent;
     color: var(--accent);
+    transition: all .2s ease;
   }
   .btn-sm:hover{ background: var(--accent-soft); }
   .btn-sm.danger{ border-color: var(--danger); color: var(--danger); }
-  .btn-sm.danger:hover{ background: rgba(209,101,101,0.12); }
+  .btn-sm.danger:hover{ background: rgba(239,68,68,0.1); }
 
   .gate{
     position:fixed; inset:0;
@@ -215,13 +226,14 @@
     bottom:22px; right:22px;
     background: var(--accent-strong);
     color:#fff;
-    padding:9px 16px;
+    padding:10px 18px;
     border-radius: var(--radius);
     font-size:13px;
     opacity:0;
     transform: translateY(6px);
     transition: all .18s ease;
     pointer-events:none;
+    box-shadow: 0 8px 20px rgba(0,0,0,.3);
   }
   .copy-flash.show{ opacity:1; transform:translateY(0); }
 </style>
