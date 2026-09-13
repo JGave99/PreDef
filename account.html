@@ -309,6 +309,34 @@
     margin-bottom:12px;
   }
 
+  .lh-item{
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 14px 16px;
+    margin-bottom: 10px;
+  }
+  .lh-item-head{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    margin-bottom:6px;
+  }
+  .lh-item-name{
+    font-weight:600;
+    font-size:13.5px;
+    flex:1;
+  }
+  .lh-item-margins{
+    font-size:12px;
+    color: var(--ink-soft);
+    margin-bottom:10px;
+  }
+  .lh-item-actions{
+    display:flex;
+    gap:8px;
+  }
+
   .gate{
     position:fixed; inset:0;
     background: var(--bg);
@@ -336,6 +364,7 @@
       <button class="nav-item active" data-tab="tab-account">👤 Gestione account</button>
       <button class="nav-item" data-tab="tab-import">📥 Importazione referti</button>
       <button class="nav-item" data-tab="tab-personalizza">⚙ Personalizza referti</button>
+      <button class="nav-item" data-tab="tab-stampa">🖨 Gestione stampa</button>
       <a class="nav-item" href="archivio.html">📁 Archivio</a>
     </aside>
 
@@ -580,6 +609,51 @@
     <div class="reset-row">
       <button class="btn-sm danger" id="btn-reset-data">Ripristina impostazioni predefinite</button>
     </div>
+    </div>
+
+    <div class="tab-panel" id="tab-stampa">
+    <h1>Gestione stampa</h1>
+
+    <h2>Aggiungi carta intestata</h2>
+    <div class="card">
+      <p class="muted" style="margin-top:0;">
+        Carica un PDF (anche di una sola pagina) con il logo/intestazione della struttura, dagli un nome e imposta i margini in cui deve cadere il testo del referto. Puoi salvarne più di una — ad esempio una per ogni struttura in cui lavori.
+      </p>
+      <div class="field-row">
+        <div class="field">
+          <label>Nome carta intestata</label>
+          <input type="text" id="lh-nome" placeholder="es. Ospedale San Marco — Radiologia">
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label>File PDF</label>
+          <input type="file" id="lh-file" accept="application/pdf">
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label>Margine superiore (mm)</label>
+          <input type="text" id="lh-margin-top" value="40">
+        </div>
+        <div class="field">
+          <label>Margine sinistro (mm)</label>
+          <input type="text" id="lh-margin-left" value="20">
+        </div>
+        <div class="field">
+          <label>Margine destro (mm)</label>
+          <input type="text" id="lh-margin-right" value="20">
+        </div>
+      </div>
+      <div class="field-row">
+        <button class="btn-sm" id="lh-save-btn">+ Salva carta intestata</button>
+      </div>
+      <div class="field-message" id="lh-message"></div>
+    </div>
+
+    <h2>Carte intestate salvate</h2>
+    <div id="lh-list"></div>
+    <div id="lh-empty" class="muted">Nessuna carta intestata salvata per ora.</div>
     </div>
 
     </main>
@@ -1471,6 +1545,119 @@ function escapeAttr(s){
 }
 
 // ============================================================
+// GESTIONE STAMPA — carte intestate salvate
+// ============================================================
+let letterheads = [];
+
+async function loadLetterheads(){
+  const { data, error } = await supabaseClient
+    .from('letterheads')
+    .select('id, nome, storage_path, margine_top, margine_left, margine_right, created_at')
+    .eq('user_id', currentUser.id)
+    .order('created_at', { ascending: false });
+  if (error){
+    console.warn('Impossibile caricare le carte intestate.', error);
+    return;
+  }
+  letterheads = data || [];
+  renderLetterheads();
+}
+
+function renderLetterheads(){
+  const list = document.getElementById('lh-list');
+  const empty = document.getElementById('lh-empty');
+  list.innerHTML = '';
+  if (!letterheads.length){
+    empty.classList.remove('hidden');
+    return;
+  }
+  empty.classList.add('hidden');
+
+  letterheads.forEach(lh => {
+    const item = document.createElement('div');
+    item.className = 'lh-item';
+    item.innerHTML = `
+      <div class="lh-item-head">
+        <span class="lh-item-name">${escapeHtml(lh.nome)}</span>
+      </div>
+      <div class="lh-item-margins">Margini — superiore: ${lh.margine_top}mm · sinistro: ${lh.margine_left}mm · destro: ${lh.margine_right}mm</div>
+      <div class="lh-item-actions">
+        <button class="btn-sm" data-action="modifica">Modifica margini</button>
+        <button class="btn-sm danger" data-action="elimina">Elimina</button>
+      </div>
+    `;
+    item.querySelector('[data-action="elimina"]').onclick = async () => {
+      if (!confirm('Eliminare la carta intestata "' + lh.nome + '"?')) return;
+      await supabaseClient.storage.from('letterheads').remove([lh.storage_path]);
+      await supabaseClient.from('letterheads').delete().eq('id', lh.id);
+      loadLetterheads();
+    };
+    item.querySelector('[data-action="modifica"]').onclick = () => {
+      const nuovoTop = prompt('Margine superiore (mm):', lh.margine_top);
+      if (nuovoTop === null) return;
+      const nuovoLeft = prompt('Margine sinistro (mm):', lh.margine_left);
+      if (nuovoLeft === null) return;
+      const nuovoRight = prompt('Margine destro (mm):', lh.margine_right);
+      if (nuovoRight === null) return;
+      supabaseClient.from('letterheads').update({
+        margine_top: parseFloat(nuovoTop) || lh.margine_top,
+        margine_left: parseFloat(nuovoLeft) || lh.margine_left,
+        margine_right: parseFloat(nuovoRight) || lh.margine_right
+      }).eq('id', lh.id).then(() => loadLetterheads());
+    };
+    list.appendChild(item);
+  });
+}
+
+document.getElementById('lh-save-btn').onclick = async () => {
+  const msg = document.getElementById('lh-message');
+  msg.className = 'field-message';
+  const nome = document.getElementById('lh-nome').value.trim();
+  const file = document.getElementById('lh-file').files[0];
+  const marginTop = parseFloat(document.getElementById('lh-margin-top').value) || 40;
+  const marginLeft = parseFloat(document.getElementById('lh-margin-left').value) || 20;
+  const marginRight = parseFloat(document.getElementById('lh-margin-right').value) || 20;
+
+  if (!nome || !file){
+    msg.textContent = 'Inserisci un nome e scegli un file PDF.';
+    msg.classList.add('error');
+    return;
+  }
+
+  const btn = document.getElementById('lh-save-btn');
+  btn.disabled = true;
+  msg.textContent = 'Caricamento in corso…';
+
+  try{
+    const path = currentUser.id + '/' + Date.now() + '_' + file.name.replace(/[^a-zA-Z0-9_.-]/g, '_');
+    const { error: uploadError } = await supabaseClient.storage.from('letterheads').upload(path, file, {
+      contentType: 'application/pdf'
+    });
+    if (uploadError) throw uploadError;
+
+    const { error: insertError } = await supabaseClient.from('letterheads').insert({
+      user_id: currentUser.id,
+      nome: nome,
+      storage_path: path,
+      margine_top: marginTop,
+      margine_left: marginLeft,
+      margine_right: marginRight
+    });
+    if (insertError) throw insertError;
+
+    document.getElementById('lh-nome').value = '';
+    document.getElementById('lh-file').value = '';
+    msg.textContent = 'Carta intestata salvata.';
+    msg.classList.add('ok');
+    loadLetterheads();
+  }catch(e){
+    msg.textContent = 'Errore: ' + e.message;
+    msg.classList.add('error');
+  }
+  btn.disabled = false;
+};
+
+// ============================================================
 // PROFILO
 // ============================================================
 document.getElementById('update-password-btn').onclick = async () => {
@@ -1535,6 +1722,7 @@ document.querySelectorAll('.nav-item[data-tab]').forEach(btn => {
   document.getElementById('profile-email').value = currentUser.email || '';
   DATA = await loadDataFromCloud();
   refreshAllSettingsSelects();
+  await loadLetterheads();
   document.getElementById('gate').classList.add('hidden');
   document.getElementById('page-root').classList.remove('hidden');
 })();
