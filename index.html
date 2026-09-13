@@ -315,6 +315,11 @@
     flex-direction:column;
     overflow:hidden;
   }
+  .print-row{
+    display:flex;
+    justify-content:flex-end;
+    margin-top:12px;
+  }
   .doc-meta{
     padding: 16px 20px 12px;
     border-bottom: 1px dashed var(--line);
@@ -681,7 +686,6 @@
         <button class="btn ghost" id="btn-mic-report" title="Detta nel referto">🎤</button>
         <button class="btn ghost" id="btn-reset">Svuota</button>
         <button class="btn ghost" id="btn-archive">Salva nell'archivio</button>
-        <button class="btn ghost" id="btn-open-print">🖨 Stampa</button>
         <button class="btn primary" id="btn-copy">Copia negli appunti</button>
       </div>
     </div>
@@ -691,6 +695,9 @@
         <div class="row"><b id="i18n-meta-esame-label">ESAME:</b> <span id="meta-esame">—</span></div>
       </div>
       <textarea class="report-text" id="report-text" placeholder="Il referto composto apparirà qui. Puoi anche scrivere o correggere liberamente."></textarea>
+    </div>
+    <div class="print-row">
+      <button class="btn ghost" id="btn-open-print">🖨 Stampa</button>
     </div>
   </main>
 </div>
@@ -706,18 +713,20 @@
     </div>
     <div class="settings-body">
       <div class="settings-section">
-        <h3>Carta intestata (opzionale)</h3>
+        <h3>Carta intestata</h3>
         <div class="field-row">
           <div class="field">
-            <label>File PDF della carta intestata</label>
-            <input type="file" id="letterhead-file" accept="application/pdf">
+            <label>Seleziona</label>
+            <select id="print-letterhead-select">
+              <option value="">Nessuna (pagina bianca)</option>
+            </select>
           </div>
         </div>
-        <p style="font-size:12px; color:var(--ink-soft); margin-top:4px;">
-          Se non carichi nulla, verrà generata una pagina bianca con solo il testo — utile se usi fogli di carta intestata già prestampati nella stampante.
+        <p style="font-size:12px; color:var(--ink-soft); margin-top:4px;" id="print-letterhead-hint">
+          Nessuna carta intestata salvata — puoi aggiungerne una da "Il mio account → Gestione stampa", oppure stampare su pagina bianca con i margini qui sotto (utile per fogli già prestampati nella stampante).
         </p>
       </div>
-      <div class="settings-section">
+      <div class="settings-section" id="print-manual-margins">
         <h3>Posizione del testo</h3>
         <div class="field-row">
           <div class="field">
@@ -735,9 +744,6 @@
             <input type="text" id="margin-right" value="20">
           </div>
         </div>
-        <p style="font-size:12px; color:var(--ink-soft); margin-top:4px;">
-          Regola il margine superiore in base allo spazio occupato dal logo/intestazione, così il testo non ci finisce sopra.
-        </p>
       </div>
       <div class="field-message" id="print-message" style="font-size:12px; min-height:16px;"></div>
       <div class="field-row" style="justify-content:flex-end;">
@@ -1416,12 +1422,13 @@ function wrapTextToLines(text, font, fontSize, maxWidth){
   return lines;
 }
 
-document.getElementById('btn-open-print').onclick = () => {
+document.getElementById('btn-open-print').onclick = async () => {
   if (!el.reportText.value.trim()){
     alert('Non c\'è nulla da stampare: il referto è vuoto.');
     return;
   }
   document.getElementById('print-message').textContent = '';
+  await loadLetterheadsForPrint();
   document.getElementById('print-overlay').classList.add('open');
 };
 document.getElementById('print-close').onclick = () => {
@@ -1431,17 +1438,60 @@ document.getElementById('print-overlay').addEventListener('click', (e) => {
   if (e.target.id === 'print-overlay') e.currentTarget.classList.remove('open');
 });
 
+let letterheadsCache = [];
+
+async function loadLetterheadsForPrint(){
+  const select = document.getElementById('print-letterhead-select');
+  const hint = document.getElementById('print-letterhead-hint');
+  select.innerHTML = '<option value="">Nessuna (pagina bianca)</option>';
+  letterheadsCache = [];
+
+  if (!supabaseClient || !currentUser) return;
+
+  const { data, error } = await supabaseClient
+    .from('letterheads')
+    .select('id, nome, storage_path, margine_top, margine_left, margine_right')
+    .eq('user_id', currentUser.id)
+    .order('created_at', { ascending: false });
+
+  if (error || !data || !data.length){
+    hint.textContent = 'Nessuna carta intestata salvata — puoi aggiungerne una da "Il mio account → Gestione stampa", oppure stampare su pagina bianca con i margini qui sotto (utile per fogli già prestampati nella stampante).';
+    toggleManualMargins(true);
+    return;
+  }
+
+  letterheadsCache = data;
+  data.forEach(lh => {
+    const opt = document.createElement('option');
+    opt.value = lh.id;
+    opt.textContent = lh.nome;
+    select.appendChild(opt);
+  });
+  hint.textContent = 'Selezionando una carta intestata verranno usati i margini salvati per quella carta. Scegli "Nessuna" per stampare su pagina bianca con margini personalizzati.';
+  toggleManualMargins(select.value === '');
+}
+
+function toggleManualMargins(show){
+  document.getElementById('print-manual-margins').style.display = show ? '' : 'none';
+}
+
+document.getElementById('print-letterhead-select').addEventListener('change', (e) => {
+  toggleManualMargins(e.target.value === '');
+});
+
 document.getElementById('print-generate-btn').onclick = async () => {
   const msg = document.getElementById('print-message');
   msg.className = 'field-message';
   msg.textContent = '';
 
-  const marginTop = parseFloat(document.getElementById('margin-top').value) || 40;
-  const marginLeft = parseFloat(document.getElementById('margin-left').value) || 20;
-  const marginRight = parseFloat(document.getElementById('margin-right').value) || 20;
   const testo = el.reportText.value;
-  const fileInput = document.getElementById('letterhead-file');
+  const selectedId = document.getElementById('print-letterhead-select').value;
+  const selectedLh = letterheadsCache.find(l => l.id === selectedId) || null;
   const btn = document.getElementById('print-generate-btn');
+
+  const marginTop = selectedLh ? selectedLh.margine_top : (parseFloat(document.getElementById('margin-top').value) || 40);
+  const marginLeft = selectedLh ? selectedLh.margine_left : (parseFloat(document.getElementById('margin-left').value) || 20);
+  const marginRight = selectedLh ? selectedLh.margine_right : (parseFloat(document.getElementById('margin-right').value) || 20);
 
   btn.disabled = true;
   msg.textContent = 'Generazione del PDF in corso…';
@@ -1450,8 +1500,10 @@ document.getElementById('print-generate-btn').onclick = async () => {
     const { PDFDocument, StandardFonts, rgb } = PDFLib;
     let pdfDoc, hasTemplate = false, templateIndex = 0, width, height;
 
-    if (fileInput.files && fileInput.files[0]){
-      const bytes = await fileInput.files[0].arrayBuffer();
+    if (selectedLh){
+      const { data: fileBlob, error: dlError } = await supabaseClient.storage.from('letterheads').download(selectedLh.storage_path);
+      if (dlError) throw dlError;
+      const bytes = await fileBlob.arrayBuffer();
       pdfDoc = await PDFDocument.load(bytes);
       hasTemplate = true;
       const firstPage = pdfDoc.getPage(0);
