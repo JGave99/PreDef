@@ -78,6 +78,14 @@
   .channel-item:hover{ background: var(--panel); color: var(--ink); }
   .channel-item.active{ background: var(--accent-soft); color: var(--accent); font-weight:600; }
   .channel-item .hash{ opacity:.6; }
+  .channel-item .chname{ flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .channel-admin-actions{ display:none; align-items:center; gap:4px; margin-left:auto; }
+  .channel-item:hover .channel-admin-actions{ display:flex; }
+  .channel-item:hover .unread-dot{ display:none; }
+  .channel-admin-actions span{
+    font-size:12px; opacity:.65; padding:2px 3px; border-radius:4px;
+  }
+  .channel-admin-actions span:hover{ opacity:1; background: rgba(255,255,255,0.08); }
   .unread-dot{
     width:8px; height:8px; border-radius:50%; background: var(--accent);
     margin-left:auto; flex:none;
@@ -445,14 +453,50 @@ function hasUnread(ch){
 function renderChannelList(){
   const list = document.getElementById('channel-list');
   list.innerHTML = '';
+  const isAdmin = myMembership && myMembership.role === 'admin';
   channels.forEach(ch => {
     const item = document.createElement('div');
     item.className = 'channel-item' + (ch.id === currentChannelId ? ' active' : '');
-    item.innerHTML = `<span class="hash">#</span><span>${escapeHtml(ch.nome)}</span>` +
-      (hasUnread(ch) ? '<span class="unread-dot"></span>' : '');
+    item.innerHTML = `<span class="hash">#</span><span class="chname">${escapeHtml(ch.nome)}</span>` +
+      (hasUnread(ch) ? '<span class="unread-dot"></span>' : '') +
+      (isAdmin ? `<span class="channel-admin-actions">
+          <span data-action="rename" title="Rinomina">✎</span>
+          <span data-action="delete" title="Elimina">🗑</span>
+        </span>` : '');
     item.onclick = () => selectChannel(ch.id);
+    if (isAdmin){
+      item.querySelector('[data-action="rename"]').onclick = (e) => { e.stopPropagation(); renameChannel(ch); };
+      item.querySelector('[data-action="delete"]').onclick = (e) => { e.stopPropagation(); deleteChannel(ch); };
+    }
     list.appendChild(item);
   });
+}
+
+async function renameChannel(ch){
+  const nuovoNome = prompt('Nuovo nome per il canale:', ch.nome);
+  if (nuovoNome === null) return;
+  const pulito = nuovoNome.trim().toLowerCase().replace(/\s+/g, '-');
+  if (!pulito || pulito === ch.nome) return;
+  const { error } = await supabaseClient.from('channels').update({ nome: pulito }).eq('id', ch.id);
+  if (error){
+    alert('Errore: ' + error.message);
+    return;
+  }
+  await loadChannels();
+}
+
+async function deleteChannel(ch){
+  if (!confirm('Eliminare il canale "#' + ch.nome + '"? Verranno eliminati anche tutti i suoi messaggi, in modo permanente.')) return;
+  const { error } = await supabaseClient.from('channels').delete().eq('id', ch.id);
+  if (error){
+    alert('Errore: ' + error.message);
+    return;
+  }
+  if (ch.id === currentChannelId){
+    currentChannelId = null;
+    if (messagesSub){ supabaseClient.removeChannel(messagesSub); messagesSub = null; }
+  }
+  await loadChannels();
 }
 
 async function loadMembersMini(){
