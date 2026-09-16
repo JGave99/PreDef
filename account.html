@@ -354,7 +354,7 @@
   <div class="topbar">
     <div class="brand"><span class="mark"></span> Il mio account</div>
     <div class="topbar-right">
-      <a class="btn-settings" href="index.html">← Torna al referto</a>
+      <a class="btn-settings" href="app.html">← Torna al referto</a>
       <button class="btn-settings" id="btn-logout">Esci</button>
     </div>
   </div>
@@ -662,7 +662,7 @@
 
 <script>
 // ============================================================
-// DATI DI DEFAULT (identici a index.html)
+// DATI DI DEFAULT (identici a app.html)
 // ============================================================
 const DEFAULT_DATA = {
   metodiche: ['Ecografia', 'RX', 'TC', 'RMN'],
@@ -964,7 +964,7 @@ const DEFAULT_DATA = {
 };
 
 // ============================================================
-// CONFIGURAZIONE SUPABASE (identica a index.html)
+// CONFIGURAZIONE SUPABASE (identica a app.html)
 // ============================================================
 const SUPABASE_URL = 'https://umejthggxihtyqvcszgm.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVtZWp0aGdneGlodHlxdmNzemdtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODg4NzI0MzEsImV4cCI6MjEwNDQ0ODQzMX0.BPaujgB70aLpWSifk5nH93fuyyyfOe8Uw4RupV1YQQE';
@@ -1689,7 +1689,7 @@ document.getElementById('update-password-btn').onclick = async () => {
 
 document.getElementById('btn-logout').onclick = async () => {
   if (supabaseClient) await supabaseClient.auth.signOut();
-  window.location.href = 'index.html';
+  window.location.href = 'app.html';
 };
 
 // ============================================================
@@ -1706,7 +1706,7 @@ document.querySelectorAll('.nav-item[data-tab]').forEach(btn => {
 });
 
 // ============================================================
-// AVVIO — richiede una sessione valida, altrimenti torna a index.html
+// AVVIO — richiede una sessione valida, altrimenti torna a app.html
 // ============================================================
 (async function init(){
   if (!supabaseClient){
@@ -1715,7 +1715,7 @@ document.querySelectorAll('.nav-item[data-tab]').forEach(btn => {
   }
   const { data: { session } } = await supabaseClient.auth.getSession();
   if (!session || !session.user){
-    window.location.href = 'index.html';
+    window.location.href = 'app.html';
     return;
   }
   currentUser = session.user;
