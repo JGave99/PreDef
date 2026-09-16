@@ -246,7 +246,7 @@
   <div class="topbar">
     <div class="brand"><span class="mark"></span> Archivio referti</div>
     <div class="topbar-right">
-      <a class="btn-settings" href="index.html">← Torna al referto</a>
+      <a class="btn-settings" href="app.html">← Torna al referto</a>
     </div>
   </div>
 
@@ -398,7 +398,7 @@ document.getElementById('filter-esame').addEventListener('change', renderList);
   }
   const { data: { session } } = await supabaseClient.auth.getSession();
   if (!session || !session.user){
-    window.location.href = 'index.html';
+    window.location.href = 'app.html';
     return;
   }
   currentUser = session.user;
