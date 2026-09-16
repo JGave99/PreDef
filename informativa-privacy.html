@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Informativa sulla Privacy — Referti</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #0f172a; --panel: #1e293b; --panel-alt: #0b1120; --line: #334155;
+    --ink: #f8fafc; --ink-soft: #94a3b8; --accent: #38bdf8; --accent-soft: rgba(56,189,248,0.08);
+    --font: 'Inter', -apple-system, sans-serif;
+  }
+  *{box-sizing:border-box;}
+  body{ margin:0; font-family: var(--font); background: var(--bg); color: var(--ink); line-height:1.65; }
+  .topbar{
+    display:flex; align-items:center; justify-content:space-between; padding: 14px 28px;
+    background: var(--panel-alt); border-bottom: 1px solid var(--line); position:sticky; top:0;
+  }
+  .brand{ font-weight:700; font-size:15px; display:flex; align-items:center; gap:10px; }
+  .brand .mark{ width:20px; height:20px; border:2px solid var(--accent); border-radius:50%; position:relative; }
+  .brand .mark::after{ content:''; position:absolute; left:50%; top:50%; width:2px; height:12px; background: var(--accent); transform:translate(-50%,-50%); }
+  .brand .mark::before{ content:''; position:absolute; left:50%; top:50%; width:12px; height:2px; background: var(--accent); transform:translate(-50%,-50%); }
+  .back{ font-size:13.5px; color: var(--ink-soft); text-decoration:none; padding:7px 14px; border:1px solid var(--line); border-radius:8px; }
+  .back:hover{ background: var(--panel); color: var(--ink); }
+
+  .doc{ max-width: 760px; margin: 0 auto; padding: 56px 24px 100px; }
+  .doc h1{ font-size:30px; font-weight:800; margin:0 0 8px; }
+  .doc .updated{ color: var(--ink-soft); font-size:13px; margin-bottom:36px; }
+  .note{
+    background: var(--panel); border: 1px solid var(--line); border-left: 3px solid var(--accent);
+    border-radius:8px; padding:14px 18px; font-size:13.5px; color: var(--ink-soft); margin-bottom:40px;
+  }
+  .doc h2{ font-size:19px; font-weight:700; margin:38px 0 12px; color: var(--ink); }
+  .doc p{ font-size:15px; color:#cbd5e1; margin:0 0 14px; }
+  .doc ul{ margin:0 0 14px; padding-left:22px; }
+  .doc li{ font-size:15px; color:#cbd5e1; margin-bottom:6px; }
+  .doc a{ color: var(--accent); }
+  .placeholder{ color: var(--accent); font-weight:600; }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="brand"><span class="mark"></span> Referti</div>
+  <a class="back" href="index.html">← Torna al sito</a>
+</div>
+
+<div class="doc">
+  <h1>Informativa sulla Privacy</h1>
+  <p class="updated">Ultimo aggiornamento: <span class="placeholder">[inserire data]</span></p>
+
+  <div class="note">
+    Questo documento descrive quali dati raccogliamo tramite il sito e come li trattiamo. Non conserviamo mai dati di pazienti: il servizio è pensato esclusivamente per modelli di testo personali, e i nostri Termini di Servizio vietano espressamente di inserirne.
+  </div>
+
+  <h2>1. Titolare del trattamento</h2>
+  <p>Il titolare del trattamento dei dati raccolti tramite questo sito è <span class="placeholder">[Nome / Ragione sociale]</span>, contattabile all'indirizzo <span class="placeholder">[email di contatto]</span>.</p>
+
+  <h2>2. Dati che raccogliamo</h2>
+  <p>Per far funzionare il servizio raccogliamo:</p>
+  <ul>
+    <li><strong>Dati di account:</strong> indirizzo email e password (quest'ultima conservata in forma crittografata, mai visibile a noi in chiaro)</li>
+    <li><strong>Contenuti che crei:</strong> i tuoi modelli di testo personalizzati, i documenti che scegli di salvare nel tuo archivio, i file che carichi (es. carta intestata), i messaggi che scrivi nei canali di team</li>
+    <li><strong>Dati tecnici essenziali:</strong> indirizzo IP e informazioni del browser, raccolti automaticamente dai fornitori che ci ospitano, per motivi di sicurezza e funzionamento</li>
+  </ul>
+  <p>Il servizio è pensato per contenuti personali e modelli di testo — non inserire dati che identificano altre persone (inclusi eventuali pazienti), come previsto dai Termini di Servizio.</p>
+
+  <h2>3. Perché li raccogliamo</h2>
+  <ul>
+    <li>Per farti usare il servizio ed erogare le sue funzioni (creazione dell'account, salvataggio dei tuoi contenuti, sincronizzazione tra dispositivi)</li>
+    <li>Per comunicazioni essenziali legate al servizio (es. conferma di registrazione)</li>
+    <li>Per eventuali comunicazioni su nuove funzionalità, solo se acconsenti esplicitamente</li>
+  </ul>
+
+  <h2>4. Come proteggiamo i tuoi dati</h2>
+  <ul>
+    <li>Le comunicazioni sono cifrate (HTTPS)</li>
+    <li>Ogni utente può accedere solo ai propri dati, salvo le funzioni di condivisione che attivi tu stesso (es. canali di team)</li>
+    <li>Le password sono conservate in forma crittografata</li>
+  </ul>
+
+  <h2>5. Quanto conserviamo i dati</h2>
+  <p>Finché il tuo account resta attivo. Se lo elimini, cancelliamo anche i dati associati.</p>
+
+  <h2>6. Fornitori che usiamo</h2>
+  <p>Per erogare il servizio ci appoggiamo a:</p>
+  <ul>
+    <li><strong>Supabase Inc.</strong> — autenticazione, database e archiviazione dei file</li>
+    <li><strong>GitHub, Inc. (Microsoft)</strong> — hosting del sito</li>
+  </ul>
+  <p>Non vendiamo né cediamo i tuoi dati a terzi per scopi pubblicitari.</p>
+
+  <h2>7. I tuoi diritti</h2>
+  <p>Puoi in qualsiasi momento:</p>
+  <ul>
+    <li>accedere ai tuoi dati o chiederne una copia</li>
+    <li>correggerli</li>
+    <li>chiederne la cancellazione</li>
+    <li>revocare eventuali consensi dati</li>
+  </ul>
+  <p>Per farlo, usa la funzione di cancellazione account nella pagina "Il mio account", oppure scrivici a <span class="placeholder">[email di contatto]</span>. Hai inoltre diritto di rivolgerti al Garante per la protezione dei dati personali (garanteprivacy.it).</p>
+
+  <h2>8. Età minima</h2>
+  <p>Il servizio è rivolto a persone maggiorenni.</p>
+
+  <h2>9. Cookie</h2>
+  <p>Usiamo solo cookie tecnici essenziali (per mantenerti connesso). Nessun cookie di profilazione o pubblicitario.</p>
+
+  <h2>10. Modifiche a questa informativa</h2>
+  <p>Possiamo aggiornare questo documento; le modifiche rilevanti ti saranno comunicate.</p>
+
+  <h2>11. Contatti</h2>
+  <p>Per qualsiasi domanda: <span class="placeholder">[email di contatto]</span></p>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Termini di Servizio — Referti</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #0f172a; --panel: #1e293b; --panel-alt: #0b1120; --line: #334155;
+    --ink: #f8fafc; --ink-soft: #94a3b8; --accent: #38bdf8; --accent-soft: rgba(56,189,248,0.08);
+    --font: 'Inter', -apple-system, sans-serif;
+  }
+  *{box-sizing:border-box;}
+  body{ margin:0; font-family: var(--font); background: var(--bg); color: var(--ink); line-height:1.65; }
+  .topbar{
+    display:flex; align-items:center; justify-content:space-between; padding: 14px 28px;
+    background: var(--panel-alt); border-bottom: 1px solid var(--line); position:sticky; top:0;
+  }
+  .brand{ font-weight:700; font-size:15px; display:flex; align-items:center; gap:10px; }
+  .brand .mark{ width:20px; height:20px; border:2px solid var(--accent); border-radius:50%; position:relative; }
+  .brand .mark::after{ content:''; position:absolute; left:50%; top:50%; width:2px; height:12px; background: var(--accent); transform:translate(-50%,-50%); }
+  .brand .mark::before{ content:''; position:absolute; left:50%; top:50%; width:12px; height:2px; background: var(--accent); transform:translate(-50%,-50%); }
+  .back{ font-size:13.5px; color: var(--ink-soft); text-decoration:none; padding:7px 14px; border:1px solid var(--line); border-radius:8px; }
+  .back:hover{ background: var(--panel); color: var(--ink); }
+
+  .doc{ max-width: 760px; margin: 0 auto; padding: 56px 24px 100px; }
+  .doc h1{ font-size:30px; font-weight:800; margin:0 0 8px; }
+  .doc .updated{ color: var(--ink-soft); font-size:13px; margin-bottom:36px; }
+  .note{
+    background: var(--panel); border: 1px solid var(--line); border-left: 3px solid var(--accent);
+    border-radius:8px; padding:14px 18px; font-size:13.5px; color: var(--ink-soft); margin-bottom:40px;
+  }
+  .doc h2{ font-size:19px; font-weight:700; margin:38px 0 12px; color: var(--ink); }
+  .doc p{ font-size:15px; color:#cbd5e1; margin:0 0 14px; }
+  .doc ul{ margin:0 0 14px; padding-left:22px; }
+  .doc li{ font-size:15px; color:#cbd5e1; margin-bottom:6px; }
+  .doc a{ color: var(--accent); }
+  .placeholder{ color: var(--accent); font-weight:600; }
+  .doc strong{ color: var(--ink); }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="brand"><span class="mark"></span> Referti</div>
+  <a class="back" href="index.html">← Torna al sito</a>
+</div>
+
+<div class="doc">
+  <h1>Termini di Servizio</h1>
+  <p class="updated">Ultimo aggiornamento: <span class="placeholder">[inserire data]</span></p>
+
+  <div class="note">
+    Usando questo sito accetti le regole descritte qui sotto. Il punto più importante: questo è uno strumento per organizzare i tuoi testi, non un archivio per dati di pazienti — non inserirne mai, in nessuna sezione del sito.
+  </div>
+
+  <h2>1. Cosa offriamo</h2>
+  <p>Il sito <span class="placeholder">[nome del servizio]</span> (il "Servizio") è uno strumento che ti aiuta a comporre e organizzare referti tramite una libreria di modelli di testo personalizzabili, con dettatura vocale, archiviazione, stampa e canali di comunicazione di team.</p>
+
+  <h2>2. Accettazione dei termini</h2>
+  <p>Registrandoti e usando il Servizio accetti questi Termini e la nostra <a href="informativa-privacy.html">Informativa sulla Privacy</a>. Se non li accetti, non usare il Servizio.</p>
+
+  <h2>3. Registrazione</h2>
+  <ul>
+    <li>Devi avere almeno 18 anni</li>
+    <li>Devi fornire un'email valida</li>
+    <li>Sei responsabile della sicurezza delle tue credenziali e di ciò che accade con il tuo account</li>
+  </ul>
+
+  <h2>4. Cosa non puoi fare</h2>
+  <p>Usando il Servizio, ti impegni a non:</p>
+  <ul>
+    <li><strong>Inserire dati che identificano una persona reale non tua</strong> (nome, data di nascita, codice fiscale, o qualsiasi altro dato che la renda riconoscibile) in nessuna parte del sito — referti, indicazioni, messaggi di team o altro. Il Servizio è pensato solo per modelli di testo generici.</li>
+    <li>Usare il Servizio per scopi illegali, molesti o lesivi verso terzi, anche nei canali di team</li>
+    <li>Provare ad accedere senza autorizzazione a dati o account di altri utenti</li>
+  </ul>
+  <p>Violare queste regole può comportare la sospensione o chiusura dell'account.</p>
+
+  <h2>5. I tuoi contenuti</h2>
+  <p>Il Servizio è uno strumento di scrittura: sei tu il responsabile di ciò che scrivi, incolli o generi tramite di esso. Se lo usi per scopi professionali, resta a te la responsabilità di verificarne l'accuratezza prima di qualunque utilizzo.</p>
+
+  <h2>6. Proprietà dei contenuti</h2>
+  <p>I contenuti che crei (modelli di testo, documenti archiviati, file caricati) restano tuoi. Usando il Servizio ci dai solo il permesso di conservarli ed elaborarli per farteli usare. Il codice, il design e il marchio del Servizio restano invece di nostra proprietà.</p>
+
+  <h2>7. Canali di team</h2>
+  <p>I messaggi che scrivi in un canale sono visibili a tutti i membri di quel canale. Anche qui vale la regola dell'Art. 4: nessun dato che identifichi persone reali non coinvolte direttamente nella conversazione.</p>
+
+  <h2>8. Disponibilità del servizio</h2>
+  <p>Facciamo il possibile per tenerlo sempre attivo, ma non garantiamo un servizio ininterrotto o privo di errori, e possiamo modificarlo o sospenderlo. Ti consigliamo di non affidarti al Servizio come unico posto dove conservi contenuti importanti.</p>
+
+  <h2>9. Piano gratuito e futuri piani a pagamento</h2>
+  <p>Oggi il Servizio è gratuito. In futuro potremmo introdurre piani a pagamento con funzioni aggiuntive: te lo comunicheremo in anticipo, e userai le funzioni a pagamento solo se le accetti esplicitamente.</p>
+
+  <h2>10. Limiti di responsabilità</h2>
+  <p>Nei limiti consentiti dalla legge, non siamo responsabili per danni diretti o indiretti derivanti dall'uso (o mancato uso) del Servizio, inclusa l'eventuale perdita di contenuti.</p>
+
+  <h2>11. Sospensione dell'account</h2>
+  <p>Possiamo sospendere o chiudere il tuo account in caso di violazione di questi Termini. Puoi in qualsiasi momento eliminare tu stesso il tuo account dalla pagina "Il mio account".</p>
+
+  <h2>12. Modifiche a questi termini</h2>
+  <p>Possiamo aggiornare questi Termini; le modifiche importanti ti saranno comunicate. Continuare a usare il Servizio dopo un aggiornamento vale come accettazione.</p>
+
+  <h2>13. Legge applicabile</h2>
+  <p>Questi Termini sono regolati dalla legge italiana. Per eventuali controversie è competente il Foro di <span class="placeholder">[città]</span>, salvo diversa previsione inderogabile di legge.</p>
+
+  <h2>14. Contatti</h2>
+  <p>Per domande su questi Termini: <span class="placeholder">[email di contatto]</span></p>
+</div>
+
+</body>
+</html>
