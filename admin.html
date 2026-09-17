@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Amministrazione — Referti</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #0f172a; --panel: #1e293b; --panel-alt: #0b1120; --line: #334155;
+    --ink: #f8fafc; --ink-soft: #94a3b8; --accent: #38bdf8; --accent-soft: rgba(56,189,248,0.08);
+    --accent-strong: #0284c7; --accent-dim: #0369a1; --danger: #ef4444;
+    --font: 'Inter', -apple-system, sans-serif; --radius: 8px; --radius-lg: 10px;
+  }
+  *{box-sizing:border-box;}
+  body{ margin:0; font-family: var(--font); background: var(--bg); color: var(--ink); min-height:100vh; }
+  .topbar{
+    position:sticky; top:0; display:flex; align-items:center; justify-content:space-between;
+    padding: 14px 28px; background: var(--panel-alt); border-bottom: 1px solid var(--line); z-index:10;
+  }
+  .brand{ font-weight:700; font-size:15px; display:flex; align-items:center; gap:10px; }
+  .brand .mark{ width:20px; height:20px; border:2px solid var(--accent); border-radius:50%; position:relative; }
+  .brand .mark::after{ content:''; position:absolute; left:50%; top:50%; width:2px; height:12px; background: var(--accent); transform:translate(-50%,-50%); }
+  .brand .mark::before{ content:''; position:absolute; left:50%; top:50%; width:12px; height:2px; background: var(--accent); transform:translate(-50%,-50%); }
+  .btn-settings{
+    background: transparent; border: 1px solid var(--line); color: var(--ink); font-family: var(--font);
+    font-size:13px; padding: 7px 14px; border-radius: 6px; cursor:pointer; text-decoration:none;
+  }
+  .btn-settings:hover{ background-color: var(--line); }
+
+  .page{ max-width: 900px; margin:0 auto; padding: 32px 24px 80px; }
+  .page h1{ font-size:20px; font-weight:700; margin:4px 0 6px; }
+  .page .subtitle{ font-size:13px; color: var(--ink-soft); margin:0 0 28px; }
+
+  .tabs{ display:flex; gap:8px; margin-bottom:22px; }
+  .tab-btn{
+    font-family: var(--font); font-size:13px; font-weight:600; padding:8px 16px; border-radius:999px;
+    border:1px solid var(--line); background:transparent; color: var(--ink-soft); cursor:pointer;
+  }
+  .tab-btn.active{ background: var(--accent-strong); border-color: var(--accent); color:#fff; }
+
+  .req-card{
+    background: var(--panel); border:1px solid var(--line); border-radius: var(--radius-lg);
+    padding:18px 20px; margin-bottom:14px;
+  }
+  .req-head{ display:flex; justify-content:space-between; align-items:baseline; margin-bottom:10px; flex-wrap:wrap; gap:6px; }
+  .req-email{ font-weight:600; font-size:14.5px; }
+  .req-date{ font-size:12px; color: var(--ink-soft); }
+  .req-status{
+    display:inline-block; padding:3px 10px; border-radius:999px; font-size:11px; font-weight:700;
+    text-transform:uppercase; letter-spacing:.04em; margin-bottom:12px;
+  }
+  .req-status.in_attesa{ background: rgba(245,158,11,0.12); color:#f59e0b; }
+  .req-status.approvato{ background: rgba(34,197,94,0.12); color:#22c55e; }
+  .req-status.rifiutato{ background: rgba(239,68,68,0.12); color: var(--danger); }
+  .req-actions{ display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
+  .btn-sm{
+    font-family: var(--font); font-size:12.5px; font-weight:600; padding:7px 14px; border-radius:6px;
+    cursor:pointer; border:1px solid var(--accent); background:transparent; color: var(--accent);
+  }
+  .btn-sm:hover{ background: var(--accent-soft); }
+  .btn-sm.primary{ background: var(--accent-strong); color:#fff; border-color: var(--accent-strong); }
+  .btn-sm.primary:hover{ background: var(--accent-dim); }
+  .btn-sm.danger{ border-color: var(--danger); color: var(--danger); }
+  .btn-sm.danger:hover{ background: rgba(239,68,68,0.1); }
+  .req-note{
+    font-family: var(--font); font-size:13px; padding:7px 10px; border:1px solid var(--line);
+    border-radius:6px; background: var(--bg); color: var(--ink); flex:1; min-width:180px;
+  }
+  .empty-state{ text-align:center; color: var(--ink-soft); font-size:13.5px; padding:50px 20px; border:1px dashed var(--line); border-radius: var(--radius-lg); }
+  .gate{ position:fixed; inset:0; background: var(--bg); display:flex; align-items:center; justify-content:center; font-size:13px; color: var(--ink-soft); text-align:center; padding:20px; }
+  .hidden{ display:none; }
+</style>
+</head>
+<body>
+
+<div class="gate" id="gate">Verifica accesso in corso…</div>
+
+<div id="page-root" class="hidden">
+  <div class="topbar">
+    <div class="brand"><span class="mark"></span> Amministrazione</div>
+    <a class="btn-settings" href="app.html">← Torna al referto</a>
+  </div>
+
+  <div class="page">
+    <h1>Richieste di verifica specializzando</h1>
+    <p class="subtitle">Rivedi il documento caricato e approva o rifiuta l'accesso al piano da 5€/mese.</p>
+
+    <div class="tabs">
+      <button class="tab-btn active" data-filter="in_attesa">In attesa</button>
+      <button class="tab-btn" data-filter="approvato">Approvate</button>
+      <button class="tab-btn" data-filter="rifiutato">Rifiutate</button>
+      <button class="tab-btn" data-filter="tutte">Tutte</button>
+    </div>
+
+    <div id="req-list"></div>
+  </div>
+</div>
+
+<script>
+const SUPABASE_URL = 'https://umejthggxihtyqvcszgm.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVtZWp0aGdneGlodHlxdmNzemdtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODg4NzI0MzEsImV4cCI6MjEwNDQ0ODQzMX0.BPaujgB70aLpWSifk5nH93fuyyyfOe8Uw4RupV1YQQE';
+const supabaseClient = (window.supabase && SUPABASE_URL.indexOf('INSERISCI') === -1)
+  ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+  : null;
+
+let currentUser = null;
+let allRequests = [];
+let currentFilter = 'in_attesa';
+
+function escapeHtml(s){
+  return (s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+function formatDate(iso){
+  const d = new Date(iso);
+  return d.toLocaleDateString('it-IT', { day:'2-digit', month:'2-digit', year:'numeric' }) + ' ' +
+         d.toLocaleTimeString('it-IT', { hour:'2-digit', minute:'2-digit' });
+}
+
+async function loadRequests(){
+  const { data, error } = await supabaseClient
+    .from('verification_requests')
+    .select('id, user_id, email, storage_path, status, note_admin, submitted_at')
+    .order('submitted_at', { ascending: false });
+  if (error){
+    document.getElementById('req-list').innerHTML = '<div class="empty-state">Errore nel caricamento: ' + escapeHtml(error.message) + '</div>';
+    return;
+  }
+  allRequests = data || [];
+  renderRequests();
+}
+
+function renderRequests(){
+  const list = document.getElementById('req-list');
+  const filtered = currentFilter === 'tutte' ? allRequests : allRequests.filter(r => r.status === currentFilter);
+
+  if (!filtered.length){
+    list.innerHTML = '<div class="empty-state">Nessuna richiesta in questa categoria.</div>';
+    return;
+  }
+
+  list.innerHTML = '';
+  filtered.forEach(req => {
+    const card = document.createElement('div');
+    card.className = 'req-card';
+    card.innerHTML = `
+      <div class="req-head">
+        <span class="req-email">${escapeHtml(req.email || req.user_id)}</span>
+        <span class="req-date">${formatDate(req.submitted_at)}</span>
+      </div>
+      <div class="req-status ${req.status}">${req.status.replace('_',' ')}</div>
+      ${req.note_admin ? '<p style="font-size:12.5px; color:var(--ink-soft); margin:0 0 10px;">Nota: ' + escapeHtml(req.note_admin) + '</p>' : ''}
+      <div class="req-actions">
+        <button class="btn-sm" data-action="view">Vedi documento</button>
+        ${req.status !== 'approvato' ? '<button class="btn-sm primary" data-action="approve">Approva</button>' : ''}
+        ${req.status !== 'rifiutato' ? '<input type="text" class="req-note" placeholder="Motivo del rifiuto (opzionale)" data-note>' : ''}
+        ${req.status !== 'rifiutato' ? '<button class="btn-sm danger" data-action="reject">Rifiuta</button>' : ''}
+      </div>
+    `;
+    card.querySelector('[data-action="view"]').onclick = () => viewDocument(req.storage_path);
+    const approveBtn = card.querySelector('[data-action="approve"]');
+    if (approveBtn) approveBtn.onclick = () => reviewRequest(req.id, 'approvato', null);
+    const rejectBtn = card.querySelector('[data-action="reject"]');
+    if (rejectBtn){
+      rejectBtn.onclick = () => {
+        const noteInput = card.querySelector('[data-note]');
+        reviewRequest(req.id, 'rifiutato', noteInput ? noteInput.value.trim() : null);
+      };
+    }
+    list.appendChild(card);
+  });
+}
+
+async function viewDocument(path){
+  const { data, error } = await supabaseClient.storage.from('verifiche').createSignedUrl(path, 300);
+  if (error){
+    alert('Errore nell\'apertura del documento: ' + error.message);
+    return;
+  }
+  window.open(data.signedUrl, '_blank');
+}
+
+async function reviewRequest(id, status, note){
+  const { error } = await supabaseClient.from('verification_requests').update({
+    status: status,
+    note_admin: note || null,
+    reviewed_at: new Date().toISOString(),
+    reviewed_by: currentUser.id
+  }).eq('id', id);
+  if (error){
+    alert('Errore: ' + error.message);
+    return;
+  }
+  await loadRequests();
+}
+
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.onclick = () => {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    currentFilter = btn.dataset.filter;
+    renderRequests();
+  };
+});
+
+(async function init(){
+  if (!supabaseClient){
+    document.getElementById('gate').textContent = 'Configurazione cloud mancante.';
+    return;
+  }
+  const { data: { session } } = await supabaseClient.auth.getSession();
+  if (!session || !session.user){
+    window.location.href = 'app.html';
+    return;
+  }
+  currentUser = session.user;
+
+  const { data: adminRow } = await supabaseClient
+    .from('app_admins')
+    .select('user_id')
+    .eq('user_id', currentUser.id)
+    .maybeSingle();
+
+  if (!adminRow){
+    document.getElementById('gate').textContent = 'Questa pagina è riservata agli amministratori del sito.';
+    return;
+  }
+
+  await loadRequests();
+  document.getElementById('gate').classList.add('hidden');
+  document.getElementById('page-root').classList.remove('hidden');
+})();
+</script>
+</body>
+</html>
