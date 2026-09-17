@@ -405,6 +405,17 @@
       </div>
       <p class="muted">La gestione degli abbonamenti a pagamento sarà disponibile prossimamente. Quando sarà attiva, potrai gestire da qui il tuo piano e i metodi di pagamento.</p>
     </div>
+
+    <h2>Zona pericolosa</h2>
+    <div class="card" style="border-color:var(--danger);">
+      <p class="muted" style="margin-top:0;">
+        Elimina definitivamente il tuo account. Verranno cancellati in modo permanente: la tua libreria personalizzata, i referti archiviati, le carte intestate caricate, la tua appartenenza a eventuali team e i messaggi che hai scritto. L'operazione non è reversibile.
+      </p>
+      <div class="field-row">
+        <button class="btn-sm danger" id="delete-account-btn">Elimina il mio account</button>
+      </div>
+      <div class="field-message" id="delete-account-message"></div>
+    </div>
     </div>
 
     <div class="tab-panel" id="tab-import">
@@ -1685,6 +1696,49 @@ document.getElementById('update-password-btn').onclick = async () => {
   msg.classList.add('ok');
   document.getElementById('new-password').value = '';
   document.getElementById('confirm-password').value = '';
+};
+
+document.getElementById('delete-account-btn').onclick = async () => {
+  const msg = document.getElementById('delete-account-message');
+  msg.className = 'field-message';
+
+  const conferma1 = confirm(
+    'Vuoi eliminare definitivamente il tuo account?\n\n' +
+    'Verranno cancellati in modo permanente e irreversibile: la tua libreria personalizzata, ' +
+    'i referti archiviati, le carte intestate caricate, la tua appartenenza a eventuali team ' +
+    'e i messaggi che hai scritto.'
+  );
+  if (!conferma1) return;
+
+  const digitato = prompt('Per confermare, scrivi ELIMINA (in maiuscolo) qui sotto:');
+  if (digitato !== 'ELIMINA'){
+    msg.textContent = 'Eliminazione annullata (testo di conferma non corrispondente).';
+    msg.classList.add('error');
+    return;
+  }
+
+  const btn = document.getElementById('delete-account-btn');
+  btn.disabled = true;
+  msg.textContent = 'Eliminazione in corso…';
+
+  try{
+    // Rimuove prima i file delle carte intestate dallo storage
+    if (letterheads && letterheads.length){
+      const percorsi = letterheads.map(lh => lh.storage_path);
+      await supabaseClient.storage.from('letterheads').remove(percorsi);
+    }
+
+    // Rimuove tutti i dati applicativi e infine l'account stesso
+    const { error } = await supabaseClient.rpc('delete_my_account');
+    if (error) throw error;
+
+    await supabaseClient.auth.signOut();
+    window.location.href = 'index.html';
+  }catch(e){
+    btn.disabled = false;
+    msg.textContent = 'Errore durante l\'eliminazione: ' + e.message;
+    msg.classList.add('error');
+  }
 };
 
 document.getElementById('btn-logout').onclick = async () => {
