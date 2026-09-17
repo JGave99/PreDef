@@ -200,6 +200,13 @@
     text-transform:uppercase;
     letter-spacing:.04em;
   }
+  .status-badge{
+    display:inline-flex; align-items:center; gap:6px;
+    padding:8px 14px; border-radius:8px; font-size:13px; font-weight:600; margin-bottom:14px;
+  }
+  .status-badge.in_attesa{ background: rgba(245,158,11,0.12); color:#f59e0b; }
+  .status-badge.approvato{ background: rgba(34,197,94,0.12); color:#22c55e; }
+  .status-badge.rifiutato{ background: rgba(239,68,68,0.12); color: var(--danger); }
   .muted{ color: var(--ink-soft); font-size:12.5px; line-height:1.6; }
   .field-message{
     font-size:12px;
@@ -404,6 +411,26 @@
         <span class="muted">Piano attuale</span>
       </div>
       <p class="muted">La gestione degli abbonamenti a pagamento sarà disponibile prossimamente. Quando sarà attiva, potrai gestire da qui il tuo piano e i metodi di pagamento.</p>
+    </div>
+
+    <h2>Verifica specializzando</h2>
+    <div class="card">
+      <p class="muted" style="margin-top:0;">
+        Il piano da 5€/mese è riservato agli specializzandi. Carica un documento che attesti la tua posizione (es. attestato di iscrizione alla scuola di specializzazione): lo verificheremo manualmente prima di sbloccare quel piano per il tuo account.
+      </p>
+      <div id="verif-status"></div>
+      <div id="verif-upload-area">
+        <div class="field-row">
+          <div class="field">
+            <label>Documento (PDF o immagine)</label>
+            <input type="file" id="verif-file" accept="application/pdf,image/*">
+          </div>
+        </div>
+        <div class="field-row">
+          <button class="btn-sm" id="verif-submit-btn">Invia per la verifica</button>
+        </div>
+      </div>
+      <div class="field-message" id="verif-message"></div>
     </div>
 
     <h2>Zona pericolosa</h2>
@@ -1747,6 +1774,75 @@ document.getElementById('btn-logout').onclick = async () => {
 };
 
 // ============================================================
+// VERIFICA SPECIALIZZANDO
+// ============================================================
+async function loadVerificationStatus(){
+  const { data, error } = await supabaseClient
+    .from('verification_requests')
+    .select('status, note_admin, submitted_at')
+    .eq('user_id', currentUser.id)
+    .order('submitted_at', { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  const statusDiv = document.getElementById('verif-status');
+  const uploadArea = document.getElementById('verif-upload-area');
+
+  if (error || !data){
+    statusDiv.innerHTML = '';
+    uploadArea.classList.remove('hidden');
+    return;
+  }
+
+  const labels = {
+    in_attesa: '⏳ In attesa di revisione',
+    approvato: '✓ Verificato — puoi scegliere il piano Specializzando',
+    rifiutato: '✕ Richiesta rifiutata'
+  };
+  statusDiv.innerHTML = `<div class="status-badge ${data.status}">${labels[data.status]}</div>` +
+    (data.status === 'rifiutato' && data.note_admin ? `<p class="muted" style="margin-top:-6px;">Motivo: ${escapeHtml(data.note_admin)}</p>` : '');
+
+  // Permetti un nuovo caricamento solo se rifiutato; se in attesa o approvato, nascondi il form
+  uploadArea.classList.toggle('hidden', data.status !== 'rifiutato');
+}
+
+document.getElementById('verif-submit-btn').onclick = async () => {
+  const msg = document.getElementById('verif-message');
+  msg.className = 'field-message';
+  const file = document.getElementById('verif-file').files[0];
+  if (!file){
+    msg.textContent = 'Seleziona prima un file.';
+    msg.classList.add('error');
+    return;
+  }
+
+  const btn = document.getElementById('verif-submit-btn');
+  btn.disabled = true;
+  msg.textContent = 'Caricamento in corso…';
+
+  try{
+    const path = currentUser.id + '/' + Date.now() + '_' + file.name.replace(/[^a-zA-Z0-9_.-]/g, '_');
+    const { error: upErr } = await supabaseClient.storage.from('verifiche').upload(path, file);
+    if (upErr) throw upErr;
+
+    const { error: insErr } = await supabaseClient.from('verification_requests').insert({
+      user_id: currentUser.id,
+      storage_path: path,
+      email: currentUser.email
+    });
+    if (insErr) throw insErr;
+
+    document.getElementById('verif-file').value = '';
+    msg.textContent = '';
+    await loadVerificationStatus();
+  }catch(e){
+    msg.textContent = 'Errore: ' + e.message;
+    msg.classList.add('error');
+  }
+  btn.disabled = false;
+};
+
+// ============================================================
 // ============================================================
 // NAVIGAZIONE A SCHEDE (colonna laterale)
 // ============================================================
@@ -1777,6 +1873,7 @@ document.querySelectorAll('.nav-item[data-tab]').forEach(btn => {
   DATA = await loadDataFromCloud();
   refreshAllSettingsSelects();
   await loadLetterheads();
+  await loadVerificationStatus();
   document.getElementById('gate').classList.add('hidden');
   document.getElementById('page-root').classList.remove('hidden');
 })();
