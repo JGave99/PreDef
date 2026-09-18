@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Team — Referti</title>
+<title>Team — ModReport</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -183,7 +183,7 @@
   <div class="topbar">
     <div class="brand"><span class="mark"></span> Team</div>
     <div class="topbar-right">
-      <a class="btn-settings" href="index.html">← Torna al referto</a>
+      <a class="btn-settings" href="app.html">← Torna al referto</a>
       <button class="btn-settings hidden" id="btn-invite">+ Invita</button>
     </div>
   </div>
@@ -300,7 +300,7 @@ function formatTime(iso){
   }
   const { data: { session } } = await supabaseClient.auth.getSession();
   if (!session || !session.user){
-    window.location.href = 'index.html';
+    window.location.href = 'app.html';
     return;
   }
   currentUser = session.user;
