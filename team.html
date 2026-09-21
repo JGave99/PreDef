@@ -352,8 +352,14 @@ function formatTime(iso){
   await showApp();
 })();
 
+function nomeVisualizzato(){
+  const meta = currentUser.user_metadata;
+  if (meta && meta.nome && meta.cognome) return meta.nome + ' ' + meta.cognome;
+  return (currentUser.email || 'Utente').split('@')[0];
+}
+
 document.getElementById('btn-become-admin').onclick = async () => {
-  const nome = (currentUser.email || 'Amministratore').split('@')[0];
+  const nome = nomeVisualizzato();
   const { error } = await supabaseClient.from('team_members').insert({
     user_id: currentUser.id, nome: nome, role: 'admin'
   });
@@ -369,7 +375,7 @@ document.getElementById('btn-become-admin').onclick = async () => {
 document.getElementById('btn-join-code').onclick = async () => {
   const code = document.getElementById('join-code-input').value.trim();
   if (!code) return;
-  const nome = (currentUser.email || 'Utente').split('@')[0];
+  const nome = nomeVisualizzato();
   const { data, error } = await supabaseClient.rpc('join_team_with_code', {
     invite_code: code, member_name: nome
   });
