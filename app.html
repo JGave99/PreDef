@@ -1541,6 +1541,29 @@ document.getElementById('print-generate-btn').onclick = async () => {
       y -= lineHeight;
     }
 
+    // Firma del medico, se nome e cognome sono impostati nel profilo
+    const meta = currentUser.user_metadata;
+    if (meta && meta.nome && meta.cognome){
+      const firma = 'Dott. ' + meta.nome + ' ' + meta.cognome;
+      const firmaSize = 11;
+      const spazioFirma = lineHeight * 2 + firmaSize;
+      if (y < bottomMargin + spazioFirma){
+        if (hasTemplate){
+          const [copied] = await pdfDoc.copyPages(pdfDoc, [templateIndex]);
+          page = pdfDoc.addPage(copied);
+        } else {
+          page = pdfDoc.addPage([width, height]);
+        }
+        y = height - mmToPt(marginTop);
+      } else {
+        y -= lineHeight * 2;
+      }
+      const firmaWidth = font.widthOfTextAtSize(firma, firmaSize);
+      page.drawText(firma, {
+        x: width - mmToPt(marginRight) - firmaWidth, y, size: firmaSize, font, color: rgb(0, 0, 0)
+      });
+    }
+
     const pdfBytes = await pdfDoc.save();
     const blob = new Blob([pdfBytes], { type: 'application/pdf' });
     const url = URL.createObjectURL(blob);
