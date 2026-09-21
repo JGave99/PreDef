@@ -396,6 +396,24 @@
     <div class="card">
       <div class="field-row">
         <div class="field">
+          <label>Nome</label>
+          <input type="text" id="profile-nome" placeholder="Nome">
+        </div>
+        <div class="field">
+          <label>Cognome</label>
+          <input type="text" id="profile-cognome" placeholder="Cognome">
+        </div>
+      </div>
+      <p class="muted" style="margin:0 0 10px;">Comparirà nella chat di team e in fondo al referto stampato.</p>
+      <div class="field-row">
+        <button class="btn-sm" id="update-name-btn">Salva nome e cognome</button>
+      </div>
+      <div class="field-message" id="name-message"></div>
+    </div>
+
+    <div class="card">
+      <div class="field-row">
+        <div class="field">
           <label>Email</label>
           <input type="email" id="profile-email" disabled>
         </div>
@@ -1706,6 +1724,39 @@ document.getElementById('lh-save-btn').onclick = async () => {
 // ============================================================
 // PROFILO
 // ============================================================
+document.getElementById('update-name-btn').onclick = async () => {
+  const nome = document.getElementById('profile-nome').value.trim();
+  const cognome = document.getElementById('profile-cognome').value.trim();
+  const msg = document.getElementById('name-message');
+  msg.className = 'field-message';
+
+  if (!nome || !cognome){
+    msg.textContent = 'Inserisci sia nome che cognome.';
+    msg.classList.add('error');
+    return;
+  }
+
+  const btn = document.getElementById('update-name-btn');
+  btn.disabled = true;
+  msg.textContent = 'Salvataggio in corso…';
+
+  try{
+    const { error: authError } = await supabaseClient.auth.updateUser({ data: { nome, cognome } });
+    if (authError) throw authError;
+    currentUser.user_metadata = Object.assign({}, currentUser.user_metadata, { nome, cognome });
+
+    // Se l'utente è già membro di un team, sincronizza anche il nome mostrato in chat
+    await supabaseClient.rpc('update_my_display_name', { new_nome: nome + ' ' + cognome });
+
+    msg.textContent = 'Nome e cognome salvati.';
+    msg.classList.add('ok');
+  }catch(e){
+    msg.textContent = 'Errore: ' + e.message;
+    msg.classList.add('error');
+  }
+  btn.disabled = false;
+};
+
 document.getElementById('update-password-btn').onclick = async () => {
   const pw1 = document.getElementById('new-password').value;
   const pw2 = document.getElementById('confirm-password').value;
@@ -1991,6 +2042,8 @@ document.querySelectorAll('.nav-item[data-tab]').forEach(btn => {
   }
   currentUser = session.user;
   document.getElementById('profile-email').value = currentUser.email || '';
+  document.getElementById('profile-nome').value = (currentUser.user_metadata && currentUser.user_metadata.nome) || '';
+  document.getElementById('profile-cognome').value = (currentUser.user_metadata && currentUser.user_metadata.cognome) || '';
   DATA = await loadDataFromCloud();
   refreshAllSettingsSelects();
   await loadLetterheads();
