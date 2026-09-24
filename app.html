@@ -1128,6 +1128,130 @@ document.getElementById('btn-confronto').onclick = () => insertConfronto('Confro
 document.getElementById('btn-presa-visione').onclick = () => insertConfronto('Presa visione di precedente analogo del ');
 document.getElementById('btn-non-precedenti').onclick = () => insertConfronto('Non disponibili precedenti per confronto.');
 
+// --- GESTIONE OVERLAY E STAMPA PDF ---
+
+const printOverlay = document.getElementById('print-overlay');
+const printSelect = document.getElementById('print-letterhead-select');
+
+document.getElementById('btn-open-print').onclick = async () => {
+  if (!el.reportText.value.trim()) {
+    alert('Il referto è vuoto. Componi o scrivi del testo prima di stampare.');
+    return;
+  }
+  
+  printSelect.innerHTML = '<option value="">Nessuna (pagina bianca)</option>';
+  if (currentUser && supabaseClient) {
+    try {
+      const { data } = await supabaseClient
+        .from('letterheads')
+        .select('id, nome, storage_path, margine_top, margine_left, margine_right')
+        .eq('user_id', currentUser.id);
+      
+      if (data && data.length) {
+        data.forEach(lh => {
+          const opt = document.createElement('option');
+          opt.value = lh.id;
+          opt.textContent = lh.nome;
+          opt.dataset.path = lh.storage_path;
+          opt.dataset.top = lh.margine_top;
+          opt.dataset.left = lh.margine_left;
+          opt.dataset.right = lh.margine_right;
+          printSelect.appendChild(opt);
+        });
+      }
+    } catch(e) {
+      console.warn('Errore nel caricamento carte intestate:', e);
+    }
+  }
+  
+  printOverlay.classList.add('open');
+};
+
+document.getElementById('print-close').onclick = () => {
+  printOverlay.classList.remove('open');
+};
+
+printSelect.onchange = () => {
+  const selectedOpt = printSelect.options[printSelect.selectedIndex];
+  if (selectedOpt && selectedOpt.value) {
+    document.getElementById('margin-top').value = selectedOpt.dataset.top || 40;
+    document.getElementById('margin-left').value = selectedOpt.dataset.left || 20;
+    document.getElementById('margin-right').value = selectedOpt.dataset.right || 20;
+  }
+};
+
+document.getElementById('print-generate-btn').onclick = async () => {
+  const btn = document.getElementById('print-generate-btn');
+  const msg = document.getElementById('print-message');
+  btn.disabled = true;
+  msg.textContent = 'Generazione PDF in corso…';
+
+  try {
+    const { PDFDocument, rgb, StandardFonts } = PDFLib;
+    let pdfDoc;
+
+    const selectedOpt = printSelect.options[printSelect.selectedIndex];
+    
+    if (selectedOpt && selectedOpt.value && selectedOpt.dataset.path) {
+      const { data: fileData, error } = await supabaseClient.storage
+        .from('letterheads')
+        .download(selectedOpt.dataset.path);
+      
+      if (error) throw error;
+      const arrayBuffer = await fileData.arrayBuffer();
+      pdfDoc = await PDFDocument.load(arrayBuffer);
+    } else {
+      pdfDoc = await PDFDocument.create();
+      pdfDoc.addPage([595.28, 841.89]);
+    }
+
+    const page = pdfDoc.getPages()[0];
+    const { width, height } = page.getSize();
+
+    const mmToPt = 2.83465;
+    const marginTop = (parseFloat(document.getElementById('margin-top').value) || 40) * mmToPt;
+    const marginLeft = (parseFloat(document.getElementById('margin-left').value) || 20) * mmToPt;
+    const marginRight = (parseFloat(document.getElementById('margin-right').value) || 20) * mmToPt;
+
+    const fontSize = 11;
+    const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
+    const textWidth = width - marginLeft - marginRight;
+    
+    const text = el.reportText.value;
+    const lines = text.split('\n');
+    let currentY = height - marginTop;
+
+    for (const line of lines) {
+      if (currentY < 40) break;
+      
+      page.drawText(line, {
+        x: marginLeft,
+        y: currentY,
+        size: fontSize,
+        font: font,
+        color: rgb(0, 0, 0),
+        maxWidth: textWidth
+      });
+      
+      currentY -= (fontSize * 1.4);
+    }
+
+    const pdfBytes = await pdfDoc.save();
+    const blob = new Blob([pdfBytes], { type: 'application/pdf' });
+    const url = URL.createObjectURL(blob);
+    
+    window.open(url, '_blank');
+    printOverlay.classList.remove('open');
+    msg.textContent = '';
+  } catch (e) {
+    msg.textContent = 'Errore nella generazione del PDF: ' + e.message;
+  }
+  
+  btn.disabled = false;
+};
+
+// --- AUTENTICAZIONE E INIZIALIZZAZIONE ---
+
 const loginOverlay = document.getElementById('login-overlay');
 const appRoot = document.getElementById('app-root');
 
