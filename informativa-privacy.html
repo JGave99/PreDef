@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Informativa sulla Privacy — ModReport</title>
+<link rel="icon" type="image/png" href="modreport_logo_bars_m.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
@@ -19,9 +20,11 @@
     background: var(--panel-alt); border-bottom: 1px solid var(--line); position:sticky; top:0;
   }
   .brand{ font-weight:700; font-size:15px; display:flex; align-items:center; gap:10px; }
-  .brand .mark{ width:20px; height:20px; border:2px solid var(--accent); border-radius:50%; position:relative; }
-  .brand .mark::after{ content:''; position:absolute; left:50%; top:50%; width:2px; height:12px; background: var(--accent); transform:translate(-50%,-50%); }
-  .brand .mark::before{ content:''; position:absolute; left:50%; top:50%; width:12px; height:2px; background: var(--accent); transform:translate(-50%,-50%); }
+  .brand .mark{
+    width:20px; height:20px; border-radius:5px;
+    background: url('modreport_logo_bars_m.png') no-repeat center / cover;
+    display:inline-block; flex:none;
+  }
   .back{ font-size:13.5px; color: var(--ink-soft); text-decoration:none; padding:7px 14px; border:1px solid var(--line); border-radius:8px; }
   .back:hover{ background: var(--panel); color: var(--ink); }
 
