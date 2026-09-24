@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Archivio — ModReport</title>
+<link rel="icon" type="image/png" href="modreport_logo_bars_m.png">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -55,25 +56,9 @@
     gap:10px;
   }
   .brand .mark{
-    width:20px;height:20px;
-    border:2px solid var(--accent);
-    border-radius:50%;
-    position:relative;
-    flex:none;
-  }
-  .brand .mark::after{
-    content:'';
-    position:absolute; left:50%; top:50%;
-    width:2px; height:12px;
-    background: var(--accent);
-    transform:translate(-50%,-50%);
-  }
-  .brand .mark::before{
-    content:'';
-    position:absolute; left:50%; top:50%;
-    width:12px; height:2px;
-    background: var(--accent);
-    transform:translate(-50%,-50%);
+    width:20px; height:20px; border-radius:5px;
+    background: url('modreport_logo_bars_m.png') no-repeat center / cover;
+    display:inline-block; flex:none;
   }
   .topbar-right{ display:flex; align-items:center; gap:10px; }
   .btn-settings{
