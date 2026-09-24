@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Amministrazione — ModReport</title>
+<link rel="icon" type="image/png" href="modreport_logo_bars_m.png">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -21,9 +22,11 @@
     padding: 14px 28px; background: var(--panel-alt); border-bottom: 1px solid var(--line); z-index:10;
   }
   .brand{ font-weight:700; font-size:15px; display:flex; align-items:center; gap:10px; }
-  .brand .mark{ width:20px; height:20px; border:2px solid var(--accent); border-radius:50%; position:relative; }
-  .brand .mark::after{ content:''; position:absolute; left:50%; top:50%; width:2px; height:12px; background: var(--accent); transform:translate(-50%,-50%); }
-  .brand .mark::before{ content:''; position:absolute; left:50%; top:50%; width:12px; height:2px; background: var(--accent); transform:translate(-50%,-50%); }
+  .brand .mark{
+    width:20px; height:20px; border-radius:5px;
+    background: url('modreport_logo_bars_m.png') no-repeat center / cover;
+    display:inline-block; flex:none;
+  }
   .btn-settings{
     background: transparent; border: 1px solid var(--line); color: var(--ink); font-family: var(--font);
     font-size:13px; padding: 7px 14px; border-radius: 6px; cursor:pointer; text-decoration:none;
