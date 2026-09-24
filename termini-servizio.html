@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Termini di Servizio — ModReport</title>
+<link rel="icon" type="image/png" href="modreport_logo_bars_m.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
@@ -19,9 +20,11 @@
     background: var(--panel-alt); border-bottom: 1px solid var(--line); position:sticky; top:0;
   }
   .brand{ font-weight:700; font-size:15px; display:flex; align-items:center; gap:10px; }
-  .brand .mark{ width:20px; height:20px; border:2px solid var(--accent); border-radius:50%; position:relative; }
-  .brand .mark::after{ content:''; position:absolute; left:50%; top:50%; width:2px; height:12px; background: var(--accent); transform:translate(-50%,-50%); }
-  .brand .mark::before{ content:''; position:absolute; left:50%; top:50%; width:12px; height:2px; background: var(--accent); transform:translate(-50%,-50%); }
+  .brand .mark{
+    width:20px; height:20px; border-radius:5px;
+    background: url('modreport_logo_bars_m.png') no-repeat center / cover;
+    display:inline-block; flex:none;
+  }
   .back{ font-size:13.5px; color: var(--ink-soft); text-decoration:none; padding:7px 14px; border:1px solid var(--line); border-radius:8px; }
   .back:hover{ background: var(--panel); color: var(--ink); }
 
@@ -85,7 +88,7 @@
   <p>I contenuti che crei (modelli di testo, documenti archiviati, file caricati) restano tuoi. Usando il Servizio ci dai solo il permesso di conservarli ed elaborarli per farteli usare. Il codice, il design e il marchio del Servizio restano invece di nostra proprietà.</p>
 
   <h2>7. Canali di team</h2>
-  <p>I messaggi che scrivi in un canale sono visibili a tutti i membri di quel canale. Anche qui vale la regola dell'Art. 4: nessun dato che identifichi persone reali non coinvolte direttamente nella conversazione.</p>
+  <p>I messaggi che scrivi in un canale sono visibili a tutti i membri di quel canale. Anche qui vale la regla dell'Art. 4: nessun dato che identifichi persone reali non coinvolte direttamente nella conversazione.</p>
 
   <h2>8. Disponibilità del servizio</h2>
   <p>Facciamo il possibile per tenerlo sempre attivo, ma non garantiamo un servizio ininterrotto o privo di errori, e possiamo modificarlo o sospenderlo. Ti consigliamo di non affidarti al Servizio come unico posto dove conservi contenuti importanti.</p>
