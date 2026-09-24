@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Il mio account — ModReport</title>
+<link rel="icon" type="image/png" href="modreport_logo_bars_m.png">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -55,25 +56,9 @@
     gap:10px;
   }
   .brand .mark{
-    width:20px;height:20px;
-    border:2px solid var(--accent);
-    border-radius:50%;
-    position:relative;
-    flex:none;
-  }
-  .brand .mark::after{
-    content:'';
-    position:absolute; left:50%; top:50%;
-    width:2px; height:12px;
-    background: var(--accent);
-    transform:translate(-50%,-50%);
-  }
-  .brand .mark::before{
-    content:'';
-    position:absolute; left:50%; top:50%;
-    width:12px; height:2px;
-    background: var(--accent);
-    transform:translate(-50%,-50%);
+    width:20px; height:20px; border-radius:5px;
+    background: url('modreport_logo_bars_m.png') no-repeat center / cover;
+    display:inline-block; flex:none;
   }
   .topbar-right{ display:flex; align-items:center; gap:10px; }
   .btn-settings{
@@ -738,56 +723,14 @@
 </div>
 
 <script>
-// ============================================================
-// DATI DI DEFAULT (identici a app.html)
-// ============================================================
 const DEFAULT_DATA = {
   metodiche: ['Ecografia', 'RX', 'TC', 'RMN'],
-
   esamiByMetodica: {
-    'RX': [
-      'RX TORACE 2PR',
-      'RX TORACE AP supino',
-      'RX ADDOME',
-      'RX RACHIDE LOMBOSACRALE',
-      'RX BACINO',
-      'RX GINOCCHIO',
-      'RX SPALLA',
-      'RX POLSO',
-      'RX CAVIGLIA',
-      'RX RACHIDE CERVICALE'
-    ],
-    'Ecografia': [
-      'ECOGRAFIA ADDOME COMPLETO',
-      'ECOGRAFIA TIROIDE',
-      'ECOGRAFIA ADDOME SUPERIORE',
-      'ECOGRAFIA RENALE E VESCICALE',
-      'ECOGRAFIA PARTI MOLLI',
-      'ECOCOLORDOPPLER ARTI INFERIORI VENOSO',
-      'ECOGRAFIA SCROTALE',
-      'ECOGRAFIA MAMMARIA'
-    ],
-    'TC': [
-      'TC TORACE',
-      'TC ADDOME COMPLETO',
-      'TC ADDOME SENZA E CON MDC',
-      'TC TORACE ADDOME PELVI (STADIAZIONE)',
-      'TC RACHIDE LOMBOSACRALE',
-      'TC BACINO',
-      'TC COLONNA CERVICALE',
-      'TC ANGIOGRAFIA AORTA'
-    ],
-    'RMN': [
-      'RMN RACHIDE LOMBOSACRALE',
-      'RMN GINOCCHIO',
-      'RMN SPALLA',
-      'RMN ADDOME SUPERIORE',
-      'RMN BACINO',
-      'RMN RACHIDE CERVICALE',
-      'RMN ENCEFALO'
-    ]
+    'RX': ['RX TORACE 2PR', 'RX TORACE AP supino', 'RX ADDOME', 'RX RACHIDE LOMBOSACRALE', 'RX BACINO', 'RX GINOCCHIO', 'RX SPALLA', 'RX POLSO', 'RX CAVIGLIA', 'RX RACHIDE CERVICALE'],
+    'Ecografia': ['ECOGRAFIA ADDOME COMPLETO', 'ECOGRAFIA TIROIDE', 'ECOGRAFIA ADDOME SUPERIORE', 'ECOGRAFIA RENALE E VESCICALE', 'ECOGRAFIA PARTI MOLLI', 'ECOCOLORDOPPLER ARTI INFERIORI VENOSO', 'ECOGRAFIA SCROTALE', 'ECOGRAFIA MAMMARIA'],
+    'TC': ['TC TORACE', 'TC ADDOME COMPLETO', 'TC ADDOME SENZA E CON MDC', 'TC TORACE ADDOME PELVI (STADIAZIONE)', 'TC RACHIDE LOMBOSACRALE', 'TC BACINO', 'TC COLONNA CERVICALE', 'TC ANGIOGRAFIA AORTA'],
+    'RMN': ['RMN RACHIDE LOMBOSACRALE', 'RMN GINOCCHIO', 'RMN SPALLA', 'RMN ADDOME SUPERIORE', 'RMN BACINO', 'RMN RACHIDE CERVICALE', 'RMN ENCEFALO']
   },
-
   indicazioniByEsame: {
     'RX TORACE 2PR': ['Tosse persistente', 'Dispnea', 'Dolore toracico', 'Follow-up oncologico', 'Inquadramento preoperatorio'],
     'RX TORACE AP supino': ['Controllo post-procedurale', 'Paziente non collaborante', 'Monitoraggio in reparto'],
@@ -799,7 +742,6 @@ const DEFAULT_DATA = {
     'RX POLSO': ['Trauma', 'Dolore'],
     'RX CAVIGLIA': ['Trauma', 'Dolore'],
     'RX RACHIDE CERVICALE': ['Trauma', 'Cervicalgia'],
-
     'ECOGRAFIA ADDOME COMPLETO': ['Dolore addominale', 'Alterazione indici epatici', 'Follow-up'],
     'ECOGRAFIA TIROIDE': ['Riscontro di nodulo palpabile', 'Controllo periodico', 'Familiarità per patologia tiroidea'],
     'ECOGRAFIA ADDOME SUPERIORE': ['Dolore ipocondrio destro', 'Alterazione indici epatici'],
@@ -808,7 +750,6 @@ const DEFAULT_DATA = {
     'ECOCOLORDOPPLER ARTI INFERIORI VENOSO': ['Sospetta trombosi venosa profonda', 'Edema arto'],
     'ECOGRAFIA SCROTALE': ['Dolore scrotale', 'Tumefazione palpabile'],
     'ECOGRAFIA MAMMARIA': ['Riscontro di nodulo palpabile', 'Controllo'],
-
     'TC TORACE': ['Stadiazione oncologica', 'Sospetta embolia polmonare', 'Dispnea ingravescente'],
     'TC ADDOME COMPLETO': ['Dolore addominale acuto', 'Stadiazione neoplastica', 'Follow-up post-chirurgico'],
     'TC ADDOME SENZA E CON MDC': ['Dolore addominale', 'Sospetta neoplasia'],
@@ -817,7 +758,6 @@ const DEFAULT_DATA = {
     'TC BACINO': ['Trauma', 'Coxalgia'],
     'TC COLONNA CERVICALE': ['Trauma'],
     'TC ANGIOGRAFIA AORTA': ['Sospetta dissezione aortica', 'Follow-up aneurisma'],
-
     'RMN RACHIDE LOMBOSACRALE': ['Lombalgia', 'Sciatalgia', 'Sospetta ernia discale'],
     'RMN GINOCCHIO': ['Gonalgia', 'Trauma', 'Sospetta lesione meniscale'],
     'RMN SPALLA': ['Dolore', 'Sospetta lesione della cuffia dei rotatori'],
@@ -826,223 +766,22 @@ const DEFAULT_DATA = {
     'RMN RACHIDE CERVICALE': ['Cervicalgia', 'Cervicobrachialgia'],
     'RMN ENCEFALO': ['Cefalea persistente', 'Sospetta lesione ischemica', 'Vertigini']
   },
-
   refertoByEsame: {
     'RX TORACE 2PR': {
       'Parenchima': [
         { label: 'Parenchima nella norma', text: 'Non addensamenti parenchimali a focolaio.', neg: false },
         { label: 'Addensamento', text: 'Addensamento parenchimale in sede da definire con approfondimento clinico-radiologico.', neg: true }
       ],
-      'Pleura': [
-        { label: 'Pleura libera', text: 'Non versamento pleurico bilateralmente.', neg: false }
-      ],
+      'Pleura': [{ label: 'Pleura libera', text: 'Non versamento pleurico bilateralmente.', neg: false }],
       'Cuore e mediastino': [
         { label: 'Cuore nella norma', text: 'Ombra cardiaca di dimensioni e morfologia nei limiti della norma.', neg: false },
         { label: 'Mediastino nella norma', text: 'Mediastino in asse, di ampiezza regolare.', neg: false }
       ],
-      'Scheletro': [
-        { label: 'Scheletro indenne', text: 'Non evidenti lesioni ossee focali a carico dello scheletro toracico in esame.', neg: false }
-      ]
-    },
-    'RX TORACE AP supino': {
-      'Parenchima': [
-        { label: 'Nella norma', text: 'Non evidenti addensamenti parenchimali focali, con i limiti intrinseci della proiezione singola in AP.', neg: false }
-      ],
-      'Presidi': [
-        { label: 'Presidi in sede', text: 'Presidi (CVC/SNG/drenaggi), ove presenti, in sede regolare.', neg: false }
-      ]
-    },
-    'RX ADDOME': {
-      'Gas intestinale': [
-        { label: 'Distribuzione regolare', text: 'Non evidenza di livelli idroaerei significativi.', neg: false }
-      ],
-      'Calcificazioni': [
-        { label: 'Assenti', text: 'Non calcificazioni patologiche in proiezione addominale.', neg: false }
-      ],
-      'Profili ossei': [
-        { label: 'Nella norma', text: 'Profili ossei del bacino e del rachide in esame nella norma.', neg: false }
-      ]
-    },
-    'RX RACHIDE LOMBOSACRALE': {
-      'Corpi vertebrali': [
-        { label: 'Nella norma', text: 'Non evidenti alterazioni di forma e struttura dei corpi vertebrali in esame.', neg: false }
-      ]
-    },
-    'RX BACINO': {
-      'Reperto': [
-        { label: 'Nella norma', text: 'Non evidenti rime di frattura né alterazioni strutturali a carico del bacino in esame.', neg: false }
-      ]
-    },
-    'RX GINOCCHIO': {
-      'Reperto': [
-        { label: 'Nella norma', text: 'Non evidenti esiti post-traumatici recenti; rime articolari conservate.', neg: false }
-      ]
-    },
-    'RX SPALLA': {
-      'Reperto': [
-        { label: 'Nella norma', text: 'Non evidenti alterazioni ossee focali; profilo articolare regolare.', neg: false }
-      ]
-    },
-    'RX POLSO': {
-      'Reperto': [
-        { label: 'Nella norma', text: 'Non rime di frattura; rapporti articolari conservati.', neg: false }
-      ]
-    },
-    'RX CAVIGLIA': {
-      'Reperto': [
-        { label: 'Nella norma', text: 'Non evidenti rime di frattura; mortasa tibio-astragalica congrua.', neg: false }
-      ]
-    },
-    'RX RACHIDE CERVICALE': {
-      'Corpi vertebrali': [
-        { label: 'Nella norma', text: 'Non evidenti alterazioni di forma e allineamento dei corpi vertebrali cervicali.', neg: false }
-      ]
-    },
-
-    'ECOGRAFIA ADDOME COMPLETO': {
-      'Fegato': [
-        { label: 'Fegato nella norma', text: 'Fegato di dimensioni ed ecostruttura nei limiti della norma.', neg: false }
-      ],
-      'Colecisti e vie biliari': [
-        { label: 'Nella norma', text: 'Colecisti alitiasica a pareti regolari; vie biliari non dilatate.', neg: false }
-      ],
-      'Reni': [
-        { label: 'Reni nella norma', text: 'Reni di dimensioni e morfologia conservate, senza dilatazione delle vie escretrici.', neg: false }
-      ]
-    },
-    'ECOGRAFIA TIROIDE': {
-      'Parenchima tiroideo': [
-        { label: 'Ecostruttura omogenea', text: 'Ghiandola tiroidea in sede, di dimensioni nella norma ed ecostruttura omogenea.', neg: false }
-      ],
-      'Noduli': [
-        { label: 'Non noduli', text: 'Non si evidenziano formazioni nodulari focali.', neg: false }
-      ]
-    },
-    'ECOGRAFIA ADDOME SUPERIORE': {
-      'Fegato e vie biliari': [
-        { label: 'Nella norma', text: 'Fegato, colecisti e vie biliari nei limiti della norma.', neg: false }
-      ]
-    },
-    'ECOGRAFIA RENALE E VESCICALE': {
-      'Reni e vescica': [
-        { label: 'Nella norma', text: 'Reni e vescica nei limiti della norma, senza dilatazione delle vie escretrici.', neg: false }
-      ]
-    },
-    'ECOGRAFIA PARTI MOLLI': {
-      'Reperto': [
-        { label: 'Nella norma', text: 'Non evidenti raccolte né lesioni focali nei tessuti molli in esame.', neg: false }
-      ]
-    },
-    'ECOCOLORDOPPLER ARTI INFERIORI VENOSO': {
-      'Asse venoso': [
-        { label: 'Nella norma', text: 'Pervietà e comprimibilità conservate dell’asse venoso profondo in esame; non segni di trombosi.', neg: false }
-      ]
-    },
-    'ECOGRAFIA SCROTALE': {
-      'Testicoli': [
-        { label: 'Nella norma', text: 'Testicoli in sede, di dimensioni ed ecostruttura nella norma.', neg: false }
-      ]
-    },
-    'ECOGRAFIA MAMMARIA': {
-      'Parenchima ghiandolare': [
-        { label: 'Nella norma', text: 'Parenchima ghiandolare privo di formazioni focali sospette.', neg: false }
-      ]
-    },
-
-    'TC TORACE': {
-      'Parenchima polmonare': [
-        { label: 'Nella norma', text: 'Parenchima polmonare privo di alterazioni densitometriche focali.', neg: false }
-      ],
-      'Linfonodi': [
-        { label: 'Non linfoadenopatie', text: 'Non linfoadenopatie mediastiniche o ilari di rilievo dimensionale.', neg: false }
-      ]
-    },
-    'TC ADDOME COMPLETO': {
-      'Fegato e vie biliari': [
-        { label: 'Nella norma', text: 'Fegato di dimensioni e densità nei limiti, privo di lesioni focali.', neg: false }
-      ],
-      'Linfonodi': [
-        { label: 'Non linfoadenopatie', text: 'Non linfoadenopatie retroperitoneali di rilievo dimensionale.', neg: false }
-      ]
-    },
-    'TC ADDOME SENZA E CON MDC': {
-      'Organi parenchimatosi': [
-        { label: 'Nella norma', text: 'Fegato, milza, pancreas e reni nei limiti della norma per morfologia e densitometria.', neg: false }
-      ]
-    },
-    'TC TORACE ADDOME PELVI (STADIAZIONE)': {
-      'Reperto generale': [
-        { label: 'Non secondarismi', text: 'Non evidenza di lesioni secondarie a distanza nei distretti esaminati.', neg: false }
-      ]
-    },
-    'TC RACHIDE LOMBOSACRALE': {
-      'Reperto': [
-        { label: 'Nella norma', text: 'Non evidenti alterazioni ossee significative; canale vertebrale pervio.', neg: false }
-      ]
-    },
-    'TC BACINO': {
-      'Reperto': [
-        { label: 'Nella norma', text: 'Non rime di frattura; strutture articolari conservate.', neg: false }
-      ]
-    },
-    'TC COLONNA CERVICALE': {
-      'Reperto': [
-        { label: 'Nella norma', text: 'Non evidenti rime di frattura né dislocazioni vertebrali.', neg: false }
-      ]
-    },
-    'TC ANGIOGRAFIA AORTA': {
-      'Aorta': [
-        { label: 'Nella norma', text: 'Aorta toracica e addominale di calibro regolare, senza segni di dissezione né ectasie significative.', neg: false }
-      ]
-    },
-
-    'RMN RACHIDE LOMBOSACRALE': {
-      'Dischi intervertebrali': [
-        { label: 'Nella norma', text: 'Dischi intervertebrali di segnale e altezza conservati ai livelli esaminati.', neg: false }
-      ],
-      'Canale vertebrale': [
-        { label: 'Pervio', text: 'Canale vertebrale di ampiezza conservata, privo di stenosi significative.', neg: false }
-      ]
-    },
-    'RMN GINOCCHIO': {
-      'Menischi e legamenti': [
-        { label: 'Nella norma', text: 'Menischi e legamenti crociati privi di alterazioni di segnale significative.', neg: false }
-      ]
-    },
-    'RMN SPALLA': {
-      'Cuffia dei rotatori': [
-        { label: 'Integra', text: 'Cuffia dei rotatori integra, senza alterazioni di segnale.', neg: false }
-      ]
-    },
-    'RMN ADDOME SUPERIORE': {
-      'Fegato e vie biliari': [
-        { label: 'Nella norma', text: 'Fegato e vie biliari nei limiti della norma.', neg: false }
-      ]
-    },
-    'RMN BACINO': {
-      'Teste femorali': [
-        { label: 'Nella norma', text: 'Teste femorali di segnale conservato, senza segni di necrosi avascolare.', neg: false }
-      ]
-    },
-    'RMN RACHIDE CERVICALE': {
-      'Dischi intervertebrali': [
-        { label: 'Nella norma', text: 'Dischi intervertebrali cervicali di segnale e altezza conservati.', neg: false }
-      ]
-    },
-    'RMN ENCEFALO': {
-      'Parenchima encefalico': [
-        { label: 'Nella norma', text: 'Non alterazioni di segnale focali del parenchima encefalico sovra- e sottotentoriale.', neg: false }
-      ],
-      'Sistema ventricolare': [
-        { label: 'Nella norma', text: 'Sistema ventricolare in asse, di ampiezza nei limiti della norma per età.', neg: false }
-      ]
+      'Scheletro': [{ label: 'Scheletro indenne', text: 'Non evidenti lesioni ossee focali a carico dello scheletro toracico in esame.', neg: false }]
     }
   }
 };
 
-// ============================================================
-// CONFIGURAZIONE SUPABASE (identica a app.html)
-// ============================================================
 const SUPABASE_URL = 'https://umejthggxihtyqvcszgm.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVtZWp0aGdneGlodHlxdmNzemdtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODg4NzI0MzEsImV4cCI6MjEwNDQ0ODQzMX0.BPaujgB70aLpWSifk5nH93fuyyyfOe8Uw4RupV1YQQE';
 const supabaseClient = (window.supabase && SUPABASE_URL.indexOf('INSERISCI') === -1)
@@ -1053,9 +792,7 @@ let DATA = JSON.parse(JSON.stringify(DEFAULT_DATA));
 let currentUser = null;
 let persistTimer = null;
 
-function localCloneDefault(){
-  return JSON.parse(JSON.stringify(DEFAULT_DATA));
-}
+function localCloneDefault(){ return JSON.parse(JSON.stringify(DEFAULT_DATA)); }
 
 async function loadDataFromCloud(){
   if (!supabaseClient || !currentUser) return localCloneDefault();
@@ -1085,9 +822,6 @@ function persist(){
   }, 500);
 }
 
-// ============================================================
-// PERSONALIZZAZIONE — utility per i menu a tendina
-// ============================================================
 function allEsami(){
   const out = [];
   DATA.metodiche.forEach(m => {
@@ -1179,9 +913,6 @@ function loadEditIndicazioneField(){
   input.value = (idx !== '' && list[idx] !== undefined) ? list[idx] : '';
 }
 
-// ============================================================
-// PERSONALIZZAZIONE — azioni
-// ============================================================
 document.getElementById('add-metodica-btn').onclick = () => {
   const input = document.getElementById('new-metodica-name');
   const name = input.value.trim();
@@ -1318,312 +1049,6 @@ document.getElementById('btn-reset-data').onclick = () => {
   refreshAllSettingsSelects();
 };
 
-// ============================================================
-// DETTATURA VOCALE (Web Speech API) — stessi campi di testo libero
-// ============================================================
-const SpeechRecognitionCtor = window.SpeechRecognition || window.webkitSpeechRecognition || null;
-
-function createMicHandler(getTargetEl, btnEl){
-  let recognition = null;
-  let recording = false;
-  btnEl.addEventListener('click', () => {
-    const target = getTargetEl();
-    if (!target) return;
-    if (!SpeechRecognitionCtor){
-      alert('La dettatura vocale non è supportata da questo browser. Usa Chrome o Edge.');
-      return;
-    }
-    if (recording){
-      recognition && recognition.stop();
-      return;
-    }
-    recognition = new SpeechRecognitionCtor();
-    recognition.lang = 'it-IT';
-    recognition.continuous = true;
-    recognition.interimResults = false;
-    recognition.onresult = (e) => {
-      let finalText = '';
-      for (let i = e.resultIndex; i < e.results.length; i++){
-        if (e.results[i].isFinal) finalText += e.results[i][0].transcript;
-      }
-      finalText = finalText.trim();
-      if (finalText){
-        const needsSpace = target.value && !/[\s\n]$/.test(target.value);
-        target.value = target.value + (needsSpace ? ' ' : '') + finalText + ' ';
-      }
-    };
-    recognition.onerror = (e) => {
-      recording = false;
-      btnEl.classList.remove('recording');
-      const messages = {
-        'not-allowed': 'Permesso al microfono negato. Controlla le impostazioni del sito nel browser.',
-        'no-speech': 'Non ho sentito nulla. Riprova.',
-        'audio-capture': 'Nessun microfono trovato.',
-        'network': 'La dettatura richiede una connessione internet attiva.'
-      };
-      if (messages[e.error]) alert(messages[e.error]);
-    };
-    recognition.onend = () => {
-      recording = false;
-      btnEl.classList.remove('recording');
-    };
-    try{
-      recognition.start();
-      recording = true;
-    }catch(err){ console.warn('Impossibile avviare la dettatura:', err); }
-  });
-}
-
-createMicHandler(() => document.getElementById('new-indicazione-text'), document.getElementById('mic-new-indicazione-text'));
-createMicHandler(() => document.getElementById('new-referto-text'), document.getElementById('mic-new-referto-text'));
-createMicHandler(() => document.getElementById('edit-referto-text'), document.getElementById('mic-edit-referto-text'));
-createMicHandler(() => document.getElementById('edit-indicazione-text'), document.getElementById('mic-edit-indicazione-text'));
-createMicHandler(() => document.getElementById('ai-report-text'), document.getElementById('mic-ai-report-text'));
-
-// ============================================================
-// SCOMPOSIZIONE REFERTO — analisi locale a regole (nessuna IA, nessun invio dati)
-// ============================================================
-
-// Parole chiave per indovinare il gruppo/distretto anatomico di ogni frase.
-const KEYWORD_GROUPS = [
-  [/pleur/i, 'Pleura'],
-  [/mediastin/i, 'Mediastino'],
-  [/cuore|cardiac/i, 'Cuore'],
-  [/scheletr|osse[ao]|frattur/i, 'Scheletro'],
-  [/fegato|epatic/i, 'Fegato'],
-  [/colecist|vie biliari/i, 'Colecisti e vie biliari'],
-  [/mils?a|splen/i, 'Milza'],
-  [/pancrea/i, 'Pancreas'],
-  [/ren[ei]\b|escretri/i, 'Reni'],
-  [/vescica/i, 'Vescica'],
-  [/colon|coprostasi/i, 'Colon'],
-  [/anse intestinali/i, 'Anse intestinali'],
-  [/aria libera|pneumoperitoneo|idroaere/i, 'Cavità peritoneale'],
-  [/linfonod/i, 'Linfonodi'],
-  [/aort/i, 'Aorta'],
-  [/menisc|legament/i, 'Menischi e legamenti'],
-  [/cuffia dei rotatori/i, 'Cuffia dei rotatori'],
-  [/disc[oi] intervertebr/i, 'Dischi intervertebrali'],
-  [/canale vertebrale/i, 'Canale vertebrale'],
-  [/test[ae] femoral/i, 'Teste femorali'],
-  [/tiroide/i, 'Tiroide'],
-  [/testicol/i, 'Testicoli'],
-  [/parenchima/i, 'Parenchima'],
-  [/calcificazion/i, 'Calcificazioni']
-];
-
-function guessGroup(sentence){
-  for (const [rx, label] of KEYWORD_GROUPS){
-    if (rx.test(sentence)) return label;
-  }
-  return 'Referto';
-}
-
-// Le frasi normali in italiano radiologico iniziano quasi sempre con una
-// negazione ("Non...") o con espressioni come "nella norma"; le frasi che
-// affermano direttamente un reperto vengono segnate come da approfondire.
-function guessNeg(sentence){
-  const s = sentence.trim();
-  const normalPattern = /^(non\s|nella norma|nei limiti|regolare|assente|conservat)/i;
-  return !normalPattern.test(s);
-}
-
-function guessLabel(sentence){
-  const clean = sentence.replace(/[.!?]+$/, '').trim();
-  const words = clean.split(/\s+/);
-  const short = words.slice(0, 5).join(' ');
-  return words.length > 5 ? short + '…' : short;
-}
-
-function parseReportText(rawText){
-  const raw = rawText.trim();
-  const upperRaw = raw.toUpperCase();
-
-  let foundEsame = null, foundMetodica = null, esameEsistente = false, body = raw;
-
-  // 1. Cerca tra gli esami già presenti in libreria
-  outer:
-  for (const m of DATA.metodiche){
-    for (const e of (DATA.esamiByMetodica[m] || [])){
-      const idx = upperRaw.indexOf(e.toUpperCase());
-      if (idx !== -1){
-        foundEsame = e;
-        foundMetodica = m;
-        esameEsistente = true;
-        body = raw.slice(0, idx) + raw.slice(idx + e.length);
-        break outer;
-      }
-    }
-  }
-
-  // 2. Se non trovato, prova a riconoscere una metodica per parola chiave
-  //    e considera la sequenza iniziale in maiuscolo come nome dell'esame
-  if (!foundEsame){
-    const metodicaKeywords = [
-      ['RX', /\bRX\b/i],
-      ['TC', /\bTC\b/i],
-      ['RMN', /\bR[MN]N\b|\bRISONANZA\b/i],
-      ['Ecografia', /\bECOGRAFIA\b|\bECOCOLORDOPPLER\b/i]
-    ];
-    for (const [m, rx] of metodicaKeywords){
-      if (rx.test(raw)){ foundMetodica = m; break; }
-    }
-    const match = raw.match(/^([A-ZÀ-Ý0-9°\s]{4,60}?)(?=\s+[A-ZÀ-Ý][a-zà-ý])/);
-    if (match){
-      foundEsame = match[1].trim();
-      body = raw.slice(match[1].length);
-    }
-  }
-
-  // 3. Suddividi il resto del testo in frasi
-  const sentences = body
-    .split(/(?<=[.!?])\s+/)
-    .map(s => s.trim())
-    .filter(s => s.length > 3);
-
-  const voci = sentences.map(s => ({
-    gruppo: guessGroup(s),
-    etichetta: guessLabel(s),
-    testo: s,
-    neg: guessNeg(s)
-  }));
-
-  return {
-    metodica: foundMetodica || '',
-    esame: foundEsame || '',
-    esame_esistente: esameEsistente,
-    indicazione: '',
-    voci_referto: voci
-  };
-}
-
-document.getElementById('ai-analyze-btn').onclick = () => {
-  const msg = document.getElementById('ai-message');
-  const text = document.getElementById('ai-report-text').value.trim();
-  msg.className = 'field-message';
-  document.getElementById('ai-results').classList.add('hidden');
-
-  if (!text){
-    msg.textContent = 'Incolla prima il testo del referto.';
-    msg.classList.add('error');
-    return;
-  }
-
-  const result = parseReportText(text);
-
-  if (!result.esame){
-    msg.textContent = 'Non sono riuscito a riconoscere un esame in questo testo. Puoi comunque compilare i campi manualmente qui sotto, oppure usare il pannello di personalizzazione più in basso.';
-    msg.classList.add('error');
-  } else if (!result.voci_referto.length){
-    msg.textContent = 'Esame riconosciuto, ma non ho trovato frasi da scomporre nel resto del testo.';
-    msg.classList.add('error');
-  } else {
-    msg.textContent = '';
-  }
-
-  renderAiResults(result);
-};
-
-function renderAiResults(result){
-  document.getElementById('ai-metodica-riconosciuta').value = result.metodica || '';
-  document.getElementById('ai-esame-riconosciuto').value = result.esame || '';
-
-  const indRow = document.getElementById('ai-indicazione-row');
-  if (result.indicazione){
-    indRow.classList.remove('hidden');
-    document.getElementById('ai-indicazione-riconosciuta').value = result.indicazione;
-  } else {
-    indRow.classList.add('hidden');
-  }
-
-  const list = document.getElementById('ai-voci-list');
-  list.innerHTML = '';
-
-  if (result.warning){
-    const w = document.createElement('div');
-    w.className = 'ai-warning';
-    w.textContent = '⚠ ' + result.warning;
-    list.appendChild(w);
-  }
-
-  (result.voci_referto || []).forEach((voce, idx) => {
-    const item = document.createElement('div');
-    item.className = 'ai-voce-item' + (voce.neg ? ' neg' : '');
-    item.innerHTML = `
-      <div class="voce-row">
-        <input type="text" data-field="gruppo" value="${escapeAttr(voce.gruppo || '')}" placeholder="Gruppo">
-        <input type="text" data-field="etichetta" value="${escapeAttr(voce.etichetta || '')}" placeholder="Etichetta">
-      </div>
-      <div class="voce-row">
-        <textarea data-field="testo" placeholder="Testo">${escapeHtml(voce.testo || '')}</textarea>
-      </div>
-      <div class="voce-row" style="align-items:center;">
-        <label class="checkbox-row" style="margin:0;">
-          <input type="checkbox" data-field="neg" ${voce.neg ? 'checked' : ''}> reperto da approfondire
-        </label>
-      </div>
-      <div class="ai-voce-actions">
-        <button class="btn-sm danger" data-action="scarta">Scarta</button>
-        <button class="btn-sm" data-action="aggiungi">+ Aggiungi alla libreria</button>
-      </div>
-    `;
-    item.querySelector('[data-action="scarta"]').onclick = () => item.remove();
-    item.querySelector('[data-action="aggiungi"]').onclick = () => {
-      const gruppo = item.querySelector('[data-field="gruppo"]').value.trim();
-      const etichetta = item.querySelector('[data-field="etichetta"]').value.trim();
-      const testo = item.querySelector('[data-field="testo"]').value.trim();
-      const neg = item.querySelector('[data-field="neg"]').checked;
-      if (!gruppo || !etichetta || !testo) return;
-      aggiungiVoceAllaLibreria(result, gruppo, etichetta, testo, neg);
-      item.classList.add('added');
-      item.querySelector('[data-action="aggiungi"]').textContent = '✓ Aggiunta';
-      item.querySelector('[data-action="aggiungi"]').disabled = true;
-    };
-    list.appendChild(item);
-  });
-
-  document.getElementById('ai-results').classList.remove('hidden');
-}
-
-function aggiungiVoceAllaLibreria(result, gruppo, etichetta, testo, neg){
-  const metodica = result.metodica;
-  const esame = result.esame;
-  if (!metodica || !esame) return;
-
-  if (!DATA.metodiche.includes(metodica)){
-    DATA.metodiche.push(metodica);
-    DATA.esamiByMetodica[metodica] = DATA.esamiByMetodica[metodica] || [];
-  }
-  DATA.esamiByMetodica[metodica] = DATA.esamiByMetodica[metodica] || [];
-  if (!DATA.esamiByMetodica[metodica].includes(esame)){
-    DATA.esamiByMetodica[metodica].push(esame);
-  }
-
-  DATA.refertoByEsame[esame] = DATA.refertoByEsame[esame] || {};
-  DATA.refertoByEsame[esame][gruppo] = DATA.refertoByEsame[esame][gruppo] || [];
-  DATA.refertoByEsame[esame][gruppo].push({ label: etichetta, text: testo, neg });
-
-  if (result.indicazione){
-    DATA.indicazioniByEsame[esame] = DATA.indicazioniByEsame[esame] || [];
-    if (!DATA.indicazioniByEsame[esame].includes(result.indicazione)){
-      DATA.indicazioniByEsame[esame].push(result.indicazione);
-    }
-  }
-
-  persist();
-  refreshAllSettingsSelects();
-}
-
-function escapeHtml(s){
-  return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-}
-function escapeAttr(s){
-  return escapeHtml(s).replace(/"/g, '&quot;');
-}
-
-// ============================================================
-// GESTIONE STAMPA — carte intestate salvate
-// ============================================================
 let letterheads = [];
 
 async function loadLetterheads(){
@@ -1734,9 +1159,6 @@ document.getElementById('lh-save-btn').onclick = async () => {
   btn.disabled = false;
 };
 
-// ============================================================
-// PROFILO
-// ============================================================
 document.getElementById('update-name-btn').onclick = async () => {
   const nome = document.getElementById('profile-nome').value.trim();
   const cognome = document.getElementById('profile-cognome').value.trim();
@@ -1758,7 +1180,6 @@ document.getElementById('update-name-btn').onclick = async () => {
     if (authError) throw authError;
     currentUser.user_metadata = Object.assign({}, currentUser.user_metadata, { nome, cognome });
 
-    // Se l'utente è già membro di un team, sincronizza anche il nome mostrato in chat
     await supabaseClient.rpc('update_my_display_name', { new_nome: nome + ' ' + cognome });
 
     msg.textContent = 'Nome e cognome salvati.';
@@ -1803,15 +1224,13 @@ document.getElementById('delete-account-btn').onclick = async () => {
 
   const conferma1 = confirm(
     'Vuoi eliminare definitivamente il tuo account?\n\n' +
-    'Verranno cancellati in modo permanente e irreversibile: la tua libreria personalizzata, ' +
-    'i referti archiviati, le carte intestate caricate, la tua appartenenza a eventuali team ' +
-    'e i messaggi che hai scritto.'
+    'Verranno cancellati in modo permanente e irreversibile tutti i tuoi dati.'
   );
   if (!conferma1) return;
 
   const digitato = prompt('Per confermare, scrivi ELIMINA (in maiuscolo) qui sotto:');
   if (digitato !== 'ELIMINA'){
-    msg.textContent = 'Eliminazione annullata (testo di conferma non corrispondente).';
+    msg.textContent = 'Eliminazione annullata.';
     msg.classList.add('error');
     return;
   }
@@ -1821,13 +1240,11 @@ document.getElementById('delete-account-btn').onclick = async () => {
   msg.textContent = 'Eliminazione in corso…';
 
   try{
-    // Rimuove prima i file delle carte intestate dallo storage
     if (letterheads && letterheads.length){
       const percorsi = letterheads.map(lh => lh.storage_path);
       await supabaseClient.storage.from('letterheads').remove(percorsi);
     }
 
-    // Rimuove tutti i dati applicativi e infine l'account stesso
     const { error } = await supabaseClient.rpc('delete_my_account');
     if (error) throw error;
 
@@ -1845,192 +1262,6 @@ document.getElementById('btn-logout').onclick = async () => {
   window.location.href = 'app.html';
 };
 
-// ============================================================
-// ABBONAMENTO
-// ============================================================
-const PLANS = [
-  { id: 'specializzando', nome: 'Specializzando', prezzo: '5€', desc: 'Refertazione completa. Riservato agli specializzandi con verifica approvata. Nessun accesso alla chat di team.' },
-  { id: 'base', nome: 'Base', prezzo: '10€', desc: 'Refertazione completa per tutti. Nessun accesso alla chat di team.' },
-  { id: 'pro', nome: 'Pro', prezzo: '20€', desc: 'Tutto il piano Base, più accesso completo alla chat di team.' }
-];
-
-let mySubscription = null;
-let myVerificationApproved = false;
-
-async function loadSubscriptionStatus(){
-  const { data: sub } = await supabaseClient
-    .from('subscriptions')
-    .select('plan, status, current_period_end')
-    .eq('user_id', currentUser.id)
-    .maybeSingle();
-  mySubscription = sub || null;
-
-  const { data: verif } = await supabaseClient
-    .from('verification_requests')
-    .select('status')
-    .eq('user_id', currentUser.id)
-    .eq('status', 'approvato')
-    .maybeSingle();
-  myVerificationApproved = !!verif;
-
-  renderSubscriptionUI();
-}
-
-function renderSubscriptionUI(){
-  const currentCard = document.getElementById('sub-current-card');
-  const plansArea = document.getElementById('sub-plans-area');
-  const attiva = mySubscription && ['active', 'trialing'].includes(mySubscription.status);
-
-  if (attiva){
-    const planInfo = PLANS.find(p => p.id === mySubscription.plan);
-    const dataFine = mySubscription.current_period_end
-      ? new Date(mySubscription.current_period_end).toLocaleDateString('it-IT', { day:'2-digit', month:'2-digit', year:'numeric' })
-      : '—';
-    currentCard.innerHTML = `
-      <div class="card">
-        <div class="plan-row">
-          <span class="plan-badge">${escapeHtml(planInfo ? planInfo.nome : mySubscription.plan)}</span>
-          <span class="muted">Piano attuale — rinnovo il ${dataFine}</span>
-        </div>
-        <div class="field-row">
-          <button class="btn-sm" id="manage-sub-btn">Gestisci abbonamento</button>
-        </div>
-      </div>
-    `;
-    document.getElementById('manage-sub-btn').onclick = openBillingPortal;
-    plansArea.innerHTML = '';
-  } else {
-    currentCard.innerHTML = `
-      <div class="card">
-        <div class="plan-row">
-          <span class="plan-badge">Nessun abbonamento attivo</span>
-        </div>
-        <p class="muted" style="margin:8px 0 0;">Scegli un piano per iniziare a usare il Servizio.</p>
-      </div>
-    `;
-    plansArea.innerHTML = '<div class="plans-grid">' + PLANS.map(p => {
-      const bloccato = p.id === 'specializzando' && !myVerificationApproved;
-      return `
-        <div class="plan-card ${bloccato ? 'disabled' : ''}">
-          <h4>${escapeHtml(p.nome)}</h4>
-          <div class="price">${p.prezzo}<span> /mese</span></div>
-          <p class="desc">${escapeHtml(p.desc)}</p>
-          <button class="btn-sm primary" data-plan="${p.id}" ${bloccato ? 'disabled' : ''}>
-            ${bloccato ? 'Richiede verifica' : 'Abbonati'}
-          </button>
-        </div>
-      `;
-    }).join('') + '</div>';
-
-    plansArea.querySelectorAll('[data-plan]').forEach(btn => {
-      if (!btn.disabled) btn.onclick = () => startCheckout(btn.dataset.plan);
-    });
-  }
-}
-
-async function startCheckout(plan){
-  const msg = document.getElementById('sub-message');
-  msg.className = 'field-message';
-  msg.textContent = 'Apertura pagamento in corso…';
-  try{
-    const { data, error } = await supabaseClient.functions.invoke('create-checkout-session', { body: { plan } });
-    if (error) throw error;
-    if (data && data.error) throw new Error(data.error);
-    window.location.href = data.url;
-  }catch(e){
-    msg.textContent = 'Errore: ' + e.message;
-    msg.classList.add('error');
-  }
-}
-
-async function openBillingPortal(){
-  const msg = document.getElementById('sub-message');
-  msg.className = 'field-message';
-  msg.textContent = 'Apertura in corso…';
-  try{
-    const { data, error } = await supabaseClient.functions.invoke('create-portal-session', { body: {} });
-    if (error) throw error;
-    if (data && data.error) throw new Error(data.error);
-    window.location.href = data.url;
-  }catch(e){
-    msg.textContent = 'Errore: ' + e.message;
-    msg.classList.add('error');
-  }
-}
-
-// ============================================================
-// VERIFICA SPECIALIZZANDO
-// ============================================================
-async function loadVerificationStatus(){
-  const { data, error } = await supabaseClient
-    .from('verification_requests')
-    .select('status, note_admin, submitted_at')
-    .eq('user_id', currentUser.id)
-    .order('submitted_at', { ascending: false })
-    .limit(1)
-    .maybeSingle();
-
-  const statusDiv = document.getElementById('verif-status');
-  const uploadArea = document.getElementById('verif-upload-area');
-
-  if (error || !data){
-    statusDiv.innerHTML = '';
-    uploadArea.classList.remove('hidden');
-    return;
-  }
-
-  const labels = {
-    in_attesa: '⏳ In attesa di revisione',
-    approvato: '✓ Verificato — puoi scegliere il piano Specializzando',
-    rifiutato: '✕ Richiesta rifiutata'
-  };
-  statusDiv.innerHTML = `<div class="status-badge ${data.status}">${labels[data.status]}</div>` +
-    (data.status === 'rifiutato' && data.note_admin ? `<p class="muted" style="margin-top:-6px;">Motivo: ${escapeHtml(data.note_admin)}</p>` : '');
-
-  // Permetti un nuovo caricamento solo se rifiutato; se in attesa o approvato, nascondi il form
-  uploadArea.classList.toggle('hidden', data.status !== 'rifiutato');
-}
-
-document.getElementById('verif-submit-btn').onclick = async () => {
-  const msg = document.getElementById('verif-message');
-  msg.className = 'field-message';
-  const file = document.getElementById('verif-file').files[0];
-  if (!file){
-    msg.textContent = 'Seleziona prima un file.';
-    msg.classList.add('error');
-    return;
-  }
-
-  const btn = document.getElementById('verif-submit-btn');
-  btn.disabled = true;
-  msg.textContent = 'Caricamento in corso…';
-
-  try{
-    const path = currentUser.id + '/' + Date.now() + '_' + file.name.replace(/[^a-zA-Z0-9_.-]/g, '_');
-    const { error: upErr } = await supabaseClient.storage.from('verifiche').upload(path, file);
-    if (upErr) throw upErr;
-
-    const { error: insErr } = await supabaseClient.from('verification_requests').insert({
-      user_id: currentUser.id,
-      storage_path: path,
-      email: currentUser.email
-    });
-    if (insErr) throw insErr;
-
-    document.getElementById('verif-file').value = '';
-    msg.textContent = '';
-    await loadVerificationStatus();
-  }catch(e){
-    msg.textContent = 'Errore: ' + e.message;
-    msg.classList.add('error');
-  }
-  btn.disabled = false;
-};
-
-// ============================================================
-// ============================================================
-// NAVIGAZIONE A SCHEDE (colonna laterale)
-// ============================================================
 document.querySelectorAll('.nav-item[data-tab]').forEach(btn => {
   btn.addEventListener('click', () => {
     document.querySelectorAll('.nav-item[data-tab]').forEach(b => b.classList.remove('active'));
@@ -2040,9 +1271,6 @@ document.querySelectorAll('.nav-item[data-tab]').forEach(btn => {
   });
 });
 
-// ============================================================
-// AVVIO — richiede una sessione valida, altrimenti torna a app.html
-// ============================================================
 (async function init(){
   if (!supabaseClient){
     document.getElementById('gate').textContent = 'Configurazione cloud mancante.';
@@ -2060,16 +1288,6 @@ document.querySelectorAll('.nav-item[data-tab]').forEach(btn => {
   DATA = await loadDataFromCloud();
   refreshAllSettingsSelects();
   await loadLetterheads();
-  await loadVerificationStatus();
-  await loadSubscriptionStatus();
-
-  const params = new URLSearchParams(window.location.search);
-  if (params.get('checkout') === 'success'){
-    document.getElementById('sub-message').textContent = 'Pagamento ricevuto — attivazione in corso, potrebbe richiedere qualche secondo. Aggiorna la pagina tra poco se non vedi ancora il piano attivo.';
-    history.replaceState({}, '', window.location.pathname);
-  } else if (params.get('checkout') === 'cancel'){
-    history.replaceState({}, '', window.location.pathname);
-  }
 
   document.getElementById('gate').classList.add('hidden');
   document.getElementById('page-root').classList.remove('hidden');
