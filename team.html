@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Team — ModReport</title>
+<link rel="icon" type="image/png" href="modreport_logo_bars_m.png">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -44,9 +45,11 @@
     font-size:13px;
   }
   .brand{ font-weight:600; font-size:15px; display:flex; align-items:center; gap:10px; }
-  .brand .mark{ width:20px;height:20px; border:2px solid var(--accent); border-radius:50%; position:relative; flex:none; }
-  .brand .mark::after{ content:''; position:absolute; left:50%; top:50%; width:2px; height:12px; background: var(--accent); transform:translate(-50%,-50%); }
-  .brand .mark::before{ content:''; position:absolute; left:50%; top:50%; width:12px; height:2px; background: var(--accent); transform:translate(-50%,-50%); }
+  .brand .mark{
+    width:20px; height:20px; border-radius:5px;
+    background: url('modreport_logo_bars_m.png') no-repeat center / cover;
+    display:inline-block; flex:none;
+  }
   .topbar-right{ display:flex; align-items:center; gap:10px; }
   .btn-settings{
     background: transparent; border: 1px solid var(--line); color: var(--ink);
@@ -211,7 +214,6 @@
   </div>
 </div>
 
-<!-- ================= PRIMA CONFIGURAZIONE TEAM ================= -->
 <div class="gate hidden" id="setup-gate">
   <div class="setup-card">
     <h2 style="margin-top:0;">Configura il team</h2>
@@ -222,7 +224,6 @@
   </div>
 </div>
 
-<!-- ================= NON ANCORA MEMBRO ================= -->
 <div class="gate hidden" id="join-gate">
   <div class="setup-card">
     <h2 style="margin-top:0;">Entra nel team</h2>
@@ -237,7 +238,6 @@
   </div>
 </div>
 
-<!-- ================= NUOVO CANALE ================= -->
 <div class="overlay" id="channel-overlay">
   <div class="overlay-panel">
     <h2>Nuovo canale</h2>
@@ -250,7 +250,6 @@
   </div>
 </div>
 
-<!-- ================= INVITA ================= -->
 <div class="overlay" id="invite-overlay">
   <div class="overlay-panel">
     <h2>Invita un collega</h2>
@@ -271,12 +270,12 @@ const supabaseClient = (window.supabase && SUPABASE_URL.indexOf('INSERISCI') ===
   : null;
 
 let currentUser = null;
-let myMembership = null; // { role, nome } oppure null se non membro
+let myMembership = null;
 let channels = [];
 let currentChannelId = null;
 let messagesSub = null;
-let lastReadMap = {}; // channel_id -> timestamp ISO
-let lastMessageMap = {}; // channel_id -> timestamp ISO dell'ultimo messaggio
+let lastReadMap = {};
+let lastMessageMap = {};
 
 function escapeHtml(s){
   return (s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
@@ -290,9 +289,6 @@ function formatTime(iso){
          d.toLocaleTimeString('it-IT', { hour:'2-digit', minute:'2-digit' });
 }
 
-// ============================================================
-// AVVIO — autenticazione + stato di appartenenza al team
-// ============================================================
 (async function init(){
   if (!supabaseClient){
     document.getElementById('gate').textContent = 'Configurazione cloud mancante.';
@@ -305,7 +301,6 @@ function formatTime(iso){
   }
   currentUser = session.user;
 
-  // 1. C'è già un team (cioè esiste almeno un membro)?
   const { count, error: countErr } = await supabaseClient
     .from('team_members')
     .select('user_id', { count: 'exact', head: true });
@@ -316,13 +311,11 @@ function formatTime(iso){
   }
 
   if (!count || count === 0){
-    // Nessun team esiste ancora: mostra la schermata "diventa admin"
     document.getElementById('gate').classList.add('hidden');
     document.getElementById('setup-gate').classList.remove('hidden');
     return;
   }
 
-  // 2. Il team esiste: io ne faccio parte?
   const { data: myRow, error: myErr } = await supabaseClient
     .from('team_members')
     .select('user_id, nome, role')
@@ -335,7 +328,6 @@ function formatTime(iso){
   }
 
   if (!myRow){
-    // Non sono membro: provo con un eventuale codice nell'URL, altrimenti chiedo il codice
     document.getElementById('gate').classList.add('hidden');
     document.getElementById('join-gate').classList.remove('hidden');
     document.getElementById('join-with-code').classList.remove('hidden');
@@ -392,9 +384,6 @@ document.getElementById('btn-join-code').onclick = async () => {
   await showApp();
 };
 
-// ============================================================
-// APP PRINCIPALE
-// ============================================================
 async function showApp(){
   document.getElementById('gate').classList.add('hidden');
   document.getElementById('page-root').classList.remove('hidden');
@@ -426,7 +415,6 @@ async function loadChannels(){
   }
   channels = data || [];
 
-  // ultimo messaggio per canale, per calcolare i pallini "non letto"
   for (const ch of channels){
     const { data: lastMsg } = await supabaseClient
       .from('messages')
@@ -611,9 +599,6 @@ async function sendMessage(){
   }
 }
 
-// ============================================================
-// NUOVO CANALE
-// ============================================================
 document.getElementById('btn-new-channel').onclick = () => {
   document.getElementById('new-channel-name').value = '';
   document.getElementById('channel-overlay').classList.add('open');
@@ -633,9 +618,6 @@ document.getElementById('channel-create').onclick = async () => {
   await loadChannels();
 };
 
-// ============================================================
-// INVITA
-// ============================================================
 document.getElementById('btn-invite').onclick = () => {
   document.getElementById('invite-link-area').innerHTML = '<p style="font-size:12.5px; color:var(--ink-soft);">Genera un link per invitare un collega.</p>';
   document.getElementById('invite-overlay').classList.add('open');
@@ -655,7 +637,6 @@ document.getElementById('invite-generate').onclick = async () => {
     '<div class="invite-link-box">' + escapeHtml(link) + '</div>' +
     '<p style="font-size:11.5px; color:var(--ink-soft);">Copia questo link e invialo tu stesso al collega.</p>';
 };
-
 </script>
 </body>
 </html>
