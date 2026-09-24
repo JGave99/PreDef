@@ -1215,6 +1215,7 @@ document.getElementById('print-generate-btn').onclick = async () => {
 
     const fontSize = 11;
     const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
+    const fontBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
     const textWidth = width - marginLeft - marginRight;
     
     const text = el.reportText.value;
@@ -1222,7 +1223,7 @@ document.getElementById('print-generate-btn').onclick = async () => {
     let currentY = height - marginTop;
 
     for (const line of lines) {
-      if (currentY < 40) break;
+      if (currentY < 60) break;
       
       page.drawText(line, {
         x: marginLeft,
@@ -1234,6 +1235,35 @@ document.getElementById('print-generate-btn').onclick = async () => {
       });
       
       currentY -= (fontSize * 1.4);
+    }
+
+    // --- REPERIMENTO NOME MEDICO E FIRMA IN CALCE ---
+    let doctorName = '';
+    if (currentUser) {
+      const meta = currentUser.user_metadata || {};
+      if (meta.nome && meta.cognome) {
+        doctorName = `Dott. ${meta.nome} ${meta.cognome}`;
+      } else if (meta.nome) {
+        doctorName = `Dott. ${meta.nome}`;
+      } else {
+        const emailPrefix = (currentUser.email || '').split('@')[0];
+        doctorName = `Dott. ${emailPrefix}`;
+      }
+    }
+
+    if (doctorName) {
+      const doctorFontSize = 11;
+      const doctorTextWidth = fontBold.widthOfTextAtSize(doctorName, doctorFontSize);
+      const doctorX = width - marginRight - doctorTextWidth;
+      const doctorY = Math.max(currentY - 30, 40);
+
+      page.drawText(doctorName, {
+        x: doctorX,
+        y: doctorY,
+        size: doctorFontSize,
+        font: fontBold,
+        color: rgb(0, 0, 0)
+      });
     }
 
     const pdfBytes = await pdfDoc.save();
