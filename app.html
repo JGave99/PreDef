@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>ModReport — Composizione modulare</title>
+<link rel="icon" type="image/png" href="modreport_logo_bars_m.png">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -54,35 +55,17 @@
     color: var(--ink);
     font-size:13px;
   }
-  .topbar .brand{
+  .topbar .brand, .brand-login{
     font-weight:600;
     font-size:15px;
     display:flex;
     align-items:center;
     gap:10px;
   }
-  .brand .mark{
-    width:20px;height:20px;
-    border:2px solid var(--accent);
-    border-radius:50%;
-    position:relative;
-    flex:none;
-  }
-  .brand .mark::after{
-    content:'';
-    position:absolute;
-    left:50%; top:50%;
-    width:2px; height:12px;
-    background: var(--accent);
-    transform:translate(-50%,-50%);
-  }
-  .brand .mark::before{
-    content:'';
-    position:absolute;
-    left:50%; top:50%;
-    width:12px; height:2px;
-    background: var(--accent);
-    transform:translate(-50%,-50%);
+  .brand .mark, .brand-login .mark{
+    width:20px; height:20px; border-radius:5px;
+    background: url('modreport_logo_bars_m.png') no-repeat center / cover;
+    display:inline-block; flex:none;
   }
   .topbar-right{
     display:flex;
@@ -240,7 +223,7 @@
     width:100%;
     border: 1px solid var(--line);
     border-radius: var(--radius);
-    padding: 10px 40px 10px 10px;
+    padding: 10px;
     font-family: var(--font);
     font-size:13px;
     resize: vertical;
@@ -251,7 +234,6 @@
   }
   .free-text:focus{ outline:none; border-color: var(--accent); }
   .add-free{
-    margin-top:8px;
     font-size:12.5px;
     padding:7px 14px;
     border:1px solid var(--accent);
@@ -305,7 +287,7 @@
     color:#fff;
   }
   .btn.primary:hover{ background: var(--accent-dim); box-shadow: 0 4px 12px rgba(2,132,199,.3); }
-  .btn.ghost:hover{ background: var(--bg-input, var(--line)); }
+  .btn.ghost:hover{ background: var(--panel); }
   .report-doc{
     flex:1;
     background: var(--panel);
@@ -446,13 +428,6 @@
   }
   select:focus, input[type=text]:focus, textarea:focus{ outline:none; border-color: var(--accent); }
   textarea{ resize: vertical; min-height:46px; }
-  .checkbox-row{
-    display:flex;
-    align-items:center;
-    gap:7px;
-    font-size:12.5px;
-    color: var(--ink-soft);
-  }
   .btn-sm{
     font-family: var(--font);
     font-size:12.5px;
@@ -466,15 +441,6 @@
     transition: all .2s ease;
   }
   .btn-sm:hover{ background: var(--accent-soft); }
-  .btn-sm.danger{
-    border-color: var(--danger);
-    color: var(--danger);
-  }
-  .btn-sm.danger:hover{ background: rgba(239,68,68,0.1); }
-  .reset-row{
-    text-align:right;
-    padding-top:4px;
-  }
 
   .mini-toggle{
     font-family: var(--font);
@@ -497,7 +463,6 @@
     box-shadow: 0 4px 12px rgba(2,132,199,.35);
   }
 
-  /* ---------- LOGIN SCREEN ---------- */
   .login-overlay{
     position:fixed;
     inset:0;
@@ -514,14 +479,6 @@
     border: 1px solid var(--line);
     border-radius: var(--radius-lg);
     padding: 32px 28px;
-  }
-  .login-card .brand-login{
-    display:flex;
-    align-items:center;
-    gap:10px;
-    margin-bottom:24px;
-    font-weight:600;
-    font-size:16px;
   }
   .login-field{
     margin-bottom:14px;
@@ -585,10 +542,9 @@
 </head>
 <body>
 
-<!-- ================= LOGIN SCREEN ================= -->
 <div class="login-overlay" id="login-overlay">
   <div class="login-card">
-    <div class="brand-login"><span class="mark" style="border-color:var(--accent);width:18px;height:18px;display:inline-block;border:2px solid var(--accent);border-radius:50%;position:relative;"></span> ModReport — Accedi</div>
+    <div class="brand-login"><span class="mark"></span> ModReport — Accedi</div>
     <div class="login-field">
       <label>Email</label>
       <input type="email" id="login-email" placeholder="nome@ospedale.it">
@@ -602,7 +558,7 @@
       <button class="btn ghost" id="btn-signup">Registrati</button>
       <button class="btn primary" id="btn-signin">Accedi</button>
     </div>
-    <div class="login-hint">Ogni utente ha il proprio account e i propri dati, sincronizzati automaticamente su ogni postazione da cui accedi.</div>
+    <div class="login-hint">Ogni utente ha il proprio account e i propri dati, sincronizzati automaticamente su ogni postazione.</div>
     <div class="login-hint" style="margin-top:8px;">Registrandoti accetti i <a href="termini-servizio.html" style="color:var(--accent);">Termini di Servizio</a> e l'<a href="informativa-privacy.html" style="color:var(--accent);">Informativa sulla Privacy</a>.</div>
   </div>
 </div>
@@ -685,7 +641,7 @@
     <div class="report-toolbar">
       <h2 id="i18n-report-preview">Anteprima referto</h2>
       <div class="actions">
-        <button class="btn ghost" id="btn-mic-report" title="Detta nel referto">🎤</button>
+        <button class="btn ghost" id="btn-mic-report" title="Detta nel referto" aria-label="Detta nel referto">🎤</button>
         <button class="btn ghost" id="btn-reset">Svuota</button>
         <button class="btn ghost" id="btn-archive">Salva nell'archivio</button>
         <button class="btn primary" id="btn-copy">Copia negli appunti</button>
@@ -706,7 +662,6 @@
 
 <div class="copy-flash" id="copy-flash">Copiato negli appunti</div>
 
-<!-- ================= PANNELLO STAMPA ================= -->
 <div class="settings-overlay" id="print-overlay">
   <div class="settings-panel" style="width:min(480px, 92vw);">
     <div class="settings-head">
@@ -725,7 +680,7 @@
           </div>
         </div>
         <p style="font-size:12px; color:var(--ink-soft); margin-top:4px;" id="print-letterhead-hint">
-          Nessuna carta intestata salvata — puoi aggiungerne una da "Il mio account → Gestione stampa", oppure stampare su pagina bianca con i margini qui sotto (utile per fogli già prestampati nella stampante).
+          Nessuna carta intestata salvata — puoi aggiungerne una da "Il mio account → Gestione stampa".
         </p>
       </div>
       <div class="settings-section" id="print-manual-margins">
@@ -756,57 +711,14 @@
 </div>
 
 <script>
-// ============================================================
-// DATI DI DEFAULT
-// Esami ordinati per frequenza media di richiesta (radiologia body)
-// ============================================================
 const DEFAULT_DATA = {
   metodiche: ['Ecografia', 'RX', 'TC', 'RMN'],
-
   esamiByMetodica: {
-    'RX': [
-      'RX TORACE 2PR',
-      'RX TORACE AP supino',
-      'RX ADDOME',
-      'RX RACHIDE LOMBOSACRALE',
-      'RX BACINO',
-      'RX GINOCCHIO',
-      'RX SPALLA',
-      'RX POLSO',
-      'RX CAVIGLIA',
-      'RX RACHIDE CERVICALE'
-    ],
-    'Ecografia': [
-      'ECOGRAFIA ADDOME COMPLETO',
-      'ECOGRAFIA TIROIDE',
-      'ECOGRAFIA ADDOME SUPERIORE',
-      'ECOGRAFIA RENALE E VESCICALE',
-      'ECOGRAFIA PARTI MOLLI',
-      'ECOCOLORDOPPLER ARTI INFERIORI VENOSO',
-      'ECOGRAFIA SCROTALE',
-      'ECOGRAFIA MAMMARIA'
-    ],
-    'TC': [
-      'TC TORACE',
-      'TC ADDOME COMPLETO',
-      'TC ADDOME SENZA E CON MDC',
-      'TC TORACE ADDOME PELVI (STADIAZIONE)',
-      'TC RACHIDE LOMBOSACRALE',
-      'TC BACINO',
-      'TC COLONNA CERVICALE',
-      'TC ANGIOGRAFIA AORTA'
-    ],
-    'RMN': [
-      'RMN RACHIDE LOMBOSACRALE',
-      'RMN GINOCCHIO',
-      'RMN SPALLA',
-      'RMN ADDOME SUPERIORE',
-      'RMN BACINO',
-      'RMN RACHIDE CERVICALE',
-      'RMN ENCEFALO'
-    ]
+    'RX': ['RX TORACE 2PR', 'RX TORACE AP supino', 'RX ADDOME', 'RX RACHIDE LOMBOSACRALE', 'RX BACINO', 'RX GINOCCHIO', 'RX SPALLA', 'RX POLSO', 'RX CAVIGLIA', 'RX RACHIDE CERVICALE'],
+    'Ecografia': ['ECOGRAFIA ADDOME COMPLETO', 'ECOGRAFIA TIROIDE', 'ECOGRAFIA ADDOME SUPERIORE', 'ECOGRAFIA RENALE E VESCICALE', 'ECOGRAFIA PARTI MOLLI', 'ECOCOLORDOPPLER ARTI INFERIORI VENOSO', 'ECOGRAFIA SCROTALE', 'ECOGRAFIA MAMMARIA'],
+    'TC': ['TC TORACE', 'TC ADDOME COMPLETO', 'TC ADDOME SENZA E CON MDC', 'TC TORACE ADDOME PELVI (STADIAZIONE)', 'TC RACHIDE LOMBOSACRALE', 'TC BACINO', 'TC COLONNA CERVICALE', 'TC ANGIOGRAFIA AORTA'],
+    'RMN': ['RMN RACHIDE LOMBOSACRALE', 'RMN GINOCCHIO', 'RMN SPALLA', 'RMN ADDOME SUPERIORE', 'RMN BACINO', 'RMN RACHIDE CERVICALE', 'RMN ENCEFALO']
   },
-
   indicazioniByEsame: {
     'RX TORACE 2PR': ['Tosse persistente', 'Dispnea', 'Dolore toracico', 'Follow-up oncologico', 'Inquadramento preoperatorio'],
     'RX TORACE AP supino': ['Controllo post-procedurale', 'Paziente non collaborante', 'Monitoraggio in reparto'],
@@ -818,7 +730,6 @@ const DEFAULT_DATA = {
     'RX POLSO': ['Trauma', 'Dolore'],
     'RX CAVIGLIA': ['Trauma', 'Dolore'],
     'RX RACHIDE CERVICALE': ['Trauma', 'Cervicalgia'],
-
     'ECOGRAFIA ADDOME COMPLETO': ['Dolore addominale', 'Alterazione indici epatici', 'Follow-up'],
     'ECOGRAFIA TIROIDE': ['Riscontro di nodulo palpabile', 'Controllo periodico', 'Familiarità per patologia tiroidea'],
     'ECOGRAFIA ADDOME SUPERIORE': ['Dolore ipocondrio destro', 'Alterazione indici epatici'],
@@ -827,7 +738,6 @@ const DEFAULT_DATA = {
     'ECOCOLORDOPPLER ARTI INFERIORI VENOSO': ['Sospetta trombosi venosa profonda', 'Edema arto'],
     'ECOGRAFIA SCROTALE': ['Dolore scrotale', 'Tumefazione palpabile'],
     'ECOGRAFIA MAMMARIA': ['Riscontro di nodulo palpabile', 'Controllo'],
-
     'TC TORACE': ['Stadiazione oncologica', 'Sospetta embolia polmonare', 'Dispnea ingravescente'],
     'TC ADDOME COMPLETO': ['Dolore addominale acuto', 'Stadiazione neoplastica', 'Follow-up post-chirurgico'],
     'TC ADDOME SENZA E CON MDC': ['Dolore addominale', 'Sospetta neoplasia'],
@@ -836,7 +746,6 @@ const DEFAULT_DATA = {
     'TC BACINO': ['Trauma', 'Coxalgia'],
     'TC COLONNA CERVICALE': ['Trauma'],
     'TC ANGIOGRAFIA AORTA': ['Sospetta dissezione aortica', 'Follow-up aneurisma'],
-
     'RMN RACHIDE LOMBOSACRALE': ['Lombalgia', 'Sciatalgia', 'Sospetta ernia discale'],
     'RMN GINOCCHIO': ['Gonalgia', 'Trauma', 'Sospetta lesione meniscale'],
     'RMN SPALLA': ['Dolore', 'Sospetta lesione della cuffia dei rotatori'],
@@ -845,223 +754,22 @@ const DEFAULT_DATA = {
     'RMN RACHIDE CERVICALE': ['Cervicalgia', 'Cervicobrachialgia'],
     'RMN ENCEFALO': ['Cefalea persistente', 'Sospetta lesione ischemica', 'Vertigini']
   },
-
   refertoByEsame: {
     'RX TORACE 2PR': {
       'Parenchima': [
         { label: 'Parenchima nella norma', text: 'Non addensamenti parenchimali a focolaio.', neg: false },
         { label: 'Addensamento', text: 'Addensamento parenchimale in sede da definire con approfondimento clinico-radiologico.', neg: true }
       ],
-      'Pleura': [
-        { label: 'Pleura libera', text: 'Non versamento pleurico bilateralmente.', neg: false }
-      ],
+      'Pleura': [{ label: 'Pleura libera', text: 'Non versamento pleurico bilateralmente.', neg: false }],
       'Cuore e mediastino': [
         { label: 'Cuore nella norma', text: 'Ombra cardiaca di dimensioni e morfologia nei limiti della norma.', neg: false },
         { label: 'Mediastino nella norma', text: 'Mediastino in asse, di ampiezza regolare.', neg: false }
       ],
-      'Scheletro': [
-        { label: 'Scheletro indenne', text: 'Non evidenti lesioni ossee focali a carico dello scheletro toracico in esame.', neg: false }
-      ]
-    },
-    'RX TORACE AP supino': {
-      'Parenchima': [
-        { label: 'Nella norma', text: 'Non evidenti addensamenti parenchimali focali, con i limiti intrinseci della proiezione singola in AP.', neg: false }
-      ],
-      'Presidi': [
-        { label: 'Presidi in sede', text: 'Presidi (CVC/SNG/drenaggi), ove presenti, in sede regolare.', neg: false }
-      ]
-    },
-    'RX ADDOME': {
-      'Gas intestinale': [
-        { label: 'Distribuzione regolare', text: 'Non evidenza di livelli idroaerei significativi.', neg: false }
-      ],
-      'Calcificazioni': [
-        { label: 'Assenti', text: 'Non calcificazioni patologiche in proiezione addominale.', neg: false }
-      ],
-      'Profili ossei': [
-        { label: 'Nella norma', text: 'Profili ossei del bacino e del rachide in esame nella norma.', neg: false }
-      ]
-    },
-    'RX RACHIDE LOMBOSACRALE': {
-      'Corpi vertebrali': [
-        { label: 'Nella norma', text: 'Non evidenti alterazioni di forma e struttura dei corpi vertebrali in esame.', neg: false }
-      ]
-    },
-    'RX BACINO': {
-      'Reperto': [
-        { label: 'Nella norma', text: 'Non evidenti rime di frattura né alterazioni strutturali a carico del bacino in esame.', neg: false }
-      ]
-    },
-    'RX GINOCCHIO': {
-      'Reperto': [
-        { label: 'Nella norma', text: 'Non evidenti esiti post-traumatici recenti; rime articolari conservate.', neg: false }
-      ]
-    },
-    'RX SPALLA': {
-      'Reperto': [
-        { label: 'Nella norma', text: 'Non evidenti alterazioni ossee focali; profilo articolare regolare.', neg: false }
-      ]
-    },
-    'RX POLSO': {
-      'Reperto': [
-        { label: 'Nella norma', text: 'Non rime di frattura; rapporti articolari conservati.', neg: false }
-      ]
-    },
-    'RX CAVIGLIA': {
-      'Reperto': [
-        { label: 'Nella norma', text: 'Non evidenti rime di frattura; mortasa tibio-astragalica congrua.', neg: false }
-      ]
-    },
-    'RX RACHIDE CERVICALE': {
-      'Corpi vertebrali': [
-        { label: 'Nella norma', text: 'Non evidenti alterazioni di forma e allineamento dei corpi vertebrali cervicali.', neg: false }
-      ]
-    },
-
-    'ECOGRAFIA ADDOME COMPLETO': {
-      'Fegato': [
-        { label: 'Fegato nella norma', text: 'Fegato di dimensioni ed ecostruttura nei limiti della norma.', neg: false }
-      ],
-      'Colecisti e vie biliari': [
-        { label: 'Nella norma', text: 'Colecisti alitiasica a pareti regolari; vie biliari non dilatate.', neg: false }
-      ],
-      'Reni': [
-        { label: 'Reni nella norma', text: 'Reni di dimensioni e morfologia conservate, senza dilatazione delle vie escretrici.', neg: false }
-      ]
-    },
-    'ECOGRAFIA TIROIDE': {
-      'Parenchima tiroideo': [
-        { label: 'Ecostruttura omogenea', text: 'Ghiandola tiroidea in sede, di dimensioni nella norma ed ecostruttura omogenea.', neg: false }
-      ],
-      'Noduli': [
-        { label: 'Non noduli', text: 'Non si evidenziano formazioni nodulari focali.', neg: false }
-      ]
-    },
-    'ECOGRAFIA ADDOME SUPERIORE': {
-      'Fegato e vie biliari': [
-        { label: 'Nella norma', text: 'Fegato, colecisti e vie biliari nei limiti della norma.', neg: false }
-      ]
-    },
-    'ECOGRAFIA RENALE E VESCICALE': {
-      'Reni e vescica': [
-        { label: 'Nella norma', text: 'Reni e vescica nei limiti della norma, senza dilatazione delle vie escretrici.', neg: false }
-      ]
-    },
-    'ECOGRAFIA PARTI MOLLI': {
-      'Reperto': [
-        { label: 'Nella norma', text: 'Non evidenti raccolte né lesioni focali nei tessuti molli in esame.', neg: false }
-      ]
-    },
-    'ECOCOLORDOPPLER ARTI INFERIORI VENOSO': {
-      'Asse venoso': [
-        { label: 'Nella norma', text: 'Pervietà e comprimibilità conservate dell’asse venoso profondo in esame; non segni di trombosi.', neg: false }
-      ]
-    },
-    'ECOGRAFIA SCROTALE': {
-      'Testicoli': [
-        { label: 'Nella norma', text: 'Testicoli in sede, di dimensioni ed ecostruttura nella norma.', neg: false }
-      ]
-    },
-    'ECOGRAFIA MAMMARIA': {
-      'Parenchima ghiandolare': [
-        { label: 'Nella norma', text: 'Parenchima ghiandolare privo di formazioni focali sospette.', neg: false }
-      ]
-    },
-
-    'TC TORACE': {
-      'Parenchima polmonare': [
-        { label: 'Nella norma', text: 'Parenchima polmonare privo di alterazioni densitometriche focali.', neg: false }
-      ],
-      'Linfonodi': [
-        { label: 'Non linfoadenopatie', text: 'Non linfoadenopatie mediastiniche o ilari di rilievo dimensionale.', neg: false }
-      ]
-    },
-    'TC ADDOME COMPLETO': {
-      'Fegato e vie biliari': [
-        { label: 'Nella norma', text: 'Fegato di dimensioni e densità nei limiti, privo di lesioni focali.', neg: false }
-      ],
-      'Linfonodi': [
-        { label: 'Non linfoadenopatie', text: 'Non linfoadenopatie retroperitoneali di rilievo dimensionale.', neg: false }
-      ]
-    },
-    'TC ADDOME SENZA E CON MDC': {
-      'Organi parenchimatosi': [
-        { label: 'Nella norma', text: 'Fegato, milza, pancreas e reni nei limiti della norma per morfologia e densitometria.', neg: false }
-      ]
-    },
-    'TC TORACE ADDOME PELVI (STADIAZIONE)': {
-      'Reperto generale': [
-        { label: 'Non secondarismi', text: 'Non evidenza di lesioni secondarie a distanza nei distretti esaminati.', neg: false }
-      ]
-    },
-    'TC RACHIDE LOMBOSACRALE': {
-      'Reperto': [
-        { label: 'Nella norma', text: 'Non evidenti alterazioni ossee significative; canale vertebrale pervio.', neg: false }
-      ]
-    },
-    'TC BACINO': {
-      'Reperto': [
-        { label: 'Nella norma', text: 'Non rime di frattura; strutture articolari conservate.', neg: false }
-      ]
-    },
-    'TC COLONNA CERVICALE': {
-      'Reperto': [
-        { label: 'Nella norma', text: 'Non evidenti rime di frattura né dislocazioni vertebrali.', neg: false }
-      ]
-    },
-    'TC ANGIOGRAFIA AORTA': {
-      'Aorta': [
-        { label: 'Nella norma', text: 'Aorta toracica e addominale di calibro regolare, senza segni di dissezione né ectasie significative.', neg: false }
-      ]
-    },
-
-    'RMN RACHIDE LOMBOSACRALE': {
-      'Dischi intervertebrali': [
-        { label: 'Nella norma', text: 'Dischi intervertebrali di segnale e altezza conservati ai livelli esaminati.', neg: false }
-      ],
-      'Canale vertebrale': [
-        { label: 'Pervio', text: 'Canale vertebrale di ampiezza conservata, privo di stenosi significative.', neg: false }
-      ]
-    },
-    'RMN GINOCCHIO': {
-      'Menischi e legamenti': [
-        { label: 'Nella norma', text: 'Menischi e legamenti crociati privi di alterazioni di segnale significative.', neg: false }
-      ]
-    },
-    'RMN SPALLA': {
-      'Cuffia dei rotatori': [
-        { label: 'Integra', text: 'Cuffia dei rotatori integra, senza alterazioni di segnale.', neg: false }
-      ]
-    },
-    'RMN ADDOME SUPERIORE': {
-      'Fegato e vie biliari': [
-        { label: 'Nella norma', text: 'Fegato e vie biliari nei limiti della norma.', neg: false }
-      ]
-    },
-    'RMN BACINO': {
-      'Teste femorali': [
-        { label: 'Nella norma', text: 'Teste femorali di segnale conservato, senza segni di necrosi avascolare.', neg: false }
-      ]
-    },
-    'RMN RACHIDE CERVICALE': {
-      'Dischi intervertebrali': [
-        { label: 'Nella norma', text: 'Dischi intervertebrali cervicali di segnale e altezza conservati.', neg: false }
-      ]
-    },
-    'RMN ENCEFALO': {
-      'Parenchima encefalico': [
-        { label: 'Nella norma', text: 'Non alterazioni di segnale focali del parenchima encefalico sovra- e sottotentoriale.', neg: false }
-      ],
-      'Sistema ventricolare': [
-        { label: 'Nella norma', text: 'Sistema ventricolare in asse, di ampiezza nei limiti della norma per età.', neg: false }
-      ]
+      'Scheletro': [{ label: 'Scheletro indenne', text: 'Non evidenti lesioni ossee focali a carico dello scheletro toracico in esame.', neg: false }]
     }
   }
 };
 
-// ============================================================
-// CONFIGURAZIONE SUPABASE — inserire qui i valori del progetto
-// ============================================================
 const SUPABASE_URL = 'https://umejthggxihtyqvcszgm.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVtZWp0aGdneGlodHlxdmNzemdtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODg4NzI0MzEsImV4cCI6MjEwNDQ0ODQzMX0.BPaujgB70aLpWSifk5nH93fuyyyfOe8Uw4RupV1YQQE';
 const supabaseClient = (window.supabase && SUPABASE_URL.indexOf('INSERISCI') === -1)
@@ -1072,9 +780,7 @@ let DATA = JSON.parse(JSON.stringify(DEFAULT_DATA));
 let currentUser = null;
 let persistTimer = null;
 
-function localCloneDefault(){
-  return JSON.parse(JSON.stringify(DEFAULT_DATA));
-}
+function localCloneDefault(){ return JSON.parse(JSON.stringify(DEFAULT_DATA)); }
 
 async function loadDataFromCloud(){
   if (!supabaseClient || !currentUser) return localCloneDefault();
@@ -1104,13 +810,7 @@ function persist(){
   }, 500);
 }
 
-// ============================================================
-// STATO
-// ============================================================
-const state = {
-  metodica: null,
-  esame: null
-};
+const state = { metodica: null, esame: null };
 let urgenzaMode = false;
 let indicazioneLines = [];
 let lastHeaderText = '';
@@ -1128,9 +828,6 @@ const el = {
   copyFlash: document.getElementById('copy-flash')
 };
 
-// ============================================================
-// RENDER — BUILDER PRINCIPALE
-// ============================================================
 function renderMetodica(){
   el.metodicaRow.innerHTML = '';
   DATA.metodiche.forEach(m => {
@@ -1190,11 +887,11 @@ function renderIndicazione(){
   el.indicazioneBody.appendChild(row);
 
   const freeWrap = document.createElement('div');
-  freeWrap.style.marginTop = '10px';
+  freeWrap.style.marginTop = '12px';
   freeWrap.innerHTML = `
     <textarea class="free-text" id="indicazione-free" placeholder="…oppure scrivi o detta un'indicazione libera"></textarea>
-    <div style="display:flex; gap:8px; margin-top:8px;">
-      <button class="mic-btn" id="mic-indicazione-free" title="Detta">🎤</button>
+    <div style="display:flex; gap:8px; margin-top:8px; align-items:center;">
+      <button class="mic-btn" id="mic-indicazione-free" title="Detta" aria-label="Detta indicazione libera">🎤</button>
       <button class="add-free" id="add-indicazione-free">Aggiungi</button>
     </div>
   `;
@@ -1217,7 +914,7 @@ function renderReferto(){
   }
   const groups = DATA.refertoByEsame[state.esame];
   if (!groups || Object.keys(groups).length === 0){
-    el.refertoBody.innerHTML = '<div class="empty-state">Nessun blocco di referto ancora definito per questo esame. Puoi aggiungerne uno da "Personalizza".</div>';
+    el.refertoBody.innerHTML = '<div class="empty-state">Nessun blocco di referto ancora definito per questo esame. puoi aggiungerne uno da "Personalizza".</div>';
     return;
   }
   Object.entries(groups).forEach(([groupName, buttons]) => {
@@ -1260,31 +957,16 @@ function renderAll(){
   renderBreadcrumb();
 }
 
-// ============================================================
-// COMPOSIZIONE TESTO REFERTO
-// L'intestazione (Indicazione / Esame / Confronto) occupa sempre le
-// stesse righe in cima, in quest'ordine fisso, e viene ricalcolata ad
-// ogni cambiamento. Tutto ciò che segue (il corpo del referto) resta
-// testo libero: i pulsanti vi aggiungono righe in coda, e le modifiche
-// o cancellazioni fatte a mano lì non vengono mai toccate. Solo
-// l'Indicazione occupa una riga fissa in cima; Esame e Confronto si
-// aggiungono invece in coda, uno sotto l'altro senza riga vuota fra
-// loro — così puoi refertare più esami di seguito nello stesso referto.
-// ============================================================
 function computeHeader(){
   if (!indicazioneLines.length) return '';
-  const label = urgenzaMode
-    ? "Esame eseguito in regime d'urgenza con indicazione clinica: "
-    : 'Indicazione: ';
+  const label = urgenzaMode ? "Esame eseguito in regime d'urgenza con indicazione clinica: " : 'Indicazione: ';
   return label + indicazioneLines.join('; ') + '\n\n';
 }
 
 function rebuildHeader(){
   const ta = el.reportText;
   const current = ta.value;
-  const body = (lastHeaderText && current.startsWith(lastHeaderText))
-    ? current.slice(lastHeaderText.length)
-    : current;
+  const body = (lastHeaderText && current.startsWith(lastHeaderText)) ? current.slice(lastHeaderText.length) : current;
   const newHeader = computeHeader();
   ta.value = newHeader + body;
   lastHeaderText = newHeader;
@@ -1306,8 +988,6 @@ function insertIndicazione(txt){
 
 function insertEsameLine(esameName){
   const ta = el.reportText;
-  // separa dal contenuto precedente (indicazione o esame/referto già scritti)
-  // con una riga vuota, a meno che non ce ne sia già una
   if (ta.value.length && !ta.value.endsWith('\n\n')){
     appendToReport('', '\n');
   }
@@ -1334,9 +1014,6 @@ document.getElementById('btn-urgenza-toggle').onclick = () => {
   rebuildHeader();
 };
 
-// ============================================================
-// TOOLBAR PRINCIPALE
-// ============================================================
 document.getElementById('btn-reset').onclick = () => {
   urgenzaMode = false;
   indicazioneLines = [];
@@ -1344,9 +1021,7 @@ document.getElementById('btn-reset').onclick = () => {
   pendingEsameOpen = false;
   document.getElementById('btn-urgenza-toggle').classList.remove('active');
   el.reportText.value = '';
-  if (state.esame){
-    insertEsameLine(state.esame);
-  }
+  if (state.esame){ insertEsameLine(state.esame); }
 };
 
 document.getElementById('btn-copy').onclick = async () => {
@@ -1362,17 +1037,10 @@ document.getElementById('btn-copy').onclick = async () => {
 
 document.getElementById('btn-archive').onclick = async () => {
   const testo = el.reportText.value.trim();
-  if (!testo){
-    alert('Non c\'è nulla da salvare: il referto è vuoto.');
-    return;
-  }
-  if (!confirm('Salvare questo referto nell\'archivio così come appare ora?\n\nAssicurati che sia privo di dati identificativi del paziente (nome, data di nascita, codice fiscale, numero di accettazione, medico richiedente, ecc.) prima di procedere.')){
-    return;
-  }
-  if (!supabaseClient || !currentUser){
-    alert('Devi essere connesso per salvare nell\'archivio.');
-    return;
-  }
+  if (!testo){ alert('Non c\'è nulla da salvare: il referto è vuoto.'); return; }
+  if (!confirm('Salvare questo referto nell\'archivio? Assicurati che sia privo di dati identificativi del paziente.')){ return; }
+  if (!supabaseClient || !currentUser){ alert('Devi essere connesso per salvare nell\'archivio.'); return; }
+  
   const btn = document.getElementById('btn-archive');
   btn.disabled = true;
   try{
@@ -1381,211 +1049,26 @@ document.getElementById('btn-archive').onclick = async () => {
       esame: state.esame || null,
       testo: testo
     });
-    if (error){
-      alert('Errore durante il salvataggio: ' + error.message);
-    } else {
+    if (error){ alert('Errore durante il salvataggio: ' + error.message); }
+    else {
       el.copyFlash.textContent = 'Salvato nell\'archivio';
       el.copyFlash.classList.add('show');
       setTimeout(() => {
         el.copyFlash.classList.remove('show');
-        el.copyFlash.textContent = t('copied');
+        el.copyFlash.textContent = 'Copiato negli appunti';
       }, 1600);
     }
-  }catch(e){
-    alert('Errore durante il salvataggio: ' + e.message);
-  }
+  }catch(e){ alert('Errore durante il salvataggio: ' + e.message); }
   btn.disabled = false;
 };
 
-// ============================================================
-// STAMPA — inserisce il testo su una carta intestata PDF (se caricata)
-// o su una pagina bianca, poi apre la finestra di stampa
-// ============================================================
-function mmToPt(mm){ return mm * 2.834645669; }
-
-function wrapTextToLines(text, font, fontSize, maxWidth){
-  const paragraphs = text.split('\n');
-  const lines = [];
-  paragraphs.forEach(para => {
-    if (!para){ lines.push(''); return; }
-    const words = para.split(' ');
-    let current = '';
-    words.forEach(word => {
-      const test = current ? current + ' ' + word : word;
-      if (font.widthOfTextAtSize(test, fontSize) > maxWidth && current){
-        lines.push(current);
-        current = word;
-      } else {
-        current = test;
-      }
-    });
-    lines.push(current);
-  });
-  return lines;
-}
-
-document.getElementById('btn-open-print').onclick = async () => {
-  if (!el.reportText.value.trim()){
-    alert('Non c\'è nulla da stampare: il referto è vuoto.');
-    return;
+document.addEventListener('keydown', (e) => {
+  if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+    e.preventDefault();
+    document.getElementById('btn-copy').click();
   }
-  document.getElementById('print-message').textContent = '';
-  await loadLetterheadsForPrint();
-  document.getElementById('print-overlay').classList.add('open');
-};
-document.getElementById('print-close').onclick = () => {
-  document.getElementById('print-overlay').classList.remove('open');
-};
-document.getElementById('print-overlay').addEventListener('click', (e) => {
-  if (e.target.id === 'print-overlay') e.currentTarget.classList.remove('open');
 });
 
-let letterheadsCache = [];
-
-async function loadLetterheadsForPrint(){
-  const select = document.getElementById('print-letterhead-select');
-  const hint = document.getElementById('print-letterhead-hint');
-  select.innerHTML = '<option value="">Nessuna (pagina bianca)</option>';
-  letterheadsCache = [];
-
-  if (!supabaseClient || !currentUser) return;
-
-  const { data, error } = await supabaseClient
-    .from('letterheads')
-    .select('id, nome, storage_path, margine_top, margine_left, margine_right')
-    .eq('user_id', currentUser.id)
-    .order('created_at', { ascending: false });
-
-  if (error || !data || !data.length){
-    hint.textContent = 'Nessuna carta intestata salvata — puoi aggiungerne una da "Il mio account → Gestione stampa", oppure stampare su pagina bianca con i margini qui sotto (utile per fogli già prestampati nella stampante).';
-    toggleManualMargins(true);
-    return;
-  }
-
-  letterheadsCache = data;
-  data.forEach(lh => {
-    const opt = document.createElement('option');
-    opt.value = lh.id;
-    opt.textContent = lh.nome;
-    select.appendChild(opt);
-  });
-  hint.textContent = 'Selezionando una carta intestata verranno usati i margini salvati per quella carta. Scegli "Nessuna" per stampare su pagina bianca con margini personalizzati.';
-  toggleManualMargins(select.value === '');
-}
-
-function toggleManualMargins(show){
-  document.getElementById('print-manual-margins').style.display = show ? '' : 'none';
-}
-
-document.getElementById('print-letterhead-select').addEventListener('change', (e) => {
-  toggleManualMargins(e.target.value === '');
-});
-
-document.getElementById('print-generate-btn').onclick = async () => {
-  const msg = document.getElementById('print-message');
-  msg.className = 'field-message';
-  msg.textContent = '';
-
-  const testo = el.reportText.value;
-  const selectedId = document.getElementById('print-letterhead-select').value;
-  const selectedLh = letterheadsCache.find(l => l.id === selectedId) || null;
-  const btn = document.getElementById('print-generate-btn');
-
-  const marginTop = selectedLh ? selectedLh.margine_top : (parseFloat(document.getElementById('margin-top').value) || 40);
-  const marginLeft = selectedLh ? selectedLh.margine_left : (parseFloat(document.getElementById('margin-left').value) || 20);
-  const marginRight = selectedLh ? selectedLh.margine_right : (parseFloat(document.getElementById('margin-right').value) || 20);
-
-  btn.disabled = true;
-  msg.textContent = 'Generazione del PDF in corso…';
-
-  try{
-    const { PDFDocument, StandardFonts, rgb } = PDFLib;
-    let pdfDoc, hasTemplate = false, templateIndex = 0, width, height;
-
-    if (selectedLh){
-      const { data: fileBlob, error: dlError } = await supabaseClient.storage.from('letterheads').download(selectedLh.storage_path);
-      if (dlError) throw dlError;
-      const bytes = await fileBlob.arrayBuffer();
-      pdfDoc = await PDFDocument.load(bytes);
-      hasTemplate = true;
-      const firstPage = pdfDoc.getPage(0);
-      ({ width, height } = firstPage.getSize());
-    } else {
-      pdfDoc = await PDFDocument.create();
-      width = 595.28; height = 841.89; // A4
-      pdfDoc.addPage([width, height]);
-    }
-
-    const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
-    const fontSize = 11;
-    const lineHeight = fontSize * 1.4;
-    const bottomMargin = mmToPt(20);
-    const maxWidth = width - mmToPt(marginLeft) - mmToPt(marginRight);
-
-    const lines = wrapTextToLines(testo, font, fontSize, maxWidth);
-
-    let page = pdfDoc.getPage(pdfDoc.getPageCount() - 1);
-    let y = height - mmToPt(marginTop);
-
-    for (const line of lines){
-      if (y < bottomMargin){
-        if (hasTemplate){
-          const [copied] = await pdfDoc.copyPages(pdfDoc, [templateIndex]);
-          page = pdfDoc.addPage(copied);
-        } else {
-          page = pdfDoc.addPage([width, height]);
-        }
-        y = height - mmToPt(marginTop);
-      }
-      page.drawText(line, { x: mmToPt(marginLeft), y, size: fontSize, font, color: rgb(0, 0, 0) });
-      y -= lineHeight;
-    }
-
-    // Firma del medico, se nome e cognome sono impostati nel profilo
-    const meta = currentUser.user_metadata;
-    if (meta && meta.nome && meta.cognome){
-      const firma = 'Dott. ' + meta.nome + ' ' + meta.cognome;
-      const firmaSize = 11;
-      const spazioFirma = lineHeight * 2 + firmaSize;
-      if (y < bottomMargin + spazioFirma){
-        if (hasTemplate){
-          const [copied] = await pdfDoc.copyPages(pdfDoc, [templateIndex]);
-          page = pdfDoc.addPage(copied);
-        } else {
-          page = pdfDoc.addPage([width, height]);
-        }
-        y = height - mmToPt(marginTop);
-      } else {
-        y -= lineHeight * 2;
-      }
-      const firmaWidth = font.widthOfTextAtSize(firma, firmaSize);
-      page.drawText(firma, {
-        x: width - mmToPt(marginRight) - firmaWidth, y, size: firmaSize, font, color: rgb(0, 0, 0)
-      });
-    }
-
-    const pdfBytes = await pdfDoc.save();
-    const blob = new Blob([pdfBytes], { type: 'application/pdf' });
-    const url = URL.createObjectURL(blob);
-    const printWindow = window.open(url, '_blank');
-
-    if (!printWindow){
-      msg.textContent = 'Il browser ha bloccato l\'apertura della finestra. Consenti i popup per questo sito e riprova.';
-      msg.classList.add('error');
-    } else {
-      setTimeout(() => { try{ printWindow.print(); }catch(e){} }, 800);
-      document.getElementById('print-overlay').classList.remove('open');
-    }
-  }catch(e){
-    msg.textContent = 'Errore durante la generazione del PDF: ' + e.message;
-    msg.classList.add('error');
-  }
-  btn.disabled = false;
-};
-
-// ============================================================
-// DETTATURA VOCALE (Web Speech API)
-// ============================================================
 const SpeechRecognitionCtor = window.SpeechRecognition || window.webkitSpeechRecognition || null;
 
 function createMicHandler(getTargetEl, btnEl){
@@ -1595,7 +1078,7 @@ function createMicHandler(getTargetEl, btnEl){
     const target = getTargetEl();
     if (!target) return;
     if (!SpeechRecognitionCtor){
-      alert('La dettatura vocale non è supportata da questo browser. Usa Chrome o Edge (desktop o Android). Safari e Firefox non la supportano bene.');
+      alert('La dettatura vocale non è supportata da questo browser. Usa Chrome o Edge.');
       return;
     }
     if (recording){
@@ -1617,18 +1100,9 @@ function createMicHandler(getTargetEl, btnEl){
         target.value = target.value + (needsSpace ? ' ' : '') + finalText + ' ';
       }
     };
-    recognition.onerror = (e) => {
+    recognition.onerror = () => {
       recording = false;
       btnEl.classList.remove('recording');
-      const messages = {
-        'not-allowed': 'Permesso al microfono negato. Controlla le impostazioni del sito nel browser (icona lucchetto/microfono nella barra degli indirizzi) e concedi l\'accesso al microfono.',
-        'service-not-allowed': 'Permesso al microfono negato dal browser o dal sistema operativo.',
-        'no-speech': 'Non ho sentito nulla. Riprova a parlare dopo aver premuto il pulsante.',
-        'audio-capture': 'Nessun microfono trovato o accessibile su questo dispositivo.',
-        'network': 'La dettatura richiede una connessione internet attiva.'
-      };
-      if (messages[e.error]) alert(messages[e.error]);
-      else console.warn('Errore dettatura:', e.error);
     };
     recognition.onend = () => {
       recording = false;
@@ -1638,155 +1112,22 @@ function createMicHandler(getTargetEl, btnEl){
       recognition.start();
       recording = true;
       btnEl.classList.add('recording');
-    }catch(err){
-      console.warn('Impossibile avviare la dettatura:', err);
-      recording = false;
-    }
+    }catch(err){ recording = false; }
   });
 }
 
 createMicHandler(() => el.reportText, document.getElementById('btn-mic-report'));
 
-// mic per il campo "indicazione libera", ricreato ad ogni render
 function attachMicToIndicazioneFree(){
   const input = document.getElementById('indicazione-free');
   const micBtn = document.getElementById('mic-indicazione-free');
-  if (input && micBtn){
-    createMicHandler(() => input, micBtn);
-  }
+  if (input && micBtn){ createMicHandler(() => input, micBtn); }
 }
 
-// ============================================================
-// LINGUA — IT / EN (interfaccia; i contenuti clinici restano in italiano)
-// ============================================================
-let currentLang = 'it';
-const I18N = {
-  it: {
-    app_title: 'ModReport — Bozza di lavoro',
-    settings_btn: 'Personalizza',
-    block_metodica: 'Metodica',
-    block_esame: 'Esame',
-    hint_esame: 'filtrato per metodica',
-    block_indicazione: 'Indicazione',
-    hint_indicazione: 'filtrata per esame',
-    block_confronto: 'Confronto con precedenti',
-    btn_confronto: 'Confronto',
-    btn_presa_visione: 'Presa visione',
-    btn_non_precedenti: 'Non precedenti',
-    block_referto: 'Referto',
-    hint_referto: 'filtrato per esame',
-    report_preview: 'Anteprima referto',
-    btn_clear: 'Svuota',
-    btn_copy: 'Copia negli appunti',
-    copied: 'Copiato negli appunti',
-    meta_metodica: 'METODICA:',
-    meta_esame: 'ESAME:',
-    report_placeholder: 'Il referto composto apparirà qui. Puoi anche scrivere, correggere o dettare liberamente.',
-    settings_title: 'Personalizzazione',
-    s1_title: 'Aggiungi metodica', s1_label: 'Nome metodica',
-    s2_title: 'Aggiungi esame (filtrato per metodica)', s2_label1: 'Metodica', s2_label2: 'Nome esame',
-    s3_title: 'Aggiungi indicazione (filtrata per esame)', s3_label1: 'Esame', s3_label2: 'Testo indicazione',
-    s4_title: 'Aggiungi pulsante referto', s4_label1: 'Esame', s4_label2: 'Gruppo / distretto', s4_label3: 'Etichetta pulsante', s4_label4: 'Testo inserito nel referto', s4_neg: 'Segna come reperto da approfondire',
-    s5_title: 'Modifica o elimina un pulsante di referto', s5_label1: 'Esame', s5_label2: 'Gruppo', s5_label3: 'Pulsante', s5_label4: 'Etichetta pulsante', s5_label5: 'Testo inserito nel referto', s5_neg: 'Segna come reperto da approfondire',
-    s6_title: "Modifica o elimina un'indicazione", s6_label1: 'Esame', s6_label2: 'Indicazione', s6_label3: 'Nuovo testo',
-    reset_data: 'Ripristina impostazioni predefinite',
-    add_generic: '+ Aggiungi', add_esame: '+ Aggiungi esame', add_referto: '+ Aggiungi pulsante',
-    save_changes: 'Salva modifiche', delete: 'Elimina', delete_btn: 'Elimina pulsante', save: 'Salva',
-    logout: 'Esci', confirm_reset: 'Ripristinare tutti i dati ai valori predefiniti? Le personalizzazioni aggiunte andranno perse.'
-  },
-  en: {
-    app_title: 'Reports — Working draft',
-    settings_btn: 'Customize',
-    block_metodica: 'Modality',
-    block_esame: 'Exam',
-    hint_esame: 'filtered by modality',
-    block_indicazione: 'Indication',
-    hint_indicazione: 'filtered by exam',
-    block_confronto: 'Comparison with priors',
-    btn_confronto: 'Comparison',
-    btn_presa_visione: 'Reviewed',
-    btn_non_precedenti: 'No priors',
-    block_referto: 'Report',
-    hint_referto: 'filtered by exam',
-    report_preview: 'Report preview',
-    btn_clear: 'Clear',
-    btn_copy: 'Copy to clipboard',
-    copied: 'Copied to clipboard',
-    meta_metodica: 'MODALITY:',
-    meta_esame: 'EXAM:',
-    report_placeholder: 'The composed report will appear here. You can also type, correct or dictate freely.',
-    settings_title: 'Customization',
-    s1_title: 'Add modality', s1_label: 'Modality name',
-    s2_title: 'Add exam (filtered by modality)', s2_label1: 'Modality', s2_label2: 'Exam name',
-    s3_title: 'Add indication (filtered by exam)', s3_label1: 'Exam', s3_label2: 'Indication text',
-    s4_title: 'Add report button', s4_label1: 'Exam', s4_label2: 'Group / region', s4_label3: 'Button label', s4_label4: 'Text inserted into report', s4_neg: 'Flag as finding requiring follow-up',
-    s5_title: 'Edit or delete a report button', s5_label1: 'Exam', s5_label2: 'Group', s5_label3: 'Button', s5_label4: 'Button label', s5_label5: 'Text inserted into report', s5_neg: 'Flag as finding requiring follow-up',
-    s6_title: 'Edit or delete an indication', s6_label1: 'Exam', s6_label2: 'Indication', s6_label3: 'New text',
-    reset_data: 'Restore default settings',
-    add_generic: '+ Add', add_esame: '+ Add exam', add_referto: '+ Add button',
-    save_changes: 'Save changes', delete: 'Delete', delete_btn: 'Delete button', save: 'Save',
-    logout: 'Log out', confirm_reset: 'Restore all data to defaults? Any customizations you added will be lost.'
-  }
-};
+document.getElementById('btn-confronto').onclick = () => insertConfronto('Confronto con precedente analogo del ');
+document.getElementById('btn-presa-visione').onclick = () => insertConfronto('Presa visione di precedente analogo del ');
+document.getElementById('btn-non-precedenti').onclick = () => insertConfronto('Non disponibili precedenti per confronto.');
 
-const CONFRONTO_TEXT = {
-  it: {
-    confronto: 'Confronto con precedente analogo del ',
-    presaVisione: 'Presa visione di precedente analogo del ',
-    nonPrecedenti: 'Non disponibili precedenti per confronto.'
-  },
-  en: {
-    confronto: 'Comparison with similar prior exam dated ',
-    presaVisione: 'Reviewed similar prior exam dated ',
-    nonPrecedenti: 'No priors available for comparison.'
-  }
-};
-
-function t(key){
-  return (I18N[currentLang] && I18N[currentLang][key]) || key;
-}
-
-function applyLanguage(){
-  const map = {
-    'i18n-app-title': 'app_title', 'i18n-settings-btn': 'settings_btn',
-    'i18n-block-metodica': 'block_metodica', 'i18n-block-esame': 'block_esame',
-    'esame-hint': 'hint_esame', 'i18n-block-indicazione': 'block_indicazione',
-    'indicazione-hint': 'hint_indicazione', 'i18n-block-confronto': 'block_confronto',
-    'btn-confronto': 'btn_confronto', 'btn-presa-visione': 'btn_presa_visione',
-    'btn-non-precedenti': 'btn_non_precedenti', 'i18n-block-referto': 'block_referto',
-    'referto-hint': 'hint_referto', 'i18n-report-preview': 'report_preview',
-    'btn-reset': 'btn_clear', 'btn-copy': 'btn_copy',
-    'i18n-meta-metodica-label': 'meta_metodica', 'i18n-meta-esame-label': 'meta_esame',
-    'i18n-settings-title': 'settings_title',
-    'i18n-s1-title': 's1_title', 'i18n-s1-label': 's1_label', 'add-metodica-btn': 'add_generic',
-    'i18n-s2-title': 's2_title', 'i18n-s2-label1': 's2_label1', 'i18n-s2-label2': 's2_label2', 'add-esame-btn': 'add_esame',
-    'i18n-s3-title': 's3_title', 'i18n-s3-label1': 's3_label1', 'i18n-s3-label2': 's3_label2', 'add-indicazione-btn': 'add_generic',
-    'i18n-s4-title': 's4_title', 'i18n-s4-label1': 's4_label1', 'i18n-s4-label2': 's4_label2', 'i18n-s4-label3': 's4_label3', 'i18n-s4-label4': 's4_label4', 'i18n-s4-neg': 's4_neg', 'add-referto-btn': 'add_referto',
-    'i18n-s5-title': 's5_title', 'i18n-s5-label1': 's5_label1', 'i18n-s5-label2': 's5_label2', 'i18n-s5-label3': 's5_label3', 'i18n-s5-label4': 's5_label4', 'i18n-s5-label5': 's5_label5', 'i18n-s5-neg': 's5_neg',
-    'save-referto-btn': 'save_changes', 'delete-referto-btn': 'delete_btn',
-    'i18n-s6-title': 's6_title', 'i18n-s6-label1': 's6_label1', 'i18n-s6-label2': 's6_label2', 'i18n-s6-label3': 's6_label3',
-    'save-indicazione-btn': 'save', 'delete-indicazione-btn': 'delete',
-    'btn-reset-data': 'reset_data', 'btn-logout': 'logout'
-  };
-  Object.entries(map).forEach(([id, key]) => {
-    const elm = document.getElementById(id);
-    if (elm) elm.textContent = t(key);
-  });
-  el.reportText.placeholder = t('report_placeholder');
-  document.getElementById('copy-flash').textContent = t('copied');
-  document.documentElement.lang = currentLang;
-  renderBreadcrumb();
-  renderIndicazione();
-  renderReferto();
-}
-
-document.getElementById('btn-confronto').onclick = () => insertConfronto(CONFRONTO_TEXT[currentLang].confronto);
-document.getElementById('btn-presa-visione').onclick = () => insertConfronto(CONFRONTO_TEXT[currentLang].presaVisione);
-document.getElementById('btn-non-precedenti').onclick = () => insertConfronto(CONFRONTO_TEXT[currentLang].nonPrecedenti);
-
-// ============================================================
-// AUTENTICAZIONE (Supabase)
-// ============================================================
 const loginOverlay = document.getElementById('login-overlay');
 const appRoot = document.getElementById('app-root');
 
@@ -1803,50 +1144,31 @@ async function showApp(){
   DATA = await loadDataFromCloud();
   state.metodica = null;
   state.esame = null;
-  urgenzaMode = false;
-  indicazioneLines = [];
-  lastHeaderText = '';
-  pendingEsameOpen = false;
-  document.getElementById('btn-urgenza-toggle').classList.remove('active');
-  el.reportText.value = '';
   renderAll();
-  applyLanguage();
 }
 
 document.getElementById('btn-signin').onclick = async () => {
-  if (!supabaseClient){
-    showLogin('Configurazione cloud mancante: inserisci SUPABASE_URL e SUPABASE_ANON_KEY nel codice.');
-    return;
-  }
+  if (!supabaseClient) return;
   const email = document.getElementById('login-email').value.trim();
   const password = document.getElementById('login-password').value;
   const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
-  if (error){
-    document.getElementById('login-error').textContent = error.message;
-    return;
-  }
+  if (error){ document.getElementById('login-error').textContent = error.message; return; }
   currentUser = data.user;
   await showApp();
 };
 
 document.getElementById('btn-signup').onclick = async () => {
-  if (!supabaseClient){
-    showLogin('Configurazione cloud mancante: inserisci SUPABASE_URL e SUPABASE_ANON_KEY nel codice.');
-    return;
-  }
+  if (!supabaseClient) return;
   const email = document.getElementById('login-email').value.trim();
   const password = document.getElementById('login-password').value;
-  if (!email || !password || password.length < 6){
-    document.getElementById('login-error').textContent = 'Inserisci una email valida e una password di almeno 6 caratteri.';
+  if (!email || password.length < 6){
+    document.getElementById('login-error').textContent = 'Inserisci email e password valida (min 6 caratteri).';
     return;
   }
   const { data, error } = await supabaseClient.auth.signUp({ email, password });
-  if (error){
-    document.getElementById('login-error').textContent = error.message;
-    return;
-  }
+  if (error){ document.getElementById('login-error').textContent = error.message; return; }
   if (data.user && !data.session){
-    document.getElementById('login-error').textContent = 'Registrazione avvenuta: controlla la tua email per confermare l\'account, poi accedi.';
+    document.getElementById('login-error').textContent = 'Conferma l\'account tramite email, poi accedi.';
     return;
   }
   currentUser = data.user;
@@ -1859,12 +1181,9 @@ document.getElementById('btn-logout').onclick = async () => {
   showLogin();
 };
 
-// ============================================================
-// AVVIO
-// ============================================================
 (async function init(){
   if (!supabaseClient){
-    showLogin('Configurazione cloud non ancora impostata. Vedi le istruzioni per completare il collegamento a Supabase.');
+    showLogin('Configurazione cloud non ancora impostata.');
     return;
   }
   const { data: { session } } = await supabaseClient.auth.getSession();
